@@ -42,14 +42,26 @@ function TimePicker({
   allowClear = false,
 }: TimePickerProps) {
   const [open, setOpen] = React.useState(false);
-  const selectedRef = React.useRef<HTMLButtonElement>(null);
 
-  // Scroll to selected time when popover opens
-  React.useEffect(() => {
-    if (open && selectedRef.current) {
-      selectedRef.current.scrollIntoView({ block: "center" });
-    }
-  }, [open]);
+  // Callback ref that scrolls to selected item when container mounts
+  const scrollContainerRef = React.useCallback(
+    (container: HTMLDivElement | null) => {
+      if (container && value) {
+        const selectedItem = container.querySelector(
+          '[data-selected="true"]'
+        ) as HTMLElement | null;
+        if (selectedItem) {
+          const containerHeight = container.clientHeight;
+          const selectedTop = selectedItem.offsetTop;
+          const selectedHeight = selectedItem.clientHeight;
+          // Center the selected item in the container
+          container.scrollTop =
+            selectedTop - containerHeight / 2 + selectedHeight / 2;
+        }
+      }
+    },
+    [value]
+  );
 
   const handleSelect = (time: string | undefined) => {
     onChange?.(time);
@@ -81,7 +93,10 @@ function TimePicker({
         align="end"
         sideOffset={8}
       >
-        <div className="max-h-[280px] overflow-y-auto p-1">
+        <div
+          ref={scrollContainerRef}
+          className="max-h-[280px] overflow-y-auto p-1"
+        >
           {allowClear && (
             <button
               onClick={() => handleSelect(undefined)}
@@ -100,7 +115,7 @@ function TimePicker({
             return (
               <button
                 key={time}
-                ref={isSelected ? selectedRef : null}
+                data-selected={isSelected}
                 onClick={() => handleSelect(time)}
                 className={cn(
                   "w-full px-4 py-2 text-sm font-medium text-center transition-colors duration-200 ease select-none rounded-[16px]",
