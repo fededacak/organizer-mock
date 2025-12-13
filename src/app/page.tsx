@@ -55,7 +55,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { TimePicker } from "@/components/ui/time-picker";
-import { DescriptionModal } from "@/components/description-modal";
+import {
+  DescriptionModal,
+  type EventContext,
+} from "@/components/description-modal";
 import { CapacityModal } from "@/components/capacity-modal";
 import {
   LocationModal,
@@ -566,6 +569,17 @@ export default function EventCreationPage() {
         onOpenChange={setDescriptionModalOpen}
         value={description}
         onChange={setDescription}
+        eventContext={
+          {
+            title: eventTitle,
+            startDate,
+            startTime,
+            endDate: showEndDate ? endDate : undefined,
+            endTime: showEndDate ? endTime : undefined,
+            location: location?.venue?.name || location?.address,
+            capacity,
+          } satisfies EventContext
+        }
       />
 
       {/* Capacity Modal */}
@@ -794,7 +808,7 @@ function SortableTicketDisplay({
       </button>
 
       {/* Ticket Info */}
-      <div className="flex-1 min-w-0 flex flex-col gap-2">
+      <div className="flex-1 min-w-0 flex flex-col gap-1.5">
         {/* Title Row */}
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-bold text-base text-black">{ticket.name}</span>
@@ -806,7 +820,7 @@ function SortableTicketDisplay({
         </div>
 
         {/* Pricing Row */}
-        <div className="flex items-center gap-1.5 text-sm text-dark-gray">
+        <div className="flex items-center gap-1.5 text-sm text-dark-gray mb-1">
           <span>You get: {formatCurrency(youGet)}</span>
           <span className="text-mid-gray">|</span>
           <span>Buyer pays: {formatCurrency(buyerPays)}</span>
@@ -876,7 +890,7 @@ function VisibilityRadio({
       }`}
     >
       <span
-        className={`font-open-sans font-semibold text-sm ${
+        className={` text-sm font-semibold ${
           selected ? "text-black" : "text-dark-gray"
         }`}
       >
