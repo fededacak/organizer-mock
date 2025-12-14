@@ -353,12 +353,23 @@ export default function EventCreationPage() {
               {/* Event Title & DateTime Section */}
               <div className="flex flex-col gap-5">
                 {/* Event Title Input */}
-                <input
-                  type="text"
+                <textarea
                   value={eventTitle}
-                  onChange={(e) => setEventTitle(e.target.value)}
+                  onChange={(e) => {
+                    setEventTitle(e.target.value);
+                    // Auto-resize textarea
+                    e.target.style.height = "auto";
+                    e.target.style.height = `${e.target.scrollHeight}px`;
+                  }}
+                  onInput={(e) => {
+                    // Also handle on input for pasted content
+                    const target = e.target as HTMLTextAreaElement;
+                    target.style.height = "auto";
+                    target.style.height = `${target.scrollHeight}px`;
+                  }}
                   placeholder="Event Title"
-                  className="font-black text-[28px] md:text-[30px] text-black placeholder:text-mid-gray bg-transparent border-none outline-none w-full"
+                  rows={1}
+                  className="font-black text-[28px] md:text-[30px] text-black placeholder:text-mid-gray bg-transparent border-none outline-none w-full resize-none overflow-hidden leading-tight"
                 />
 
                 {/* DateTime Card */}
@@ -947,7 +958,7 @@ function VisibilityRadio({
               stiffness: 500,
               damping: 25,
             }}
-            className="absolute md:bottom-2 md:right-2 bottom-1 right-1 w-[18px] h-[18px] bg-tp-blue rounded-full flex items-center justify-center"
+            className="absolute bottom-2 right-2 w-[18px] h-[18px] bg-tp-blue rounded-full flex items-center justify-center"
           >
             <Check className="w-3 h-3 text-white" strokeWidth={3} />
           </motion.div>
