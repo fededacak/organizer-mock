@@ -215,23 +215,49 @@ export default function EventCreationPage() {
       {/* Main Content Card */}
       <div className="bg-white md:rounded-[20px] shadow-card md:h-[calc(100vh-20px)] md:max-h-[calc(100vh-20px)] flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="relative shrink-0 bg-white flex items-center justify-between px-2 py-2 md:py-3 border-b border-light-gray">
-          <button className="flex items-center gap-2.5 px-2 pr-3.5 py-2 rounded-full hover:bg-light-gray transition-colors duration-200 ease">
-            <div className="w-[26px] h-[26px] md:w-[22px] md:h-[22px] bg-mid-gray rounded-full flex items-center justify-center">
-              <ArrowLeft
-                className="w-4 h-4 md:w-3 md:h-3 text-white"
-                strokeWidth={3}
-              />
+        <header className="relative shrink-0 bg-white flex items-center justify-between px-4 sm:px-2 py-2.5 md:py-3 border-b border-light-gray">
+          {/* Mobile: TickPick Logo */}
+          <div className="flex sm:hidden items-center">
+            <Image
+              src="/logo_tp.svg"
+              alt="TickPick"
+              width={120}
+              height={27}
+              priority
+            />
+          </div>
+
+          {/* Desktop: Back button */}
+          <button className="hidden sm:flex items-center gap-2.5 px-2 pr-3.5 py-2 rounded-full hover:bg-light-gray transition-colors duration-200 ease">
+            <div className="w-[22px] h-[22px] bg-mid-gray rounded-full flex items-center justify-center">
+              <ArrowLeft className="w-3 h-3 text-white" strokeWidth={3} />
             </div>
-            <span className="font-normal text-base md:text-sm text-black">
-              Main menu
-            </span>
+            <span className="font-normal text-sm text-black">Main menu</span>
           </button>
+
           <h1 className="hidden sm:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-bold text-lg text-black">
             New Event
           </h1>
-          <div className="hidden sm:block w-[100px]" />{" "}
-          {/* Spacer for centering */}
+
+          {/* Mobile: Profile Avatar */}
+          <div className="flex sm:hidden items-center justify-center w-10 h-10 rounded-full overflow-hidden bg-light-gray">
+            <Image
+              src="/avatar-placeholder.jpg"
+              alt="Profile"
+              width={40}
+              height={40}
+              className="object-cover w-full h-full"
+              onError={(e) => {
+                // Fallback to initials if image fails to load
+                e.currentTarget.style.display = "none";
+                e.currentTarget.parentElement!.innerHTML =
+                  '<span class="font-bold text-sm text-dark-gray">JD</span>';
+              }}
+            />
+          </div>
+
+          {/* Desktop: Spacer for centering */}
+          <div className="hidden sm:block w-[100px]" />
         </header>
 
         {/* Main Content */}

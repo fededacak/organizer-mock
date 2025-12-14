@@ -297,7 +297,7 @@ export function LocationModal({
                                   result.address
                                 )
                               }
-                              className="relative opacity-0 group-hover:opacity-100 px-2 py-1 text-xs font-semibold text-tp-blue hover:text-[#2288ee] transition-all duration-200 ease cursor-pointer shrink-0"
+                              className="relative hidden md:block opacity-0 group-hover:opacity-100 px-2 py-1 text-xs font-semibold text-tp-blue hover:text-[#2288ee] transition-all duration-200 ease cursor-pointer shrink-0"
                             >
                               Save as venue
                             </button>
