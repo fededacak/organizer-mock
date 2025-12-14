@@ -1,6 +1,7 @@
 "use client";
 
 import { CapacityModal } from "@/components/capacity-modal";
+import { TickPickLogo } from "@/components/tickpick-logo";
 import {
   DescriptionModal,
   type EventContext,
@@ -218,13 +219,7 @@ export default function EventCreationPage() {
         <header className="sticky top-0 z-10 md:relative md:shrink-0 bg-white flex items-center justify-between px-4 sm:px-2 py-2.5 md:py-3 border-b border-light-gray">
           {/* Mobile: TickPick Logo */}
           <div className="flex sm:hidden items-center">
-            <Image
-              src="/logo_tp.svg"
-              alt="TickPick"
-              width={120}
-              height={27}
-              priority
-            />
+            <TickPickLogo />
           </div>
 
           {/* Desktop: Back button */}
@@ -240,20 +235,8 @@ export default function EventCreationPage() {
           </h1>
 
           {/* Mobile: Profile Avatar */}
-          <div className="flex sm:hidden items-center justify-center w-10 h-10 rounded-full overflow-hidden bg-light-gray">
-            <Image
-              src="/avatar-placeholder.jpg"
-              alt="Profile"
-              width={40}
-              height={40}
-              className="object-cover w-full h-full"
-              onError={(e) => {
-                // Fallback to initials if image fails to load
-                e.currentTarget.style.display = "none";
-                e.currentTarget.parentElement!.innerHTML =
-                  '<span class="font-bold text-sm text-dark-gray">JD</span>';
-              }}
-            />
+          <div className="flex sm:hidden items-center justify-center w-9 h-9 rounded-full bg-linear-to-br from-tp-red to-[#cc0052]">
+            <span className="font-bold text-base text-white">J</span>
           </div>
 
           {/* Desktop: Spacer for centering */}
