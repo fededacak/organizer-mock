@@ -154,13 +154,13 @@ export function LocationModal({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-[500px] max-h-[85vh] flex flex-col">
+      <DialogContent className="sm:max-w-[500px] max-h-[85vh] flex flex-col max-w-[calc(100vw-16px)]">
         <DialogHeader>
           <DialogTitle>Event Location</DialogTitle>
           <DialogCloseButton />
         </DialogHeader>
 
-        <div className="px-6 py-4 flex flex-col gap-2 flex-1 overflow-hidden">
+        <div className="px-4 md:px-6 py-4 flex flex-col gap-2 flex-1 overflow-hidden">
           {/* Search Input */}
           <div className="relative">
             <Search
@@ -175,7 +175,7 @@ export function LocationModal({
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setIsSearchFocused(false)}
               placeholder="Search for a location..."
-              className={`w-full h-[52px] pr-4 text-base text-black placeholder:text-gray bg-transparent focus:outline-none border rounded-[14px] transition-all duration-200 ease ${
+              className={`w-full h-[47px] pr-4 text-base text-black placeholder:text-gray bg-transparent focus:outline-none border rounded-[14px] transition-all duration-200 ease ${
                 isSearchFocused ? "pl-4 border-tp-blue" : "pl-11 border-border"
               }`}
               autoFocus

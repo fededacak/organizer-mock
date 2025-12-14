@@ -215,7 +215,7 @@ export default function EventCreationPage() {
       {/* Main Content Card */}
       <div className="bg-white md:rounded-[20px] shadow-card md:h-[calc(100vh-20px)] md:max-h-[calc(100vh-20px)] flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="relative shrink-0 bg-white flex items-center justify-between px-2 py-3 border-b border-light-gray">
+        <header className="relative shrink-0 bg-white flex items-center justify-between px-2 py-2 md:py-3 border-b border-light-gray">
           <button className="flex items-center gap-2.5 px-2 pr-3.5 py-2 rounded-full hover:bg-light-gray transition-colors duration-200 ease">
             <div className="w-[26px] h-[26px] md:w-[22px] md:h-[22px] bg-mid-gray rounded-full flex items-center justify-center">
               <ArrowLeft
@@ -332,7 +332,7 @@ export default function EventCreationPage() {
                   value={eventTitle}
                   onChange={(e) => setEventTitle(e.target.value)}
                   placeholder="Event Title"
-                  className="font-black text-[24px] md:text-[30px] text-black placeholder:text-mid-gray bg-transparent border-none outline-none w-full"
+                  className="font-black text-[28px] md:text-[30px] text-black placeholder:text-mid-gray bg-transparent border-none outline-none w-full"
                 />
 
                 {/* DateTime Card */}
@@ -351,7 +351,7 @@ export default function EventCreationPage() {
                         onOpenChange={setStartDateOpen}
                       >
                         <PopoverTrigger asChild>
-                          <button className="flex-1 h-11 md:h-10 bg-light-gray rounded-[10px] flex items-center justify-center px-4 overflow-hidden hover:bg-soft-gray transition-colors duration-200 ease cursor-pointer">
+                          <button className="flex-1 h-12 md:h-10 bg-light-gray rounded-[14px] md:rounded-[10px] flex items-center justify-center px-4 overflow-hidden hover:bg-soft-gray transition-colors duration-200 ease cursor-pointer">
                             <span className="font-bold text-base text-black truncate">
                               {formatDate(startDate) || "Select date"}
                             </span>
@@ -407,7 +407,7 @@ export default function EventCreationPage() {
                       <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
                         <PopoverTrigger asChild disabled={!showEndDate}>
                           <button
-                            className={`flex-1 h-11 md:h-10 bg-light-gray rounded-[10px] flex items-center justify-center px-4 overflow-hidden transition-colors duration-200 ease ${
+                            className={`flex-1 h-12 md:h-10 bg-light-gray rounded-[14px] md:rounded-[10px] flex items-center justify-center px-4 overflow-hidden transition-colors duration-200 ease ${
                               showEndDate
                                 ? "hover:bg-soft-gray cursor-pointer"
                                 : "opacity-50 cursor-not-allowed"
@@ -563,7 +563,7 @@ export default function EventCreationPage() {
               </div>
 
               {/* Create Event Button */}
-              <button className="w-full h-[50px] shrink-0 mt-3 bg-tp-blue text-white font-bold text-base rounded-[36px] flex items-center justify-center hover:bg-[#2288ee] transition-colors duration-200 ease active:scale-[0.98] transform">
+              <button className="w-full h-[54px] md:h-[50px] shrink-0 mt-3 bg-tp-blue text-white font-bold text-base rounded-[36px] flex items-center justify-center hover:bg-[#2288ee] transition-colors duration-200 ease active:scale-[0.98] transform">
                 Create Event
               </button>
             </div>
@@ -632,7 +632,7 @@ function ActionButton({
   return (
     <button
       onClick={onClick}
-      className="w-full h-[50px] md:h-[47px] cursor-pointer rounded-[14px] flex items-center justify-center gap-2 px-4 py-2 transition-colors duration-200 ease bg-light-gray hover:bg-soft-gray"
+      className="w-full h-[54px] md:h-[47px] cursor-pointer rounded-[14px] flex items-center justify-center gap-2 px-4 py-2 transition-colors duration-200 ease bg-light-gray hover:bg-soft-gray"
     >
       {icon}
       <span className="font-bold text-base text-black">{label}</span>
@@ -652,9 +652,11 @@ function DescriptionDisplay({
       onClick={onClick}
       className="w-full cursor-pointer rounded-[14px] flex items-start gap-3 px-4 py-3 transition-colors duration-200 ease bg-light-gray hover:bg-soft-gray text-left"
     >
-      <FileText className="w-4 h-4 text-black mt-0.5 shrink-0" />
+      <FileText className="w-4 h-4 text-black mt-1 md:mt-0.5 shrink-0" />
       <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-        <span className="font-bold text-sm text-black">Description</span>
+        <span className="font-bold text-base md:text-sm text-black">
+          Description
+        </span>
         <span className="text-sm text-dark-gray line-clamp-2">
           {description}
         </span>
@@ -678,9 +680,11 @@ function CapacityDisplay({
         onClick={onClick}
         className="flex-1 flex items-start gap-3 cursor-pointer text-left min-w-0"
       >
-        <Users className="w-4 h-4 text-black mt-0.5 shrink-0" />
+        <Users className="w-4 h-4 text-black mt-1 md:mt-0.5 shrink-0" />
         <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-          <span className="font-bold text-sm text-black">Capacity</span>
+          <span className="font-bold text-base md:text-sm text-black">
+            Capacity
+          </span>
           <span className="text-sm text-dark-gray">{capacity}</span>
         </div>
       </button>
@@ -732,9 +736,11 @@ function LocationDisplay({
       onClick={onClick}
       className="w-full cursor-pointer rounded-[14px] flex items-start gap-3 px-4 py-3 transition-colors duration-200 ease bg-light-gray hover:bg-soft-gray text-left"
     >
-      <MapPin className="w-4 h-4 text-black mt-0.5 shrink-0" />
+      <MapPin className="w-4 h-4 text-black mt-1 md:mt-0.5 shrink-0" />
       <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-        <span className="font-bold text-sm text-black">{displayName}</span>
+        <span className="font-bold text-base md:text-sm text-black">
+          {displayName}
+        </span>
         {displayAddress && (
           <span className="text-sm text-dark-gray line-clamp-1">
             {displayAddress}

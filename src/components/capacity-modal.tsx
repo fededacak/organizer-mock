@@ -37,13 +37,13 @@ export function CapacityModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[400px]">
+      <DialogContent className="sm:max-w-[400px] max-w-[calc(100vw-16px)]">
         <DialogHeader>
           <DialogTitle>Event Capacity</DialogTitle>
           <DialogCloseButton />
         </DialogHeader>
 
-        <div className="px-6 py-4">
+        <div className="px-4 md:px-6 py-4">
           <p className="text-base text-dark-gray mb-4">
             This capacity is shared across all ticket types linked to it.
           </p>
@@ -56,12 +56,12 @@ export function CapacityModal({
               value={value}
               onChange={handleInputChange}
               placeholder="Enter capacity..."
-              className="w-full h-[52px] px-4 text-base text-black placeholder:text-gray bg-transparent focus:outline-none border rounded-[14px]"
+              className="w-full h-[47px] px-4 text-base text-black placeholder:text-gray bg-transparent focus:outline-none border rounded-[14px]"
             />
           </div>
         </div>
 
-        <div className="flex justify-end pb-6 pt-2 px-6">
+        <div className="flex justify-end pb-6 pt-2 px-4 md:px-6">
           <button
             onClick={handleSave}
             className="bg-tp-blue cursor-pointer text-white font-bold text-base px-5 py-2.5 rounded-[36px] hover:bg-[#2288ee] transition-colors duration-200 ease active:scale-[0.98] transform"

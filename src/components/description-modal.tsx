@@ -257,7 +257,7 @@ export function DescriptionModal({
         {view === "description" && (
           <motion.div
             layoutId="modal-container"
-            className="bg-white rounded-[24px] shadow-lg w-full max-w-[600px] mx-4 pointer-events-auto"
+            className="bg-white rounded-[24px] shadow-lg w-full max-w-[600px] mx-2 pointer-events-auto"
             transition={springTransition}
           >
             {/* Header */}
@@ -284,7 +284,7 @@ export function DescriptionModal({
             </motion.div>
 
             {/* Content */}
-            <div className="px-6 py-4">
+            <div className="px-4 md:px-6 py-4">
               <div className="relative bg-white border border-neutral-200 rounded-[16px] overflow-hidden">
                 <textarea
                   value={value}
@@ -306,7 +306,7 @@ export function DescriptionModal({
             {/* Footer */}
             <motion.div
               layoutId="modal-footer"
-              className="flex justify-end pb-6 pt-2 px-6"
+              className="flex justify-end pb-6 pt-2 px-4 md:px-6"
               transition={springTransition}
             >
               <motion.button
@@ -327,7 +327,7 @@ export function DescriptionModal({
         {view === "ai-helper" && (
           <motion.div
             layoutId="modal-container"
-            className="bg-white rounded-[24px] shadow-lg w-full max-w-[460px] mx-4 pointer-events-auto"
+            className="bg-white rounded-[24px] shadow-lg w-full max-w-[460px] mx-2 pointer-events-auto"
             transition={springTransition}
           >
             {/* Header */}
@@ -354,7 +354,7 @@ export function DescriptionModal({
             </motion.div>
 
             {/* Content */}
-            <div className="px-6 py-4 space-y-4">
+            <div className="px-4 md:px-6 py-4 space-y-4">
               {/* Error Message */}
               {error && (
                 <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-[12px]">
@@ -408,7 +408,7 @@ export function DescriptionModal({
             {/* Footer */}
             <motion.div
               layoutId="modal-footer"
-              className="flex justify-between pb-6 pt-2 px-6"
+              className="flex justify-between pb-6 pt-2 px-4 md:px-6"
               transition={springTransition}
             >
               <motion.button
@@ -453,7 +453,7 @@ export function DescriptionModal({
         {view === "ai-preview" && (
           <motion.div
             layoutId="modal-container"
-            className="bg-white rounded-[24px] shadow-lg w-full max-w-[520px] mx-4 pointer-events-auto"
+            className="bg-white rounded-[24px] shadow-lg w-full max-w-[520px] mx-2 pointer-events-auto"
             transition={springTransition}
           >
             {/* Header */}
@@ -480,7 +480,7 @@ export function DescriptionModal({
             </motion.div>
 
             {/* Content */}
-            <div className="px-6 py-4 space-y-4">
+            <div className="px-4 md:px-6 py-4 space-y-4">
               {/* Generated Content Preview */}
               <div>
                 <label className="block text-sm font-bold text-black mb-1.5">
@@ -542,7 +542,7 @@ export function DescriptionModal({
             {/* Footer */}
             <motion.div
               layoutId="modal-footer"
-              className="flex justify-end gap-3 pb-6 pt-2 px-6"
+              className="flex justify-end gap-3 pb-6 pt-2 px-4 md:px-6"
               transition={springTransition}
             >
               <motion.button
