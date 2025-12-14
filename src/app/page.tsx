@@ -217,10 +217,15 @@ export default function EventCreationPage() {
         {/* Header */}
         <header className="relative shrink-0 bg-white flex items-center justify-between px-2 py-3 border-b border-light-gray">
           <button className="flex items-center gap-2.5 px-2 pr-3.5 py-2 rounded-full hover:bg-light-gray transition-colors duration-200 ease">
-            <div className="w-[22px] h-[22px] bg-mid-gray rounded-full flex items-center justify-center">
-              <ArrowLeft className="w-3 h-3 text-white" strokeWidth={3} />
+            <div className="w-[26px] h-[26px] md:w-[22px] md:h-[22px] bg-mid-gray rounded-full flex items-center justify-center">
+              <ArrowLeft
+                className="w-4 h-4 md:w-3 md:h-3 text-white"
+                strokeWidth={3}
+              />
             </div>
-            <span className="font-normal text-sm text-black">Main menu</span>
+            <span className="font-normal text-base md:text-sm text-black">
+              Main menu
+            </span>
           </button>
           <h1 className="hidden sm:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-bold text-lg text-black">
             New Event
@@ -230,8 +235,8 @@ export default function EventCreationPage() {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 min-h-0 overflow-y-auto flex justify-center px-4 py-4 md:px-8 md:py-8">
-          <div className="w-full max-w-[1000px] flex flex-col lg:flex-row gap-3 lg:gap-8">
+        <main className="flex-1 min-h-0 overflow-y-auto flex justify-center px-4 py-4 pb-8 md:px-8 md:py-8">
+          <div className="w-full max-w-[1000px] flex flex-col lg:flex-row gap-4 lg:gap-8">
             {/* Left Column - Event Image */}
             <div className="w-full lg:flex-1">
               <input
@@ -264,10 +269,10 @@ export default function EventCreationPage() {
                           e.stopPropagation();
                           fileInputRef.current?.click();
                         }}
-                        className="cursor-pointer w-[38px] h-[38px] bg-white rounded-full shadow-sm flex items-center justify-center hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200"
+                        className="cursor-pointer w-[42px] h-[42px] md:w-[38px] md:h-[38px] bg-white rounded-full shadow-sm flex items-center justify-center hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200"
                       >
                         <RefreshCcw
-                          className="w-4 h-4 text-black"
+                          className="w-5 h-5 md:w-4 md:h-4 text-black"
                           strokeWidth={2}
                         />
                       </button>
@@ -277,10 +282,10 @@ export default function EventCreationPage() {
                           e.stopPropagation();
                           handleRemoveImage();
                         }}
-                        className="group/delete cursor-pointer w-[38px] h-[38px] bg-white rounded-full shadow-sm flex items-center justify-center hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200"
+                        className="group/delete cursor-pointer w-[42px] h-[42px] md:w-[38px] md:h-[38px] bg-white rounded-full shadow-sm flex items-center justify-center hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200"
                       >
                         <Trash2
-                          className="w-4 h-4 text-black group-hover/delete:text-tp-red transition-colors duration-200 ease"
+                          className="w-5 h-5 md:w-4 md:h-4 text-black group-hover/delete:text-tp-red transition-colors duration-200 ease"
                           strokeWidth={2}
                         />
                       </button>
@@ -306,8 +311,11 @@ export default function EventCreationPage() {
                     </svg>
 
                     {/* Plus button */}
-                    <button className="cursor-pointer absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[38px] h-[38px] bg-white rounded-full shadow-sm flex items-center justify-center hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200">
-                      <Plus className="w-4 h-4 text-black" strokeWidth={2} />
+                    <button className="cursor-pointer absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[42px] h-[42px] md:w-[38px] md:h-[38px] bg-white rounded-full shadow-sm flex items-center justify-center hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200">
+                      <Plus
+                        className="w-5 h-5 md:w-4 md:h-4 text-black"
+                        strokeWidth={2}
+                      />
                     </button>
                   </>
                 )}
@@ -343,7 +351,7 @@ export default function EventCreationPage() {
                         onOpenChange={setStartDateOpen}
                       >
                         <PopoverTrigger asChild>
-                          <button className="flex-1 h-10 bg-light-gray rounded-[10px] flex items-center justify-center px-4 overflow-hidden hover:bg-soft-gray transition-colors duration-200 ease cursor-pointer">
+                          <button className="flex-1 h-11 md:h-10 bg-light-gray rounded-[10px] flex items-center justify-center px-4 overflow-hidden hover:bg-soft-gray transition-colors duration-200 ease cursor-pointer">
                             <span className="font-bold text-base text-black truncate">
                               {formatDate(startDate) || "Select date"}
                             </span>
@@ -399,7 +407,7 @@ export default function EventCreationPage() {
                       <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
                         <PopoverTrigger asChild disabled={!showEndDate}>
                           <button
-                            className={`flex-1 h-10 bg-light-gray rounded-[10px] flex items-center justify-center px-4 overflow-hidden transition-colors duration-200 ease ${
+                            className={`flex-1 h-11 md:h-10 bg-light-gray rounded-[10px] flex items-center justify-center px-4 overflow-hidden transition-colors duration-200 ease ${
                               showEndDate
                                 ? "hover:bg-soft-gray cursor-pointer"
                                 : "opacity-50 cursor-not-allowed"
@@ -535,7 +543,7 @@ export default function EventCreationPage() {
                   </label>
                   <VisibilityTooltip />
                 </div>
-                <div className="flex gap-3">
+                <div className="flex gap-2">
                   <VisibilityRadio
                     label="Public"
                     selected={visibility === "public"}
@@ -624,7 +632,7 @@ function ActionButton({
   return (
     <button
       onClick={onClick}
-      className="w-full h-[47px] cursor-pointer rounded-[14px] flex items-center justify-center gap-2 px-4 py-2 transition-colors duration-200 ease bg-light-gray hover:bg-soft-gray"
+      className="w-full h-[50px] md:h-[47px] cursor-pointer rounded-[14px] flex items-center justify-center gap-2 px-4 py-2 transition-colors duration-200 ease bg-light-gray hover:bg-soft-gray"
     >
       {icon}
       <span className="font-bold text-base text-black">{label}</span>
@@ -883,7 +891,7 @@ function VisibilityRadio({
   return (
     <button
       onClick={onClick}
-      className={`flex-1 p-3 sm:p-3.5 cursor-pointer rounded-[14px] flex items-center justify-center relative transition-shadow duration-200 ease ${
+      className={`flex-1 px-3 py-4 sm:px-3.5 sm:py-3.5 cursor-pointer rounded-[14px] flex items-center justify-center relative transition-shadow duration-200 ease ${
         selected
           ? "shadow-[inset_0_0_0_1.5px_var(--color-tp-blue)]"
           : "shadow-[inset_0_0_0_1px_var(--color-neutral-200)] hover:shadow-[inset_0_0_0_1px_var(--color-mid-gray)]"

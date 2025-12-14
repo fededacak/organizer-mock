@@ -73,7 +73,7 @@ function TimePicker({
       <PopoverTrigger asChild disabled={disabled}>
         <button
           className={cn(
-            "flex-1 h-10 bg-light-gray rounded-[10px] flex items-center justify-center px-4 gap-1 overflow-hidden transition-colors duration-200 ease",
+            "flex-1 h-11 md:h-10 bg-light-gray rounded-[10px] flex items-center justify-center px-4 gap-1 overflow-hidden transition-colors duration-200 ease",
             disabled
               ? "opacity-50 cursor-not-allowed"
               : "hover:bg-soft-gray cursor-pointer",
