@@ -1,5 +1,6 @@
 "use client";
 
+import { BannerGeneratorModal } from "@/components/banner-generator-modal";
 import { CapacityModal } from "@/components/capacity-modal";
 import { TickPickLogo } from "@/components/tickpick-logo";
 import {
@@ -64,6 +65,7 @@ import {
   RefreshCcw,
   Trash2,
   Users,
+  Wand2,
 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
@@ -119,6 +121,7 @@ export default function EventCreationPage() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [ticketModalOpen, setTicketModalOpen] = useState(false);
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
+  const [bannerModalOpen, setBannerModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -255,12 +258,7 @@ export default function EventCreationPage() {
                 onChange={handleImageUpload}
                 className="hidden"
               />
-              <div
-                onClick={() => !eventImage && fileInputRef.current?.click()}
-                className={`aspect-5/2 bg-light-gray rounded-none md:rounded-2xl relative overflow-hidden group -mx-4 -mt-4 md:mx-0 md:mt-0 ${
-                  !eventImage ? "cursor-pointer" : ""
-                }`}
-              >
+              <div className="aspect-5/2 bg-light-gray rounded-none md:rounded-2xl relative overflow-hidden group -mx-4 -mt-4 md:mx-0 md:mt-0">
                 {eventImage ? (
                   <>
                     {/* Image Preview */}
@@ -319,13 +317,50 @@ export default function EventCreationPage() {
                       />
                     </svg>
 
-                    {/* Plus button */}
-                    <button className="cursor-pointer absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[42px] h-[42px] md:w-[38px] md:h-[38px] bg-white rounded-full shadow-sm flex items-center justify-center hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200">
-                      <Plus
-                        className="w-5 h-5 md:w-4 md:h-4 text-black"
-                        strokeWidth={2}
-                      />
-                    </button>
+                    {/* Action buttons */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-3">
+                      {/* Upload image button */}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              fileInputRef.current?.click();
+                            }}
+                            className="cursor-pointer w-[42px] h-[42px] md:w-[38px] md:h-[38px] bg-white rounded-full shadow-sm flex items-center justify-center hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200"
+                          >
+                            <Plus
+                              className="w-5 h-5 text-black"
+                              strokeWidth={2}
+                            />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom">
+                          Upload image
+                        </TooltipContent>
+                      </Tooltip>
+
+                      {/* Generate with AI button */}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setBannerModalOpen(true);
+                            }}
+                            className="btn-shimmer relative cursor-pointer w-[42px] h-[42px] md:w-[38px] md:h-[38px] bg-white rounded-full shadow-sm flex items-center justify-center hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200"
+                          >
+                            <Wand2
+                              className="w-5 h-5 md:w-4 md:h-4 text-black"
+                              strokeWidth={2}
+                            />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom">
+                          Generate with AI
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                   </>
                 )}
               </div>
@@ -636,6 +671,19 @@ export default function EventCreationPage() {
         onSave={handleSaveTicket}
         eventCapacity={capacity}
       />
+
+      {/* Banner Generator Modal */}
+      <BannerGeneratorModal
+        open={bannerModalOpen}
+        onOpenChange={setBannerModalOpen}
+        onGenerate={setEventImage}
+        eventContext={{
+          title: eventTitle,
+          startDate,
+          startTime,
+          location: location?.venue?.name || location?.address,
+        }}
+      />
     </div>
   );
 }
@@ -917,19 +965,13 @@ function VisibilityRadio({
   return (
     <button
       onClick={onClick}
-      className={`flex-1 px-3 py-4 sm:px-3.5 sm:py-3.5 cursor-pointer rounded-[14px] flex items-center justify-center relative transition-shadow duration-200 ease ${
+      className={`flex-1 px-3 py-4 sm:px-3.5 sm:py-3.5 cursor-pointer rounded-[14px] flex items-center justify-center relative transition-[color,shadow] duration-200 ease text-base font-semibold ${
         selected
-          ? "shadow-[inset_0_0_0_1.5px_var(--color-tp-blue)]"
-          : "shadow-[inset_0_0_0_1px_var(--color-neutral-200)] hover:shadow-[inset_0_0_0_1px_var(--color-mid-gray)]"
+          ? "shadow-[inset_0_0_0_1.5px_var(--color-tp-blue)] text-black"
+          : "shadow-[inset_0_0_0_1px_var(--color-neutral-200)] hover:shadow-[inset_0_0_0_1px_var(--color-mid-gray)] text-dark-gray hover:text-black"
       }`}
     >
-      <span
-        className={` text-base font-semibold ${
-          selected ? "text-black" : "text-dark-gray"
-        }`}
-      >
-        {label}
-      </span>
+      <span>{label}</span>
       <AnimatePresence>
         {selected && (
           <motion.div

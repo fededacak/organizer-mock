@@ -1,0 +1,41 @@
+<svg width="1000" height="400" viewBox="0 0 1000 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="50%" style="stop-color:#764ba2"/>
+      <stop offset="100%" style="stop-color:#f093fb"/>
+    </linearGradient>
+    <linearGradient id="overlay" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:rgba(0,0,0,0.4)"/>
+      <stop offset="100%" style="stop-color:rgba(0,0,0,0)"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background gradient -->
+  <rect width="1000" height="400" fill="url(#bg)"/>
+  
+  <!-- Decorative circles -->
+  <circle cx="150" cy="100" r="120" fill="rgba(255,255,255,0.1)"/>
+  <circle cx="850" cy="320" r="180" fill="rgba(255,255,255,0.08)"/>
+  <circle cx="500" cy="200" r="80" fill="rgba(255,255,255,0.05)"/>
+  
+  <!-- Bottom overlay for text readability -->
+  <rect y="200" width="1000" height="200" fill="url(#overlay)"/>
+  
+  <!-- Sample event text -->
+  <text x="500" y="180" font-family="system-ui, -apple-system, sans-serif" font-size="48" font-weight="bold" fill="white" text-anchor="middle">
+    Your Event Name
+  </text>
+  <text x="500" y="230" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="rgba(255,255,255,0.9)" text-anchor="middle">
+    AI-Generated Banner Preview
+  </text>
+  
+  <!-- Decorative line -->
+  <rect x="420" y="260" width="160" height="3" rx="1.5" fill="rgba(255,255,255,0.6)"/>
+  
+  <!-- Date badge -->
+  <rect x="400" y="290" width="200" height="40" rx="20" fill="rgba(255,255,255,0.2)"/>
+  <text x="500" y="316" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="600" fill="white" text-anchor="middle">
+    Coming Soon
+  </text>
+</svg>
