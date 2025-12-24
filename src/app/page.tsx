@@ -88,7 +88,7 @@ function useIsMobile() {
 
 export default function EventCreationPage() {
   const isMobile = useIsMobile();
-  const [visibility, setVisibility] = useState<VisibilityOption>("public");
+  const [visibility, setVisibility] = useState<VisibilityOption>("draft");
   const [startDate, setStartDate] = useState<Date | undefined>(() => {
     const date = new Date();
     date.setMonth(date.getMonth() + 1);
@@ -601,31 +601,7 @@ export default function EventCreationPage() {
               </div>
 
               {/* Visibility Section */}
-              <div className="flex flex-col gap-1.5">
-                <div className="flex items-center gap-1 h-5">
-                  <label className="font-bold text-sm text-black">
-                    Visibility
-                  </label>
-                  <VisibilityTooltip />
-                </div>
-                <div className="flex gap-2">
-                  <VisibilityRadio
-                    label="Public"
-                    selected={visibility === "public"}
-                    onClick={() => setVisibility("public")}
-                  />
-                  <VisibilityRadio
-                    label="Private"
-                    selected={visibility === "private"}
-                    onClick={() => setVisibility("private")}
-                  />
-                  <VisibilityRadio
-                    label="Draft"
-                    selected={visibility === "draft"}
-                    onClick={() => setVisibility("draft")}
-                  />
-                </div>
-              </div>
+              <VisibilitySelector value={visibility} onChange={setVisibility} />
 
               {/* Create Event Button */}
               <button className="w-full h-[54px] md:h-[50px] shrink-0 mt-3 bg-tp-blue text-white font-bold text-base rounded-[36px] flex items-center justify-center hover:bg-[#2288ee] transition-colors duration-200 ease active:scale-[0.98] transform cursor-pointer">
@@ -802,8 +778,15 @@ function LocationDisplay({
   onClick: () => void;
 }) {
   const isTbd = location.isTbd;
-  const displayName = isTbd ? "TBD" : location.venue?.name || location.address;
-  const displayAddress = !isTbd && location.venue ? location.address : null;
+  const hasVenueName = Boolean(location.venue?.name);
+
+  // Determine what to display
+  const displayName = isTbd
+    ? "TBD"
+    : hasVenueName
+    ? location.venue!.name
+    : "Event location";
+  const displayAddress = !isTbd ? location.address : null;
 
   return (
     <button
@@ -812,7 +795,7 @@ function LocationDisplay({
     >
       <MapPin className={`w-4 h-4 mt-1 shrink-0 text-black`} />
       <div className="flex gap-3 min-w-0 flex-1 flex-wrap items-center justify-between">
-        <div className=" flex flex-col gap-0.5">
+        <div className="flex flex-col gap-0.5">
           <span className={`font-bold text-base w-fit text-black`}>
             {displayName}
           </span>
@@ -960,43 +943,108 @@ function SortableTicketDisplay({
   );
 }
 
-function VisibilityRadio({
-  label,
-  selected,
-  onClick,
-}: {
+const VISIBILITY_OPTIONS: {
+  value: VisibilityOption;
   label: string;
-  selected: boolean;
-  onClick: () => void;
+  description: string;
+}[] = [
+  {
+    value: "draft",
+    label: "Draft",
+    description: "Saved, but not ready for purchase.",
+  },
+  {
+    value: "public",
+    label: "Public",
+    description: "Listed on TickPick Marketplace.",
+  },
+  {
+    value: "private",
+    label: "Private",
+    description: "Only accessible via link.",
+  },
+];
+
+function VisibilitySelector({
+  value,
+  onChange,
+}: {
+  value: VisibilityOption;
+  onChange: (value: VisibilityOption) => void;
 }) {
+  const selectedOption = VISIBILITY_OPTIONS.find((opt) => opt.value === value);
+
   return (
-    <button
-      onClick={onClick}
-      className={`flex-1 px-3 py-4 sm:px-3.5 sm:py-3.5 cursor-pointer rounded-[14px] flex items-center justify-center relative transition-[color,shadow] duration-200 ease text-base font-semibold ${
-        selected
-          ? "shadow-[inset_0_0_0_1.5px_var(--color-tp-blue)] text-black"
-          : "shadow-[inset_0_0_0_1px_var(--color-neutral-200)] hover:shadow-[inset_0_0_0_1px_var(--color-mid-gray)] text-dark-gray hover:text-black"
-      }`}
-    >
-      <span>{label}</span>
-      <AnimatePresence>
-        {selected && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.5 }}
-            transition={{
-              type: "spring",
-              stiffness: 500,
-              damping: 25,
-            }}
-            className="absolute bottom-2 right-2 w-[18px] h-[18px] bg-tp-blue rounded-full hidden sm:flex items-center justify-center"
-          >
-            <Check className="w-3 h-3 text-white" strokeWidth={3} />
-          </motion.div>
-        )}
+    <div className="flex flex-col gap-1.5">
+      <label className="font-bold text-sm text-black">Visibility</label>
+      <div className="flex gap-2">
+        {VISIBILITY_OPTIONS.map((option) => {
+          const isSelected = value === option.value;
+          const button = (
+            <button
+              onClick={() => onChange(option.value)}
+              className={`w-full px-3 py-4 sm:px-3.5 sm:py-3.5 cursor-pointer rounded-[14px] flex items-center justify-center relative transition-[color,shadow] duration-200 ease text-base font-semibold ${
+                isSelected
+                  ? "shadow-[inset_0_0_0_1.5px_var(--color-tp-blue)] text-black"
+                  : "shadow-[inset_0_0_0_1px_var(--color-neutral-200)] hover:shadow-[inset_0_0_0_1px_var(--color-mid-gray)] text-dark-gray hover:text-black"
+              }`}
+            >
+              <span>{option.label}</span>
+              <AnimatePresence>
+                {isSelected && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.5 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 500,
+                      damping: 25,
+                    }}
+                    className="absolute bottom-2 right-2 w-[18px] h-[18px] bg-tp-blue rounded-full hidden sm:flex items-center justify-center"
+                  >
+                    <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </button>
+          );
+
+          // Only show tooltip on non-selected items
+          if (isSelected) {
+            return (
+              <div key={option.value} className="flex-1">
+                {button}
+              </div>
+            );
+          }
+
+          return (
+            <div key={option.value} className="flex-1">
+              <Tooltip>
+                <TooltipTrigger asChild>{button}</TooltipTrigger>
+                <TooltipContent side="bottom">
+                  {option.description}
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          );
+        })}
+      </div>
+      {/* Inline description for selected option */}
+      <AnimatePresence mode="wait">
+        <motion.p
+          key={value}
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 4 }}
+          transition={{ duration: 0.15 }}
+          className="text-sm text-dark-gray pl-1"
+        >
+          {selectedOption?.description}
+        </motion.p>
       </AnimatePresence>
-    </button>
+    </div>
   );
 }
 
@@ -1056,41 +1104,6 @@ function EndDateTooltip({ showEndDate }: { showEndDate: boolean }) {
         {showEndDate
           ? "End date and time are visible on the event page"
           : "End date and time are hidden on the event page"}
-      </TooltipContent>
-    </Tooltip>
-  );
-}
-
-function VisibilityTooltip() {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <Tooltip open={open} onOpenChange={setOpen}>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          aria-label="Visibility options info"
-          className="cursor-default"
-          onClick={() => setOpen((prev) => !prev)}
-        >
-          <CircleHelp className="w-4 h-4 text-gray" />
-        </button>
-      </TooltipTrigger>
-      <TooltipContent side="bottom" align="start">
-        <div className="flex flex-col gap-1.5">
-          <p>
-            <span className="font-semibold">Public:</span> Listed on TickPick
-            Marketplace.
-          </p>
-          <p>
-            <span className="font-semibold">Private:</span> Only accessible via
-            link.
-          </p>
-          <p>
-            <span className="font-semibold">Draft:</span> Saved, but not ready
-            for purchase.
-          </p>
-        </div>
       </TooltipContent>
     </Tooltip>
   );

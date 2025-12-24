@@ -3,7 +3,8 @@
 import { TickPickLogo } from "@/components/tickpick-logo";
 import { Button } from "@/components/ui/button";
 import { EventBannerCarousel } from "@/components/event-banner-carousel";
-import { useState } from "react";
+import { useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   MapPin,
   Minus,
@@ -68,6 +69,28 @@ See you February 7th. Lyric Night is a space for artists and creatives alike to 
 };
 
 export default function EventPage() {
+  return (
+    <Suspense fallback={<EventPageSkeleton />}>
+      <EventPageContent />
+    </Suspense>
+  );
+}
+
+function EventPageSkeleton() {
+  return (
+    <div className="min-h-screen bg-white flex flex-col items-center animate-pulse">
+      <div className="w-full h-[86px] bg-light-gray" />
+      <div className="w-full max-w-[1014px] pt-5 pb-20 px-4">
+        <div className="aspect-[1014/400] bg-light-gray rounded-2xl" />
+      </div>
+    </div>
+  );
+}
+
+function EventPageContent() {
+  const searchParams = useSearchParams();
+  const isDarkMode = searchParams.get("theme") === "dark";
+
   const [ticketQuantities, setTicketQuantities] = useState<
     Record<string, number>
   >({
@@ -96,101 +119,122 @@ export default function EventPage() {
   }, 0);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center">
-      {/* Navbar */}
-      <Navbar />
+    <div className={isDarkMode ? "dark" : ""}>
+      <div className="min-h-screen bg-white dark:bg-[#0a0a0f] flex flex-col items-center transition-colors duration-300 ease-out">
+        {/* Navbar */}
+        <Navbar isDarkMode={isDarkMode} />
 
-      {/* Main Content */}
-      <main className="w-full max-w-[1014px] flex flex-col lg:flex-row gap-8 px-4 lg:px-0 pt-5 pb-20">
-        {/* Left Column */}
-        <div className="flex-1 flex flex-col gap-4">
-          {/* Event Image Carousel */}
-          <EventBannerCarousel eventName={EVENT_DATA.name} />
+        {/* Main Content */}
+        <main className="w-full max-w-[1014px] flex flex-col lg:flex-row gap-8 px-4 lg:px-0 pt-5 pb-20">
+          {/* Left Column */}
+          <div className="flex-1 flex flex-col gap-4">
+            {/* Event Image Carousel */}
+            <EventBannerCarousel eventName={EVENT_DATA.name} />
 
-          {/* Organized By Section */}
-          <OrganizerSection organizer={EVENT_DATA.organizer} />
+            {/* Organized By Section */}
+            <OrganizerSection organizer={EVENT_DATA.organizer} />
 
-          {/* Spotify Section */}
-          <SpotifySection playlist={EVENT_DATA.playlist} />
+            {/* Spotify Section */}
+            <SpotifySection playlist={EVENT_DATA.playlist} />
 
-          {/* Lineup Section */}
-          <LineupSection lineup={EVENT_DATA.lineup} />
+            {/* Lineup Section */}
+            <LineupSection lineup={EVENT_DATA.lineup} />
+          </div>
 
-          {/* Host Event Promo */}
-          <HostEventPromo />
-        </div>
-
-        {/* Right Column */}
-        <div className="w-full lg:w-[500px] flex flex-col gap-4">
-          {/* Event Name & Details */}
-          <div className="border-b border-light-gray pb-4">
-            <h1 className="font-black text-[30px] text-black leading-tight">
-              {EVENT_DATA.name}
-            </h1>
-            <p className="text-sm text-dark-gray mt-1">
-              {EVENT_DATA.date} @ {EVENT_DATA.time}
-            </p>
-            <div className="mt-2">
-              <p className="font-extrabold text-sm text-black">
-                {EVENT_DATA.venue.name}
+          {/* Right Column */}
+          <div className="w-full lg:w-[500px] flex flex-col gap-4">
+            {/* Event Name & Details */}
+            <div className="border-b border-light-gray dark:border-[#2a2a35] pb-4">
+              <h1 className="font-black text-[30px] text-black dark:text-white leading-tight">
+                {EVENT_DATA.name}
+              </h1>
+              <p className="text-sm text-dark-gray dark:text-[#9ca3af] mt-1">
+                {EVENT_DATA.date} @ {EVENT_DATA.time}
               </p>
-              <p className="text-sm text-black">{EVENT_DATA.venue.address}</p>
+              <div className="mt-2">
+                <p className="font-extrabold text-sm text-black dark:text-white">
+                  {EVENT_DATA.venue.name}
+                </p>
+                <p className="text-sm text-black dark:text-[#d1d5db]">
+                  {EVENT_DATA.venue.address}
+                </p>
+              </div>
             </div>
+
+            {/* Tickets Section */}
+            <div className="border-b border-light-gray dark:border-[#2a2a35] pb-4 flex flex-col gap-3">
+              {EVENT_DATA.tickets.map((ticket) => (
+                <TicketCard
+                  key={ticket.id}
+                  ticket={ticket}
+                  quantity={ticketQuantities[ticket.id] || 0}
+                  isExpanded={expandedTicket === ticket.id}
+                  onToggleExpand={() =>
+                    setExpandedTicket(
+                      expandedTicket === ticket.id ? null : ticket.id
+                    )
+                  }
+                  onUpdateQuantity={(delta) => updateQuantity(ticket.id, delta)}
+                />
+              ))}
+            </div>
+
+            {/* Checkout Button */}
+            <CheckoutButton
+              totalTickets={totalTickets}
+              totalPrice={totalPrice}
+            />
+
+            {/* About Section */}
+            <AboutSection
+              description={EVENT_DATA.description}
+              showFull={showFullDescription}
+              onToggle={() => setShowFullDescription(!showFullDescription)}
+            />
+
+            {/* Map Section */}
+            <MapSection venue={EVENT_DATA.venue} />
           </div>
-
-          {/* Tickets Section */}
-          <div className="border-b border-light-gray pb-4 flex flex-col gap-3">
-            {EVENT_DATA.tickets.map((ticket) => (
-              <TicketCard
-                key={ticket.id}
-                ticket={ticket}
-                quantity={ticketQuantities[ticket.id] || 0}
-                isExpanded={expandedTicket === ticket.id}
-                onToggleExpand={() =>
-                  setExpandedTicket(
-                    expandedTicket === ticket.id ? null : ticket.id
-                  )
-                }
-                onUpdateQuantity={(delta) => updateQuantity(ticket.id, delta)}
-              />
-            ))}
-          </div>
-
-          {/* Checkout Button */}
-          <CheckoutButton totalTickets={totalTickets} totalPrice={totalPrice} />
-
-          {/* About Section */}
-          <AboutSection
-            description={EVENT_DATA.description}
-            showFull={showFullDescription}
-            onToggle={() => setShowFullDescription(!showFullDescription)}
-          />
-
-          {/* Map Section */}
-          <MapSection venue={EVENT_DATA.venue} />
+        </main>
+        {/* Host Event Promo */}
+        <div className="w-full bg-light-gray/50 dark:bg-[#1e1e26]/50 py-4 mx-auto">
+          <a
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-1.5 group"
+          >
+            <span className="font-semibold text-sm text-shimmer dark:text-[#9ca3af]">
+              Host your event with TickPick
+            </span>
+            <ArrowUpRight className="w-4 h-4 text-border dark:text-[#6b7280] group-hover:text-accent motion-safe:group-hover:translate-x-0.5 motion-safe:group-hover:-translate-y-0.5 transition-all duration-200 ease-out" />
+          </a>
         </div>
-      </main>
-
-      {/* Footer */}
-      <Footer />
+        {/* Footer */}
+        <Footer />
+      </div>
     </div>
   );
 }
 
 // Navbar Component
-function Navbar() {
+function Navbar({ isDarkMode }: { isDarkMode: boolean }) {
   return (
-    <header className="w-full bg-white">
+    <header className="w-full bg-white dark:bg-[#0a0a0f] transition-colors duration-300 ease-out">
       <div className="max-w-[1456px] mx-auto h-[86px] flex items-center justify-between px-4 lg:px-[72px]">
-        <TickPickLogo width={145} height={32} />
+        <TickPickLogo
+          width={145}
+          height={32}
+          variant={isDarkMode ? "light" : "dark"}
+        />
         <div className="flex items-center gap-5">
-          <button className="font-semibold text-sm text-dark-gray hover:text-black transition-colors duration-200 ease hidden sm:block cursor-pointer">
+          <button className="font-semibold text-sm text-dark-gray dark:text-[#9ca3af] hover:text-black dark:hover:text-white transition-colors duration-200 ease hidden sm:block cursor-pointer">
             Organize Events
           </button>
-          <button className="font-semibold text-sm text-dark-gray hover:text-black transition-colors duration-200 ease hidden sm:block cursor-pointer">
+          <button className="font-semibold text-sm text-dark-gray dark:text-[#9ca3af] hover:text-black dark:hover:text-white transition-colors duration-200 ease hidden sm:block cursor-pointer">
             Sell Tickets
           </button>
-          <div className="hidden sm:block w-px h-[38px] bg-light-gray mx-2" />
+          <div className="hidden sm:block w-px h-[38px] bg-light-gray dark:bg-[#2a2a35] mx-2" />
           <Button className="bg-tp-blue hover:bg-tp-blue/90 text-white font-bold text-base rounded-[36px] px-4 py-2 h-auto">
             Log In
           </Button>
@@ -207,10 +251,10 @@ function OrganizerSection({
   organizer: typeof EVENT_DATA.organizer;
 }) {
   return (
-    <section className="border-b border-light-gray pb-4">
+    <section className="border-b border-light-gray dark:border-[#2a2a35] pb-4">
       <SectionHeader title="Organized By" />
-      <div className="bg-light-gray rounded-[20px] p-5 flex items-center gap-4">
-        <div className="w-16 h-16 rounded-full bg-mid-gray overflow-hidden shrink-0">
+      <div className="bg-light-gray dark:bg-[#1e1e26] rounded-[20px] p-5 flex items-center gap-4">
+        <div className="w-16 h-16 rounded-full bg-mid-gray dark:bg-[#3a3a45] overflow-hidden shrink-0">
           <Image
             src={organizer.avatar}
             alt={organizer.name}
@@ -221,19 +265,19 @@ function OrganizerSection({
         </div>
         <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-3">
           <div className="flex-1">
-            <p className="font-extrabold text-base text-black">
+            <p className="font-extrabold text-base text-black dark:text-white">
               {organizer.name}
             </p>
-            <p className="text-xs text-dark-gray">
+            <p className="text-xs text-dark-gray dark:text-[#9ca3af]">
               <span className="font-bold">{organizer.eventsOrganized}</span>{" "}
               events organized
             </p>
-            <p className="text-xs text-dark-gray">
+            <p className="text-xs text-dark-gray dark:text-[#9ca3af]">
               <span className="font-bold">{organizer.attendeesHosted}</span>{" "}
               attendees hosted
             </p>
           </div>
-          <Button className="bg-black hover:bg-black/90 text-white font-bold text-sm rounded-[36px] px-4 py-2 h-auto">
+          <Button className="bg-black dark:bg-white hover:bg-black/90 dark:hover:bg-white/90 text-white dark:text-black font-bold text-sm rounded-[36px] px-4 py-2 h-auto">
             Follow
           </Button>
         </div>
@@ -249,7 +293,7 @@ function SpotifySection({
   playlist: typeof EVENT_DATA.playlist;
 }) {
   return (
-    <section className="border-b border-light-gray pb-4">
+    <section className="border-b border-light-gray dark:border-[#2a2a35] pb-4">
       <SectionHeader title="Playlist" />
       <div
         className="rounded-2xl overflow-hidden h-20"
@@ -315,10 +359,10 @@ function LineupSection({ lineup }: { lineup: typeof EVENT_DATA.lineup }) {
         {lineup.map((artist) => (
           <div
             key={artist.id}
-            className="bg-white border border-light-gray rounded-[20px] p-3 shadow-[0px_0px_5px_0px_rgba(0,0,0,0.08)] flex items-center gap-3"
+            className="bg-white dark:bg-[#141419] border border-light-gray dark:border-[#2a2a35] rounded-[20px] p-3 shadow-[0px_0px_5px_0px_rgba(0,0,0,0.08)] dark:shadow-[0px_0px_5px_0px_rgba(0,0,0,0.3)] flex items-center gap-3"
           >
             {artist.hasImage ? (
-              <div className="w-[30px] h-[30px] rounded-[11px] bg-mid-gray overflow-hidden">
+              <div className="w-[30px] h-[30px] rounded-[11px] bg-mid-gray dark:bg-[#3a3a45] overflow-hidden">
                 <Image
                   src="/lineup-avatar.jpg"
                   alt={artist.name}
@@ -340,7 +384,9 @@ function LineupSection({ lineup }: { lineup: typeof EVENT_DATA.lineup }) {
                 </svg>
               </div>
             )}
-            <p className="font-bold text-sm text-black">{artist.name}</p>
+            <p className="font-bold text-sm text-black dark:text-white">
+              {artist.name}
+            </p>
           </div>
         ))}
       </div>
@@ -371,33 +417,35 @@ function TicketCard({
       className={`rounded-[20px] p-4 transition-shadow duration-200 ease ${
         isSelected
           ? "shadow-[inset_0_0_0_1.5px_var(--color-tp-blue)]"
-          : "shadow-[inset_0_0_0_1px_var(--color-neutral-200)]"
+          : "shadow-[inset_0_0_0_1px_#e5e5e5] dark:shadow-[inset_0_0_0_1px_#2a2a35]"
       }`}
     >
       <div className="flex items-start gap-3">
         <div className="flex-1">
-          <p className="font-bold text-sm text-black">{ticket.name}</p>
-          <p className="font-black text-xl text-black mt-1.5">
+          <p className="font-bold text-sm text-black dark:text-white">
+            {ticket.name}
+          </p>
+          <p className="font-black text-xl text-black dark:text-white mt-1.5">
             {formatPrice(ticket.price)}
           </p>
         </div>
         {/* Quantity Stepper or Add Button */}
         {isSelected ? (
-          <div className="bg-light-gray rounded-[35px] h-[30px] flex items-center justify-center gap-2 px-2 py-1 shrink-0">
+          <div className="bg-light-gray dark:bg-[#1e1e26] rounded-[35px] h-[30px] flex items-center justify-center gap-2 px-2 py-1 shrink-0">
             <button
               onClick={() => onUpdateQuantity(-1)}
-              className="size-[14px] cursor-pointer flex items-center justify-center text-dark-gray hover:text-black transition-colors duration-200 ease shrink-0"
+              className="size-[14px] cursor-pointer flex items-center justify-center text-dark-gray dark:text-[#9ca3af] hover:text-black dark:hover:text-white transition-colors duration-200 ease shrink-0"
             >
               <Minus className="size-[14px]" strokeWidth={3} />
             </button>
-            <div className="w-[22px] h-full bg-white rounded-[6px] flex items-center justify-center shrink-0">
-              <span className="font-extrabold text-sm text-black leading-none">
+            <div className="w-[22px] h-full bg-white dark:bg-[#0a0a0f] rounded-[6px] flex items-center justify-center shrink-0">
+              <span className="font-extrabold text-sm text-black dark:text-white leading-none">
                 {quantity}
               </span>
             </div>
             <button
               onClick={() => onUpdateQuantity(1)}
-              className="size-[14px] cursor-pointer flex items-center justify-center text-dark-gray hover:text-black transition-colors duration-200 ease shrink-0"
+              className="size-[14px] cursor-pointer flex items-center justify-center text-dark-gray dark:text-[#9ca3af] hover:text-black dark:hover:text-white transition-colors duration-200 ease shrink-0"
             >
               <Plus className="size-[14px]" strokeWidth={3} />
             </button>
@@ -405,9 +453,12 @@ function TicketCard({
         ) : (
           <button
             onClick={() => onUpdateQuantity(1)}
-            className="w-[30px] h-[30px] cursor-pointer rounded-full bg-light-gray flex items-center justify-center hover:bg-soft-gray transition-colors duration-200 ease"
+            className="w-[30px] h-[30px] cursor-pointer rounded-full bg-light-gray dark:bg-[#1e1e26] flex items-center justify-center hover:bg-soft-gray dark:hover:bg-[#252530] transition-colors duration-200 ease"
           >
-            <Plus className="size-[14px] text-dark-gray" strokeWidth={3} />
+            <Plus
+              className="size-[14px] text-dark-gray dark:text-[#9ca3af]"
+              strokeWidth={3}
+            />
           </button>
         )}
       </div>
@@ -415,7 +466,7 @@ function TicketCard({
       {/* Expanded Description */}
       {isSelected && isExpanded && (
         <div className="mt-2.5">
-          <p className="text-sm text-dark-gray leading-relaxed line-clamp-2">
+          <p className="text-sm text-dark-gray dark:text-[#9ca3af] leading-relaxed line-clamp-2">
             {ticket.description}
           </p>
           <button
@@ -472,7 +523,7 @@ function AboutSection({
     <section className="flex flex-col gap-3">
       <div>
         <SectionHeader title="About" />
-        <div className="text-sm text-black leading-relaxed">
+        <div className="text-sm text-black dark:text-[#d1d5db] leading-relaxed">
           {showFull ? (
             <p className="whitespace-pre-line">{description}</p>
           ) : (
@@ -482,15 +533,15 @@ function AboutSection({
       </div>
       <button
         onClick={onToggle}
-        className="self-start border cursor-pointer border-neutral-200 rounded-[30px] px-3 py-1.5 flex items-center gap-1 hover:border-mid-gray transition-colors duration-200 ease"
+        className="self-start border cursor-pointer border-neutral-200 dark:border-[#3a3a45] rounded-[30px] px-3 py-1.5 flex items-center gap-1 hover:border-mid-gray dark:hover:border-[#6b7280] transition-colors duration-200 ease"
       >
-        <span className="font-bold text-[9px] text-black uppercase tracking-tight">
+        <span className="font-bold text-[9px] text-black dark:text-white uppercase tracking-tight">
           {showFull ? "show less" : "show more"}
         </span>
         {showFull ? (
-          <ChevronUp className="w-3 h-3 text-black" />
+          <ChevronUp className="w-3 h-3 text-black dark:text-white" />
         ) : (
-          <ChevronDown className="w-3 h-3 text-black" />
+          <ChevronDown className="w-3 h-3 text-black dark:text-white" />
         )}
       </button>
     </section>
@@ -501,15 +552,19 @@ function AboutSection({
 function MapSection({ venue }: { venue: typeof EVENT_DATA.venue }) {
   return (
     <section className="pb-4">
-      <p className="font-extrabold text-sm text-black">{venue.name}</p>
+      <p className="font-extrabold text-sm text-black dark:text-white">
+        {venue.name}
+      </p>
       <div className="flex items-center gap-2.5 mt-2.5">
         <div className="w-[22px] h-[22px] rounded-full bg-tp-orange flex items-center justify-center">
           <MapPin className="w-3 h-3 text-white" strokeWidth={2.5} />
         </div>
-        <p className="text-sm text-black">{venue.address}</p>
+        <p className="text-sm text-black dark:text-[#d1d5db]">
+          {venue.address}
+        </p>
       </div>
       {/* Static Map Placeholder */}
-      <div className="mt-2.5 w-full h-36 rounded-2xl bg-light-gray overflow-hidden relative">
+      <div className="mt-2.5 w-full h-36 rounded-2xl bg-light-gray dark:bg-[#1e1e26] overflow-hidden relative">
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-8 h-8 rounded-full bg-tp-blue flex items-center justify-center shadow-lg">
             <MapPin className="w-4 h-4 text-white" strokeWidth={2.5} />
@@ -517,7 +572,7 @@ function MapSection({ venue }: { venue: typeof EVENT_DATA.venue }) {
         </div>
         {/* Map pattern background */}
         <div
-          className="absolute inset-0 opacity-20"
+          className="absolute inset-0 opacity-20 dark:opacity-10"
           style={{
             backgroundImage: `
             linear-gradient(90deg, #d1d1d1 1px, transparent 1px),
@@ -533,25 +588,10 @@ function MapSection({ venue }: { venue: typeof EVENT_DATA.venue }) {
 
 // Section Header Component
 function SectionHeader({ title }: { title: string }) {
-  return <p className="font-extrabold text-sm text-black mb-2.5">{title}</p>;
-}
-
-// Host Event Promo Component
-function HostEventPromo() {
   return (
-    <section className="border-t border-light-gray pt-4">
-      <a
-        href="#"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 group"
-      >
-        <span className="font-semibold text-sm text-shimmer">
-          Host your event with TickPick
-        </span>
-        <ArrowUpRight className="w-4 h-4 text-border group-hover:text-accent motion-safe:group-hover:translate-x-0.5 motion-safe:group-hover:-translate-y-0.5 transition-all duration-200 ease-out" />
-      </a>
-    </section>
+    <p className="font-extrabold text-sm text-black dark:text-white mb-2.5">
+      {title}
+    </p>
   );
 }
 
@@ -588,45 +628,33 @@ function Footer() {
   ];
 
   return (
-    <footer className="w-full bg-white border-t border-light-gray">
-      {/* Host Event Promo - Full Width Dark */}
-      <div className="w-full bg-black py-3 mb-5">
-        <a
-          href="#"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-1.5 group"
-        >
-          <span className="font-semibold text-sm bg-linear-to-r from-tp-blue to-white bg-clip-text text-transparent">
-            Host your event with TickPick
-          </span>
-          <ArrowUpRight className="w-4 h-4 text-white group-hover:text-white motion-safe:group-hover:translate-x-0.5 motion-safe:group-hover:-translate-y-0.5 transition-all duration-200 ease-out" />
-        </a>
-      </div>
-
+    <footer className="w-full bg-white dark:bg-[#0a0a0f] border-t border-light-gray dark:border-[#2a2a35] transition-colors duration-300 ease-out">
       <div className="max-w-[1000px] mx-auto px-4">
         {/* Main Links */}
         <div className="flex flex-wrap justify-between gap-8 py-6">
           {/* Logo */}
           <div className="w-[190px]">
-            <TickPickLogo width={190} height={42} />
+            <TickPickLogo
+              width={190}
+              height={42}
+              className="dark:[&_path[fill='black']]:fill-white"
+            />
           </div>
 
           {/* App Downloads */}
           <div className="flex flex-col items-center gap-3">
             <div className="flex flex-col gap-3">
               {/* App Store */}
-              <div className="w-[152px] h-[51px] bg-black rounded-md flex items-center px-2 gap-2">
+              <div className="w-[152px] h-[51px] bg-black dark:bg-white rounded-md flex items-center px-2 gap-2">
                 <svg
                   width="22"
                   height="27"
                   viewBox="0 0 22 27"
-                  fill="white"
-                  className="shrink-0"
+                  className="shrink-0 fill-white dark:fill-black"
                 >
                   <path d="M18.5 13.5c0-3.5 2.8-5.2 2.9-5.3-1.6-2.3-4.1-2.6-5-2.7-2.1-.2-4.1 1.2-5.2 1.2-1.1 0-2.7-1.2-4.5-1.2-2.3 0-4.4 1.3-5.6 3.4-2.4 4.2-.6 10.3 1.7 13.7 1.1 1.7 2.5 3.5 4.3 3.4 1.7-.1 2.4-1.1 4.4-1.1 2.1 0 2.7 1.1 4.5 1.1 1.9 0 3-1.7 4.1-3.4 1.3-1.9 1.8-3.7 1.9-3.8-.1 0-3.5-1.4-3.5-5.3zM15.2 3.5c.9-1.1 1.6-2.7 1.4-4.2-1.4.1-3 .9-4 2-.9 1-1.6 2.5-1.4 4 1.5.1 3-.8 4-1.8z" />
                 </svg>
-                <div className="flex flex-col text-white">
+                <div className="flex flex-col text-white dark:text-black">
                   <span className="text-[10px] leading-tight">
                     Download on the
                   </span>
@@ -636,7 +664,7 @@ function Footer() {
                 </div>
               </div>
               {/* Google Play */}
-              <div className="w-[152px] h-[51px] bg-black rounded-md flex items-center px-2 gap-2">
+              <div className="w-[152px] h-[51px] bg-black dark:bg-white rounded-md flex items-center px-2 gap-2">
                 <svg
                   width="24"
                   height="27"
@@ -669,7 +697,7 @@ function Footer() {
                     strokeWidth="0.5"
                   />
                 </svg>
-                <div className="flex flex-col text-white">
+                <div className="flex flex-col text-white dark:text-black">
                   <span className="text-[11px] uppercase leading-tight">
                     Get it on
                   </span>
@@ -694,7 +722,7 @@ function Footer() {
                   </svg>
                 ))}
               </div>
-              <span className="text-[11px] text-dark-gray">
+              <span className="text-[11px] text-dark-gray dark:text-[#9ca3af]">
                 Rating: 4.8 - 168k reviews
               </span>
             </div>
@@ -702,13 +730,15 @@ function Footer() {
 
           {/* Company Links */}
           <div className="flex flex-col gap-2">
-            <p className="font-extrabold text-[15px] text-black">Company</p>
+            <p className="font-extrabold text-[15px] text-black dark:text-white">
+              Company
+            </p>
             <div className="flex flex-col gap-1">
               {companyLinks.map((link) => (
                 <a
                   key={link}
                   href="#"
-                  className="text-sm text-neutral-700 hover:text-black transition-colors"
+                  className="text-sm text-neutral-700 dark:text-[#9ca3af] hover:text-black dark:hover:text-white transition-colors"
                 >
                   {link}
                 </a>
@@ -718,13 +748,15 @@ function Footer() {
 
           {/* Promise Links */}
           <div className="flex flex-col gap-2 w-[194px]">
-            <p className="font-extrabold text-[15px] text-black">Our Promise</p>
+            <p className="font-extrabold text-[15px] text-black dark:text-white">
+              Our Promise
+            </p>
             <div className="flex flex-col gap-1">
               {promiseLinks.map((link) => (
                 <a
                   key={link}
                   href="#"
-                  className="text-sm text-neutral-700 hover:text-black transition-colors"
+                  className="text-sm text-neutral-700 dark:text-[#9ca3af] hover:text-black dark:hover:text-white transition-colors"
                 >
                   {link}
                 </a>
@@ -734,8 +766,8 @@ function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-light-gray py-5 flex flex-wrap items-center justify-between gap-4">
-          <div className="text-sm text-dark-gray">
+        <div className="border-t border-light-gray dark:border-[#2a2a35] py-5 flex flex-wrap items-center justify-between gap-4">
+          <div className="text-sm text-dark-gray dark:text-[#9ca3af]">
             <p>©2025 TickPick LLC. All rights reserved.</p>
             <p>
               This site is protected by reCAPTCHA and the Google{" "}
@@ -781,9 +813,14 @@ function Footer() {
             {/* X (Twitter) */}
             <a
               href="#"
-              className="w-[30px] h-[30px] rounded-full bg-black flex items-center justify-center"
+              className="w-[30px] h-[30px] rounded-full bg-black dark:bg-white flex items-center justify-center"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                className="fill-white dark:fill-black"
+              >
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
               </svg>
             </a>
