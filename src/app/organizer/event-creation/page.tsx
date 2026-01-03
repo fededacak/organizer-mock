@@ -781,12 +781,11 @@ function LocationDisplay({
   const hasVenueName = Boolean(location.venue?.name);
 
   // Determine what to display
-  const displayName = isTbd
-    ? "TBD"
-    : hasVenueName
-    ? location.venue!.name
-    : "Event location";
-  const displayAddress = !isTbd ? location.address : null;
+  // If TBD or no venue name, show "Event location" as label
+  // If has venue name, show venue name as label
+  const displayName = hasVenueName ? location.venue!.name : "Event location";
+  // Secondary line: TBD for isTbd, address otherwise
+  const displaySecondary = isTbd ? "TBD" : location.address;
 
   return (
     <button
@@ -794,17 +793,13 @@ function LocationDisplay({
       className="w-full rounded-[14px] flex items-start gap-3 px-4 py-3 bg-light-gray cursor-pointer hover:bg-soft-gray transition-colors duration-200 ease"
     >
       <MapPin className={`w-4 h-4 mt-1 shrink-0 text-black`} />
-      <div className="flex gap-3 min-w-0 flex-1 flex-wrap items-center justify-between">
-        <div className="flex flex-col gap-0.5">
-          <span className={`font-bold text-base w-fit text-black`}>
-            {displayName}
+      <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+        <span className="font-bold text-base text-black">{displayName}</span>
+        {displaySecondary && (
+          <span className="text-sm text-dark-gray line-clamp-1 text-left">
+            {displaySecondary}
           </span>
-          {displayAddress && (
-            <span className="text-sm text-dark-gray line-clamp-1 block">
-              {displayAddress}
-            </span>
-          )}
-        </div>
+        )}
       </div>
     </button>
   );
