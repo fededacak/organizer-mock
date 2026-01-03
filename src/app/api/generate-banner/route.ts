@@ -6,8 +6,6 @@ import {
   type EventContext,
 } from "@/lib/banner-prompts";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
 // ============================================================================
 // Request/Response Types
 // ============================================================================
@@ -33,6 +31,14 @@ interface ErrorResponse {
 
 export async function POST(request: Request): Promise<Response> {
   try {
+    if (!process.env.GEMINI_API_KEY) {
+      return Response.json(
+        { error: "GEMINI_API_KEY is not configured" } satisfies ErrorResponse,
+        { status: 503 }
+      );
+    }
+
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     const body: RequestBody = await request.json();
     const { vibe, textOverlay, eventContext } = body;
 

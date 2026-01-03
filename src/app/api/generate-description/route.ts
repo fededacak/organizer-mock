@@ -1,9 +1,5 @@
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 interface EventContext {
   title?: string;
   startDate?: string;
@@ -59,6 +55,17 @@ function buildUserPrompt(instructions?: string, existingText?: string): string {
 
 export async function POST(request: Request) {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      return new Response(
+        JSON.stringify({ error: "OPENAI_API_KEY is not configured" }),
+        { status: 503, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+
     const body: RequestBody = await request.json();
     const { context, instructions, existingText } = body;
 
