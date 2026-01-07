@@ -159,8 +159,8 @@ export function useEditorStore(): EditorStore {
   
   // Update element
   const updateElement = useCallback((id: string, updates: Partial<EditorElement>) => {
-    const newElements = history.present.map((el) =>
-      el.id === id ? { ...el, ...updates } : el
+    const newElements = history.present.map((el): EditorElement =>
+      el.id === id ? ({ ...el, ...updates } as EditorElement) : el
     );
     pushToHistory(newElements);
   }, [history.present, pushToHistory]);

@@ -148,9 +148,9 @@ export function SeatmapCanvas({
     [viewport, onSetViewport, stageRef]
   );
 
-  // Handle stage click
-  const handleStageClick = useCallback(
-    (e: Konva.KonvaEventObject<MouseEvent>) => {
+  // Handle stage click (shared logic)
+  const handleStageClickLogic = useCallback(
+    (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
       // Check if we clicked on the stage itself (empty area)
       if (e.target !== e.target.getStage()) return;
 
@@ -175,6 +175,16 @@ export function SeatmapCanvas({
       }
     },
     [activeTool, viewport, onAddElement, onDeselectAll, stageRef]
+  );
+
+  const handleStageClick = useCallback(
+    (e: Konva.KonvaEventObject<MouseEvent>) => handleStageClickLogic(e),
+    [handleStageClickLogic]
+  );
+
+  const handleStageTap = useCallback(
+    (e: Konva.KonvaEventObject<TouchEvent>) => handleStageClickLogic(e),
+    [handleStageClickLogic]
   );
 
   // Handle panning
@@ -395,7 +405,7 @@ export function SeatmapCanvas({
         scaleY={viewport.scale}
         onWheel={handleWheel}
         onClick={handleStageClick}
-        onTap={handleStageClick}
+        onTap={handleStageTap}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}

@@ -42,6 +42,11 @@ export function TextElement({
     onSelect(element.id, e.evt.shiftKey);
   };
 
+  const handleTap = (e: Konva.KonvaEventObject<TouchEvent>) => {
+    e.cancelBubble = true;
+    onSelect(element.id, false);
+  };
+
   const handleDoubleClick = useCallback(() => {
     setIsEditing(true);
   }, []);
@@ -147,7 +152,7 @@ export function TextElement({
       rotation={element.rotation}
       draggable
       onClick={handleClick}
-      onTap={handleClick}
+      onTap={handleTap}
       onDblClick={handleDoubleClick}
       onDblTap={handleDoubleClick}
       onDragEnd={handleDragEnd}
