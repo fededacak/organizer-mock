@@ -51,3 +51,4 @@ export function SeatmapToolbar({ activeTool, onSetActiveTool }: SeatmapToolbarPr
   );
 }
 
+

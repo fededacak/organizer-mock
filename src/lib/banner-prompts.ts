@@ -1,82 +1,58 @@
 // ============================================================================
 // Banner Prompt Configuration
 // ============================================================================
-// This file contains the vibe-to-prompt mappings and layout rules for
-// AI banner generation. Each vibe has a locked creative direction that
-// cannot be overridden by user inputs.
+// This file contains the style-to-prompt mappings and layout rules for
+// AI banner generation. Each style defines a visual rendering approach.
+// Event type is inferred from the event context (title, description, location).
 
-export type Vibe =
-  | "night-party"
-  | "live-music"
-  | "festival"
-  | "conference"
-  | "sports-fitness"
-  | "community-event";
+export type Style = "illustration" | "photorealistic" | "hybrid";
 
 // ============================================================================
-// Vibe Base Prompts
+// Style Base Prompts
 // ============================================================================
-// Each vibe defines the core creative direction including:
-// - Color palette and lighting
-// - Composition style and focal point
-// - Typography treatment zones
-// - Edge safe zones for marketplace UI
+// Each style defines the visual rendering approach including:
+// - Rendering technique and method
+// - Texture and detail characteristics
+// - Color treatment and palette approach
 
-interface VibePromptConfig {
+interface StylePromptConfig {
   basePrompt: string;
-  colorPalette: string;
-  lighting: string;
-  composition: string;
-  mood: string;
+  renderingTechnique: string;
+  textureAndDetail: string;
+  colorTreatment: string;
+  mustAvoid?: string;
 }
 
-export const VIBE_PROMPTS: Record<Vibe, VibePromptConfig> = {
-  "night-party": {
-    basePrompt: "Event banner for a night party, vibrant nightclub atmosphere",
-    colorPalette: "deep purples, electric blues, neon pink accents, black",
-    lighting: "dramatic neon lighting, glow effects, low ambient light",
-    composition: "dynamic diagonal lines, central focal point with light burst",
-    mood: "energetic, exciting, exclusive, celebratory",
-  },
-  "live-music": {
-    basePrompt: "Event banner for a live music performance, concert atmosphere",
-    colorPalette:
-      "warm reds, deep blacks, golden yellows, stage lighting colors",
-    lighting:
-      "dramatic stage spotlights, silhouette effects, warm backlighting",
-    composition: "stage-centered, dramatic depth, light rays from above",
-    mood: "passionate, electrifying, immersive, raw energy",
-  },
-  festival: {
-    basePrompt: "Event banner for an outdoor festival, celebratory atmosphere",
-    colorPalette: "bright rainbow colors, warm sunset tones, festive accents",
-    lighting: "golden hour sunlight, fairy lights, warm ambient glow",
-    composition: "wide panoramic feel, open sky, festive elements",
-    mood: "joyful, free-spirited, communal, adventurous",
-  },
-  conference: {
+export const STYLE_PROMPTS: Record<Style, StylePromptConfig> = {
+  illustration: {
     basePrompt:
-      "Event banner for a professional conference or talk, business setting",
-    colorPalette:
-      "clean blues, professional grays, white, subtle accent colors",
-    lighting: "soft even lighting, professional studio quality",
-    composition: "clean minimal layout, strong visual hierarchy, balanced",
-    mood: "professional, inspiring, knowledgeable, credible",
+      "Bold illustrated event banner, energetic artwork with a fun rebellious edge, designed for adult audiences",
+    renderingTechnique:
+      "Screen-print inspired artwork, dynamic compositions, vintage poster influence with modern twist",
+    textureAndDetail:
+      "Gritty textures, halftone dots, distressed effects, bold graphic elements, ink splatter accents",
+    colorTreatment:
+      "High contrast color schemes, vibrant accent colors, electric and bold palettes appropriate to the event theme",
+    mustAvoid:
+      "coloring book style, childlike or playful cartoons, thick black outlines, simple flat shapes, cute characters, crayon or marker textures, clip art, sticker-like elements, corporate or sterile look",
   },
-  "sports-fitness": {
+  photorealistic: {
+    basePrompt: "Photorealistic event banner, high-quality photography style",
+    renderingTechnique: "Photographic realism, natural lighting, sharp focus",
+    textureAndDetail: "Real-world textures, depth of field, fine details",
+    colorTreatment: "Natural color grading, realistic tones, cinematic look",
+  },
+  hybrid: {
     basePrompt:
-      "Event banner for a sports or fitness event, athletic atmosphere",
-    colorPalette: "bold reds, energetic oranges, dynamic blues, high contrast",
-    lighting: "bright natural light, dramatic action lighting, high energy",
-    composition: "dynamic motion lines, action-focused, powerful angles",
-    mood: "powerful, motivating, competitive, healthy",
-  },
-  "community-event": {
-    basePrompt: "Event banner for a community gathering, welcoming atmosphere",
-    colorPalette: "warm earth tones, friendly greens, soft pastels, inviting",
-    lighting: "soft natural daylight, warm ambient, welcoming glow",
-    composition: "open and inviting, centered focal point, inclusive framing",
-    mood: "welcoming, inclusive, friendly, connected",
+      "Event photo with hand-drawn graphic overlays, real photography mixed with illustrated doodles and sketchy elements",
+    renderingTechnique:
+      "Real event photography as base with hand-drawn illustrations overlaid on top, sketchy marker-style graphics, doodle art elements like arrows, stars, and decorative marks",
+    textureAndDetail:
+      "Authentic photo base with rough hand-drawn line work overlays, scribbled textures, energetic sketch marks",
+    colorTreatment:
+      "Natural photo tones as base with bright accent overlay colors, high contrast between photo and graphic elements",
+    mustAvoid:
+      "clean vector graphics, polished design, corporate look, subtle effects, minimalism",
   },
 };
 
@@ -112,24 +88,37 @@ export interface EventContext {
 }
 
 export interface BannerGenerationInput {
-  vibe: Vibe;
+  style: Style;
   textOverlay?: string;
+  customInstructions?: string;
   eventContext?: EventContext;
 }
 
 export function buildBannerPrompt(input: BannerGenerationInput): string {
-  const vibeConfig = VIBE_PROMPTS[input.vibe];
+  const styleConfig = STYLE_PROMPTS[input.style];
 
   // Start with base prompt
   const promptParts: string[] = [
-    vibeConfig.basePrompt,
-    `Color palette: ${vibeConfig.colorPalette}`,
-    `Lighting: ${vibeConfig.lighting}`,
-    `Composition: ${vibeConfig.composition}`,
-    `Mood: ${vibeConfig.mood}`,
+    styleConfig.basePrompt,
+    `Rendering technique: ${styleConfig.renderingTechnique}`,
+    `Texture and detail: ${styleConfig.textureAndDetail}`,
+    `Color treatment: ${styleConfig.colorTreatment}`,
   ];
 
+  // Add explicit avoidances if defined for this style
+  if (styleConfig.mustAvoid) {
+    promptParts.push(`MUST AVOID: ${styleConfig.mustAvoid}`);
+  }
+
+  // Add custom instructions FIRST as high priority - user input should override style defaults
+  if (input.customInstructions && input.customInstructions.trim()) {
+    promptParts.push(
+      `PRIORITY INSTRUCTIONS (override any conflicting style defaults): ${input.customInstructions.trim()}`
+    );
+  }
+
   // Add event context for visual inspiration (NOT for text rendering)
+  // The AI will infer the event type and atmosphere from this context
   const { eventContext } = input;
   if (eventContext) {
     const contextParts: string[] = [];
@@ -144,7 +133,7 @@ export function buildBannerPrompt(input: BannerGenerationInput): string {
     }
     if (contextParts.length > 0) {
       promptParts.push(
-        `Use the following event details ONLY as visual inspiration for the imagery, atmosphere, and theme - DO NOT render this information as text on the image: ${contextParts.join(
+        `Use the following event details to determine the appropriate theme, atmosphere, and visual elements. Infer the event type (party, concert, conference, sports, tailgate, festival, etc.) from these details. DO NOT render this information as text on the image: ${contextParts.join(
           ", "
         )}`
       );
@@ -157,7 +146,8 @@ export function buildBannerPrompt(input: BannerGenerationInput): string {
       `Include ONLY this exact text: "${input.textOverlay.trim()}"`,
       "Display ONLY the provided text, no additional words, titles, or decorative typography",
       "Text should be clearly readable, well-styled typography",
-      "Position text in a safe area with strong contrast against background"
+      "CRITICAL: Text must be horizontally AND vertically CENTERED in the image - place it in the exact middle of the banner",
+      "Ensure strong contrast between text and background for readability"
     );
   } else {
     promptParts.push(
@@ -175,7 +165,6 @@ export function buildBannerPrompt(input: BannerGenerationInput): string {
     "Clean composition suitable for event discovery surfaces",
     "Clear focal point, avoid clutter, respect edge safe zones",
     "Professional quality, polished, ready-to-use event banner",
-    "Photorealistic or high-quality illustration style",
     "Do NOT include any logos, watermarks, copyright symbols, or branding"
   );
 

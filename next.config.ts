@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
         hostname: "oaidalleapiprodscus.blob.core.windows.net",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "static.tickpick.com",
+        pathname: "/**",
+      },
     ],
   },
 };

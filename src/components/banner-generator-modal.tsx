@@ -1,8 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Sparkles, Loader2, RefreshCw, X } from "lucide-react";
+import {
+  Sparkles,
+  Loader2,
+  RefreshCw,
+  X,
+  CircleHelp,
+  Check,
+  Download,
+} from "lucide-react";
 import { motion, LayoutGroup } from "framer-motion";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 
 // ============================================================================
 // Types
@@ -26,33 +39,40 @@ interface BannerGeneratorModalProps {
 type ModalView = "style-selection" | "loading" | "preview";
 
 // ============================================================================
-// Vibe Types & Options
+// Style Types & Options
 // ============================================================================
 
-type Vibe =
-  | "night-party"
-  | "live-music"
-  | "festival"
-  | "conference"
-  | "sports-fitness"
-  | "community-event";
+type Style = "illustration" | "photorealistic" | "hybrid";
 
-interface VibeOption {
-  id: Vibe;
+interface StyleOption {
+  id: Style;
   label: string;
-  icon: string;
+  thumbnail: string;
 }
 
-const VIBE_OPTIONS: VibeOption[] = [
-  { id: "night-party", label: "Night Party", icon: "🎉" },
-  { id: "live-music", label: "Live Music", icon: "🎸" },
-  { id: "festival", label: "Festival", icon: "🎪" },
-  { id: "conference", label: "Conference or Talk", icon: "🎤" },
-  { id: "sports-fitness", label: "Sports or Fitness", icon: "🏃" },
-  { id: "community-event", label: "Community Event", icon: "🤝" },
+const STYLE_OPTIONS: StyleOption[] = [
+  {
+    id: "illustration",
+    label: "Illustration",
+    thumbnail:
+      "https://static.tickpick.com/media-vault/organizer/event-creation/illustration-thumbnail.jpg",
+  },
+  {
+    id: "photorealistic",
+    label: "Photorealistic",
+    thumbnail:
+      "https://static.tickpick.com/media-vault/organizer/event-creation/photorealistic-thumbnail.jpg",
+  },
+  {
+    id: "hybrid",
+    label: "Hybrid",
+    thumbnail:
+      "https://static.tickpick.com/media-vault/organizer/event-creation/hybrid-thumbnail.jpg",
+  },
 ];
 
 const TEXT_MAX_LENGTH = 60;
+const CUSTOM_INSTRUCTIONS_MAX_LENGTH = 200;
 
 // ============================================================================
 // Animation Config
@@ -78,8 +98,10 @@ export function BannerGeneratorModal({
   const [view, setView] = useState<ModalView>("style-selection");
 
   // Form state
-  const [selectedVibe, setSelectedVibe] = useState<Vibe>("night-party");
+  const [selectedStyle, setSelectedStyle] = useState<Style>("illustration");
   const [textOverlay, setTextOverlay] = useState("");
+  const [customInstructions, setCustomInstructions] = useState("");
+  const [adjustments, setAdjustments] = useState("");
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(
     null
   );
@@ -89,8 +111,10 @@ export function BannerGeneratorModal({
     if (!open) {
       const timer = setTimeout(() => {
         setView("style-selection");
-        setSelectedVibe("night-party");
+        setSelectedStyle("illustration");
         setTextOverlay("");
+        setCustomInstructions("");
+        setAdjustments("");
         setGeneratedImageUrl(null);
       }, 200);
       return () => clearTimeout(timer);
@@ -110,8 +134,9 @@ export function BannerGeneratorModal({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          vibe: selectedVibe,
+          style: selectedStyle,
           textOverlay: textOverlay || undefined,
+          customInstructions: customInstructions || undefined,
           eventContext: {
             title: eventContext.title,
             location: eventContext.location,
@@ -141,13 +166,19 @@ export function BannerGeneratorModal({
   const handleRegenerate = async () => {
     setView("loading");
 
+    // Combine original instructions with adjustments
+    const combinedInstructions = [customInstructions, adjustments]
+      .filter(Boolean)
+      .join(". ");
+
     try {
       const response = await fetch("/api/generate-banner", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          vibe: selectedVibe,
+          style: selectedStyle,
           textOverlay: textOverlay || undefined,
+          customInstructions: combinedInstructions || undefined,
           eventContext: {
             title: eventContext.title,
             location: eventContext.location,
@@ -163,6 +194,11 @@ export function BannerGeneratorModal({
       } else {
         const data = await response.json();
         setGeneratedImageUrl(data.imageUrl);
+        // Update customInstructions to include adjustments for next regeneration
+        if (adjustments) {
+          setCustomInstructions(combinedInstructions);
+          setAdjustments("");
+        }
       }
     } catch (error) {
       console.error("Regeneration error:", error);
@@ -181,7 +217,19 @@ export function BannerGeneratorModal({
 
   const handleDiscard = () => {
     setGeneratedImageUrl(null);
+    setAdjustments("");
     setView("style-selection");
+  };
+
+  const handleDownload = () => {
+    if (!generatedImageUrl) return;
+
+    const link = document.createElement("a");
+    link.href = generatedImageUrl;
+    link.download = `banner-${Date.now()}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleOverlayClick = (e: React.MouseEvent) => {
@@ -212,13 +260,13 @@ export function BannerGeneratorModal({
         {view === "style-selection" && (
           <motion.div
             layoutId="banner-modal-container"
-            className="bg-white rounded-[24px] shadow-lg w-full max-w-[480px] mx-2 pointer-events-auto"
+            className="bg-white rounded-[24px] shadow-lg w-full max-w-[420px] mx-2 pointer-events-auto"
             transition={springTransition}
           >
             {/* Header */}
             <motion.div
               layoutId="banner-modal-header"
-              className="flex items-center justify-center pb-2 pt-8 px-5 relative"
+              className="flex flex-col items-center justify-center pb-2 pt-8 px-5 relative"
               transition={springTransition}
             >
               <motion.h2
@@ -239,60 +287,119 @@ export function BannerGeneratorModal({
             </motion.div>
 
             {/* Content */}
-            <div className="px-4 md:px-6 py-4 space-y-5">
-              {/* Vibe Selection */}
+            <div className="px-4 md:px-6 py-4 flex flex-col gap-4 w-full">
+              {/* Style Selection */}
               <div>
-                <label className="block text-sm font-bold text-black mb-1.5">
-                  Vibe
+                <label className="block text-sm font-bold text-black">
+                  Style
                 </label>
-                <div className="flex flex-wrap gap-2">
-                  {VIBE_OPTIONS.map((vibe) => (
-                    <motion.button
-                      key={vibe.id}
-                      onClick={() => setSelectedVibe(vibe.id)}
-                      className={`px-4 py-2.5 rounded-full text-sm font-semibold cursor-pointer flex items-center gap-1.5 ${
-                        selectedVibe === vibe.id
-                          ? "bg-tp-blue text-white shadow-sm"
-                          : "bg-light-gray text-dark-gray hover:bg-soft-gray hover:text-black"
-                      }`}
-                      animate={{
-                        scale: selectedVibe === vibe.id ? 1.02 : 1,
-                      }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 500,
-                        damping: 30,
-                      }}
-                      style={{
-                        transition:
-                          "background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease",
-                      }}
-                    >
-                      <span>{vibe.icon}</span>
-                      <span>{vibe.label}</span>
-                    </motion.button>
-                  ))}
+                <div className="pt-2">
+                  <div className="grid grid-cols-3 gap-3">
+                    {STYLE_OPTIONS.map((style) => (
+                      <button
+                        key={style.id}
+                        onClick={() => setSelectedStyle(style.id)}
+                        className="flex flex-col items-center gap-1 cursor-pointer group"
+                      >
+                        {/* Thumbnail */}
+                        <div className="relative w-full">
+                          <div className="w-full aspect-3/2 rounded-lg overflow-hidden bg-light-gray">
+                            <img
+                              src={style.thumbnail}
+                              alt={style.label}
+                              className={`w-full h-full object-cover transition-all duration-200 ease ${
+                                selectedStyle === style.id
+                                  ? "grayscale-0 scale-100"
+                                  : "grayscale group-hover:grayscale-0 group-hover:scale-105"
+                              }`}
+                            />
+                          </div>
+                          {/* Checkmark Badge */}
+                          {selectedStyle === style.id && (
+                            <motion.div
+                              initial={{ scale: 0, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              exit={{ scale: 0, opacity: 0 }}
+                              transition={{
+                                type: "spring",
+                                stiffness: 500,
+                                damping: 30,
+                              }}
+                              className="absolute -top-1 -right-1 w-5 h-5 bg-tp-blue rounded-full flex items-center justify-center shadow-sm z-10"
+                            >
+                              <Check
+                                className="w-3 h-3 text-white"
+                                strokeWidth={3}
+                              />
+                            </motion.div>
+                          )}
+                        </div>
+                        {/* Label */}
+                        <span
+                          className={`text-xs font-medium transition-colors duration-200 ease ${
+                            selectedStyle === style.id
+                              ? "text-black"
+                              : "text-gray group-hover:text-dark-gray"
+                          }`}
+                        >
+                          {style.label}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
+              </div>
+
+              {/* Additional Instructions */}
+              <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1.5 w-full">
+                  <label className="block text-sm font-bold text-black">
+                    Additional instructions
+                  </label>
+                  <textarea
+                    value={customInstructions}
+                    onChange={(e) => setCustomInstructions(e.target.value)}
+                    maxLength={CUSTOM_INSTRUCTIONS_MAX_LENGTH}
+                    placeholder="outdoor, no people, minimal style..."
+                    rows={3}
+                    className="w-full px-3 py-2 pr-16 border border-neutral-200 rounded-[14px] text-base text-black placeholder:text-gray/80 focus:outline-none focus:border-tp-blue/40 focus:ring-[3px] focus:ring-tp-blue/20 transition-all duration-200 ease resize-none"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  * We already use your event title and description for context.
+                </p>
               </div>
 
               {/* Text Overlay Input */}
               <div>
-                <label className="block text-sm font-bold text-black mb-1.5">
-                  Text on image (optional)
-                </label>
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <label className="text-sm font-bold text-black">
+                    Overlay text
+                  </label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label="Overlay text info"
+                        className="cursor-default"
+                      >
+                        <CircleHelp className="w-4 h-4 text-gray" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" align="start">
+                      This text will appear on top of the image
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <div className="relative">
                   <input
                     type="text"
                     value={textOverlay}
                     onChange={(e) => setTextOverlay(e.target.value)}
                     maxLength={TEXT_MAX_LENGTH}
-                    placeholder="e.g. event title, date, time, location"
+                    placeholder="event title, date, time, location"
                     className="w-full h-[47px] px-4 pr-16 border border-neutral-200 rounded-[14px] text-base text-black placeholder:text-gray/80 focus:outline-none focus:border-tp-blue/40 focus:ring-[3px] focus:ring-tp-blue/20 transition-all duration-200 ease"
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray tabular-nums">
-                    {textOverlay.length}/{TEXT_MAX_LENGTH}
-                  </span>
                 </div>
               </div>
             </div>
@@ -411,31 +518,58 @@ export function BannerGeneratorModal({
             {/* Content */}
             <div className="px-4 md:px-6 py-4 space-y-4">
               {/* Generated Image Preview - 5:2 aspect ratio */}
-              <div className="aspect-5/2 rounded-[16px] overflow-hidden bg-light-gray relative">
+              <div className="aspect-5/2 rounded-[16px] overflow-hidden bg-light-gray relative group">
                 {generatedImageUrl && (
-                  <motion.img
-                    src={generatedImageUrl}
-                    alt="Generated banner"
-                    className="w-full h-full object-cover"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{
-                      duration: 0.3,
-                      ease: [0.25, 0.46, 0.45, 0.94],
-                    }}
-                  />
+                  <>
+                    <motion.img
+                      src={generatedImageUrl}
+                      alt="Generated banner"
+                      className="w-full h-full object-cover"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{
+                        duration: 0.3,
+                        ease: [0.25, 0.46, 0.45, 0.94],
+                      }}
+                    />
+                    <button
+                      onClick={handleDownload}
+                      className="absolute top-2 right-2 w-8 h-8 bg-black/50 hover:bg-black/70 text-white rounded-[10px] flex items-center justify-center transition-all duration-200 ease cursor-pointer"
+                      aria-label="Download banner"
+                    >
+                      <Download className="w-4 h-4" />
+                    </button>
+                  </>
                 )}
               </div>
 
-              {/* Regenerate Option */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleRegenerate}
-                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-dark-gray hover:text-black bg-light-gray hover:bg-soft-gray rounded-full transition-colors duration-200 ease cursor-pointer"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  Regenerate
-                </button>
+              {/* Adjust Input */}
+              <div>
+                <label className="block text-sm font-bold text-black mb-1.5">
+                  Adjust
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={adjustments}
+                    onChange={(e) => setAdjustments(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleRegenerate();
+                      }
+                    }}
+                    placeholder="More vibrant colors, add confetti..."
+                    className="w-full h-[50px] pl-4 pr-14 border border-neutral-200 rounded-full text-base text-black placeholder:text-gray/80 focus:outline-none focus:border-tp-blue/40 focus:ring-[3px] focus:ring-tp-blue/20 transition-all duration-200 ease"
+                  />
+                  <button
+                    onClick={handleRegenerate}
+                    className="w-[40px] h-[40px] flex items-center justify-center bg-tp-blue hover:bg-[#2288ee] text-white rounded-full transition-colors duration-200 ease cursor-pointer active:scale-[0.98] transform absolute right-[5px] top-1/2 -translate-y-1/2 shadow-md"
+                    aria-label="Regenerate banner"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
 

@@ -1,7 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import {
   buildBannerPrompt,
-  type Vibe,
+  type Style,
   type BannerGenerationInput,
   type EventContext,
 } from "@/lib/banner-prompts";
@@ -11,8 +11,9 @@ import {
 // ============================================================================
 
 interface RequestBody {
-  vibe: Vibe;
+  style: Style;
   textOverlay?: string;
+  customInstructions?: string;
   eventContext?: EventContext;
 }
 
@@ -40,20 +41,21 @@ export async function POST(request: Request): Promise<Response> {
 
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     const body: RequestBody = await request.json();
-    const { vibe, textOverlay, eventContext } = body;
+    const { style, textOverlay, customInstructions, eventContext } = body;
 
     // Validate required fields
-    if (!vibe) {
+    if (!style) {
       return Response.json(
-        { error: "Vibe is required" } satisfies ErrorResponse,
+        { error: "Style is required" } satisfies ErrorResponse,
         { status: 400 }
       );
     }
 
     // Build the generation input
     const generationInput: BannerGenerationInput = {
-      vibe,
+      style,
       textOverlay: textOverlay?.trim(),
+      customInstructions: customInstructions?.trim(),
       eventContext,
     };
 
