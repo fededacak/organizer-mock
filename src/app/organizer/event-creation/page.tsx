@@ -213,9 +213,9 @@ export default function EventCreationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-light-gray md:p-2.5">
+    <div className="min-h-screen md:overflow-hidden bg-light-gray md:p-2.5">
       {/* Main Content Card */}
-      <div className="bg-white md:rounded-[20px] shadow-card min-h-screen md:h-[calc(100vh-20px)] md:max-h-[calc(100vh-20px)] md:flex md:flex-col md:overflow-hidden">
+      <div className="bg-white md:rounded-[20px] shadow-card md:flex md:flex-col md:overflow-hidden md:min-h-[calc(100vh-20px)] md:max-h-[calc(100vh-20px)]">
         {/* Header */}
         <header className="sticky top-0 z-10 md:relative md:shrink-0 bg-white flex items-center justify-between px-4 sm:px-2 py-2.5 md:py-3 border-b border-light-gray">
           {/* Mobile: TickPick Logo */}
@@ -794,7 +794,7 @@ function LocationDisplay({
     >
       <MapPin className={`w-4 h-4 mt-1 shrink-0 text-black`} />
       <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-        <span className="font-bold text-base text-black">{displayName}</span>
+        <span className="font-bold text-base text-black text-left">{displayName}</span>
         {displaySecondary && (
           <span className="text-sm text-dark-gray line-clamp-1 text-left">
             {displaySecondary}

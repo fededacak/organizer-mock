@@ -1,37 +1,20 @@
-"use client";
+import { TickPickLogo } from "@/components/tickpick-logo";
+import { FolderCard, FOLDERS } from "@/components/navigation";
 
-import { useState } from "react";
-import { MainHeader } from "@/components/main-header";
-import { SearchBar } from "@/components/search-bar";
-
-export default function Page() {
-  const [activeTab, setActiveTab] = useState<"buy" | "sell" | "create">("buy");
-
-  const handleSearch = (query: string) => {
-    console.log("Searching for:", query);
-    // Handle search logic here
-  };
-
+export default function NavigationPage() {
   return (
-    <div className="min-h-screen bg-white">
-      <MainHeader activeTab={activeTab} onTabChange={setActiveTab} />
+    <div className="min-h-screen bg-light-gray flex flex-col items-center px-4 py-12">
+      {/* Logo */}
+      <div className="mb-12">
+        <TickPickLogo width={160} height={36} />
+      </div>
 
-      {/* Hero Section */}
-      <main className="px-[160px] pt-12 pb-8">
-        <div className="flex flex-col items-center text-center">
-          <h1 className="font-outfit text-5xl font-black text-black">
-            Fans Know
-          </h1>
-          <p className="mt-1 text-lg text-[#334155]">
-            The best memories start with the best prices.
-          </p>
-
-          {/* Search Bar */}
-          <div className="mt-8 w-full flex justify-center">
-            <SearchBar onSearch={handleSearch} />
-          </div>
-        </div>
-      </main>
+      {/* Folder Grid */}
+      <div className="w-full max-w-[1000px] flex gap-5">
+        {FOLDERS.map((folder) => (
+          <FolderCard key={folder.id} folder={folder} />
+        ))}
+      </div>
     </div>
   );
 }
