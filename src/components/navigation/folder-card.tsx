@@ -6,8 +6,36 @@ type FolderCardProps = {
   folder: FolderData;
 };
 
+const PAPER_CONFIGS = [
+  {
+    className: `
+      h-[100px] bg-white rounded-[16px] shadow-sm flex flex-col p-5 gap-1 w-full max-w-[160px] min-w-[130px]
+      -rotate-5 translate-x-2
+      transition-transform duration-200 ease-[cubic-bezier(.23,1,.32,1)] delay-[50ms]
+      group-hover:-translate-y-2 group-hover:-rotate-6
+    `,
+    singleClassName: `
+      h-[100px] bg-white rounded-[16px] shadow-sm flex flex-col p-5 gap-1 w-full max-w-[160px] min-w-[130px] -rotate-3
+      transition-transform duration-200 ease-[cubic-bezier(.23,1,.32,1)]
+      group-hover:-translate-y-2
+    `,
+    lines: ["60%", "100%", "100%", "100%", "80%"],
+  },
+  {
+    className: `
+      h-[100px] bg-white rounded-[16px] shadow-lg flex flex-col p-5 gap-1 w-full max-w-[160px] min-w-[120px]
+      rotate-3 -translate-x-3 translate-y-3
+      transition-transform duration-200 ease-[cubic-bezier(.23,1,.32,1)]
+      group-hover:-translate-y-1 group-hover:rotate-5
+    `,
+    lines: ["40%", "100%", "80%"],
+  },
+];
+
 export function FolderCard({ folder }: FolderCardProps) {
   const colors = FOLDER_COLORS[folder.color];
+  const paperCount = Math.min(Math.max(folder.items.length, 1), 2);
+  const papers = PAPER_CONFIGS.slice(0, paperCount);
 
   return (
     <Link
@@ -30,51 +58,18 @@ export function FolderCard({ folder }: FolderCardProps) {
         />
 
         {/* Papers peeking out */}
-        <div className="absolute top-8 left-8 right-8 flex">
-          {/* Paper 1 */}
-          <div
-            className={`
-              h-[100px] bg-white rounded-[16px] shadow-sm flex flex-col p-5 gap-1 w-full
-              -rotate-5 translate-x-3
-              transition-transform duration-200 ease-[cubic-bezier(.23,1,.32,1)] delay-[50ms]
-              group-hover:-translate-y-2 group-hover:-rotate-6
-            `}
-          >
-            <div
-              className={`h-[6px] w-[60%] ${colors.paperLines} rounded-full`}
-            />
-            <div
-              className={`h-[6px] w-full ${colors.paperLines} rounded-full`}
-            />
-                      <div
-              className={`h-[6px] w-full ${colors.paperLines} rounded-full`}
-            />
-                      <div
-              className={`h-[6px] w-full ${colors.paperLines} rounded-full`}
-            />
-                      <div
-              className={`h-[6px] w-[80%] ${colors.paperLines} rounded-full`}
-            />
-          </div>
-          {/* Paper 2 */}
-          <div
-            className={`
-              h-[100px] bg-white rounded-[16px] shadow-lg flex flex-col p-5 gap-1 w-full
-              rotate-3 -translate-x-3 translate-y-3
-              transition-transform duration-200 ease-[cubic-bezier(.23,1,.32,1)]
-              group-hover:-translate-y-1 group-hover:rotate-5
-            `}
-          >
-            <div
-              className={`h-[6px] w-[40%] ${colors.paperLines} rounded-full`}
-            />
-            <div
-              className={`h-[6px] w-full ${colors.paperLines} rounded-full`}
-            />
-                      <div
-              className={`h-[6px] w-[80%] ${colors.paperLines} rounded-full`}
-            />
-          </div>
+        <div className={`absolute top-8 left-8 right-8 flex ${paperCount === 1 ? "justify-center" : ""}`}>
+          {papers.map((paper, index) => (
+            <div key={index} className={paperCount === 1 && paper.singleClassName ? paper.singleClassName : paper.className}>
+              {paper.lines.map((width, lineIndex) => (
+                <div
+                  key={lineIndex}
+                  className={`h-[6px] ${colors.paperLines} rounded-full`}
+                  style={{ width }}
+                />
+              ))}
+            </div>
+          ))}
         </div>
       </div>
 

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { BannerGeneratorModal } from "@/components/banner-generator-modal";
 import { CapacityModal } from "@/components/capacity-modal";
 import { TickPickLogo } from "@/components/tickpick-logo";
@@ -224,12 +225,15 @@ export default function EventCreationPage() {
           </div>
 
           {/* Desktop: Back button */}
-          <button className="hidden cursor-pointer sm:flex items-center gap-2.5 px-2 pr-3.5 py-2 rounded-full hover:bg-light-gray transition-colors duration-200 ease">
+          <Link
+            href="/folder/organizer"
+            className="hidden sm:flex items-center gap-2.5 px-2 pr-3.5 py-2 rounded-full hover:bg-light-gray transition-colors duration-200 ease"
+          >
             <div className="w-[22px] h-[22px] bg-mid-gray rounded-full flex items-center justify-center">
               <ArrowLeft className="w-3 h-3 text-white" strokeWidth={3} />
             </div>
             <span className="font-normal text-sm text-black">Main menu</span>
-          </button>
+          </Link>
 
           <h1 className="hidden sm:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-bold text-lg text-black">
             New Event

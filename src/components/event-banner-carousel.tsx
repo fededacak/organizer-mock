@@ -9,9 +9,9 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import { Expand } from "lucide-react";
+import { Expand, ImageIcon } from "lucide-react";
 
-const BANNER_IMAGES = [
+const ALL_BANNER_IMAGES = [
   "/event-image.jpg",
   "/event-image-1.jpg",
   "/event-image-2.jpg",
@@ -19,12 +19,22 @@ const BANNER_IMAGES = [
 
 interface EventBannerCarouselProps {
   eventName: string;
+  imageCount?: 0 | 1 | 3;
 }
 
-export function EventBannerCarousel({ eventName }: EventBannerCarouselProps) {
+export function EventBannerCarousel({
+  eventName,
+  imageCount = 3,
+}: EventBannerCarouselProps) {
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
   const [count, setCount] = React.useState(0);
+
+  const images = React.useMemo(() => {
+    if (imageCount === 0) return [];
+    if (imageCount === 1) return [ALL_BANNER_IMAGES[0]];
+    return ALL_BANNER_IMAGES;
+  }, [imageCount]);
 
   React.useEffect(() => {
     if (!api) return;
@@ -44,8 +54,41 @@ export function EventBannerCarousel({ eventName }: EventBannerCarouselProps) {
     [api]
   );
 
+  // Placeholder when no images
+  if (imageCount === 0) {
+    return (
+      <div className="relative w-full aspect-1014/400 lg:rounded-2xl md:rounded-[20px] rounded-none overflow-hidden bg-light-gray dark:bg-[#1e1e26] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-2 text-dark-gray dark:text-[#6b7280]">
+          <ImageIcon className="w-12 h-12" />
+          <span className="text-sm font-medium">No event image</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Single image - no carousel
+  if (imageCount === 1) {
+    return (
+      <div className="relative w-full aspect-1014/400 lg:rounded-2xl md:rounded-[20px] rounded-none overflow-hidden bg-light-gray">
+        <Image
+          src={images[0]}
+          alt={eventName}
+          fill
+          className="object-cover"
+          priority
+          unoptimized
+        />
+        {/* Zoom button */}
+        <button className="absolute bottom-4 right-4 w-8 h-8 rounded-[10px] bg-black/25 flex items-center justify-center backdrop-blur-sm hover:bg-black transition-all duration-200 ease cursor-pointer hover:scale-[1.02] active:scale-[0.98]">
+          <Expand className="w-4 h-4 text-white" />
+        </button>
+      </div>
+    );
+  }
+
+  // Multiple images - carousel
   return (
-    <div className="relative w-full aspect-1014/400 rounded-2xl overflow-hidden bg-light-gray">
+    <div className="relative w-full aspect-1014/400 lg:rounded-2xl md:rounded-[20px] rounded-none overflow-hidden bg-light-gray">
       <Carousel
         setApi={setApi}
         opts={{
@@ -59,7 +102,7 @@ export function EventBannerCarousel({ eventName }: EventBannerCarouselProps) {
         className="w-full h-full"
       >
         <CarouselContent className="h-full ml-0">
-          {BANNER_IMAGES.map((src, index) => (
+          {images.map((src, index) => (
             <CarouselItem key={index} className="h-full pl-0">
               <div className="relative w-full h-full">
                 <Image

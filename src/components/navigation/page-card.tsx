@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileText } from "lucide-react";
+import { Globe } from "lucide-react";
 import type { FolderItem, FolderColor } from "./types";
 import { PAGE_ICON_COLORS } from "./constants";
 
@@ -27,16 +27,16 @@ export function PageCard({ item, color }: PageCardProps) {
     >
       {/* File Icon */}
       <div
-        className={`w-full h-14 rounded-[10px] ${iconColors.bg} flex items-center justify-center`}
+        className={`w-full h-[80px] rounded-[10px] ${iconColors.bg} flex items-center justify-center`}
       >
-        <FileText
-          className={`w-6 h-6 ${iconColors.icon} `}
-          strokeWidth={1.5}
+        <Globe
+          className={`w-7 h-7 ${iconColors.icon} `}
+          strokeWidth={1.8}
         />
       </div>
 
       {/* Page Name */}
-      <span className="text-sm font-medium text-black ml-2 mb-0.5">
+      <span className="text-sm font-medium text-black ml-2 mb-1">
         {item.name}
       </span>
     </Link>
