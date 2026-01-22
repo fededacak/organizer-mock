@@ -15,6 +15,7 @@ export interface Ticket {
   name: string;
   price: number;
   description?: string;
+  day?: string;
 }
 
 export interface Artist {
@@ -30,11 +31,18 @@ export interface Playlist {
 
 export interface EventData {
   name: string;
+  /** ISO date string (e.g., "2026-02-22") */
   date: string;
+  /** ISO date string for multiday events (e.g., "2026-02-24") */
+  endDate?: string;
+  /** Time in 24h format (e.g., "18:00") */
   time: string;
+  /** End time in 24h format (e.g., "19:30") */
+  endTime?: string;
   venue: Venue;
   organizer: Organizer;
   tickets: Ticket[];
+  singleDayTickets?: Ticket[];
   lineup: Artist[];
   description: string;
   playlist: Playlist;

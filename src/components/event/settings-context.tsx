@@ -9,24 +9,38 @@ import {
 } from "react";
 
 export interface EventSettings {
-  theme: "light" | "dark";
+  // General
+  eventType: "single" | "multi";
+  showEndTime: boolean;
   locationTBD: boolean;
-  ticketCount: 1 | 2 | 3;
+  ticketCount: 1 | 2 | 6;
+  // Sections
   description: "none" | "short" | "long";
+  youtubeVideoCount: 0 | 1 | 2;
   showLineup: boolean;
   showSpotify: boolean;
   showAddons: boolean;
+  showSponsors: boolean;
+  // Display
+  theme: "light" | "dark";
   imageCount: 0 | 1 | 3;
 }
 
 const DEFAULT_SETTINGS: EventSettings = {
-  theme: "light",
+  // General
+  eventType: "single",
+  showEndTime: false,
   locationTBD: false,
-  ticketCount: 3,
+  ticketCount: 2,
+  // Sections
   description: "long",
-  showLineup: true,
+  youtubeVideoCount: 0,
+  showLineup: false,
   showSpotify: true,
-  showAddons: true,
+  showAddons: false,
+  showSponsors: false,
+  // Display
+  theme: "light",
   imageCount: 3,
 };
 

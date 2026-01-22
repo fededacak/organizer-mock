@@ -97,7 +97,7 @@ export function TicketCard({
           >
             {ticket.description}
           </p>
-          {(isClamped || isExpanded) && (
+          {isClamped && (
             <button
               onClick={onToggleExpand}
               className="font-bold text-[10px] text-tp-blue uppercase mt-1.5 hover:underline cursor-pointer"

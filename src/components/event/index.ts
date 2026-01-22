@@ -12,3 +12,4 @@ export * from "./host-event-promo";
 export * from "./settings-context";
 export * from "./settings-panel";
 export * from "./addons-section";
+export * from "./sponsors-section";

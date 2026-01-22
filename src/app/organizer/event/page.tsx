@@ -5,8 +5,10 @@ import { EventPageClient } from "./event-page-client";
 // Mock data - in production this would come from an API/database
 const EVENT_DATA: EventData = {
   name: "Summit Sound Sessions",
-  date: "Dec 12, 2025",
-  time: "8:00pm",
+  date: "2026-02-22",
+  endDate: "2026-02-24",
+  time: "18:00",
+  endTime: "19:30",
   venue: {
     name: "Lakeside Pavilion",
     address: "1233 Rose Ave, Venice, CA",
@@ -35,6 +37,40 @@ const EVENT_DATA: EventData = {
       name: "General Admission",
       price: 20.5,
       description: "Standard admission ticket for the event.",
+    },
+    {
+      id: "vip",
+      name: "VIP Experience",
+      price: 75,
+      description: "Premium VIP access with exclusive backstage meet & greet, complimentary drinks, and reserved seating.",
+    },
+    {
+      id: "group",
+      name: "Group Pass (4 people)",
+      price: 65,
+      description: "Discounted admission for groups of 4. All attendees must enter together.",
+    },
+    {
+      id: "late-night",
+      name: "Late Night Entry",
+      price: 8,
+      description: "Entry after 10pm only. Perfect for those who want to catch the final acts.",
+    },
+  ],
+  singleDayTickets: [
+    {
+      id: "saturday",
+      name: "General Admission - Saturday",
+      price: 15,
+      description: "Admission for Saturday only.",
+      day: "Saturday",
+    },
+    {
+      id: "sunday",
+      name: "General Admission - Sunday",
+      price: 15,
+      description: "Admission for Sunday only.",
+      day: "Sunday",
     },
   ],
   lineup: [

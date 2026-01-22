@@ -5,11 +5,12 @@ import type { Organizer } from "./types";
 
 interface OrganizerSectionProps {
   organizer: Organizer;
+  hideBorder?: boolean;
 }
 
-export function OrganizerSection({ organizer }: OrganizerSectionProps) {
+export function OrganizerSection({ organizer, hideBorder }: OrganizerSectionProps) {
   return (
-    <section className="border-b border-light-gray dark:border-[#2a2a35] pb-4">
+    <section className={hideBorder ? "" : "border-b border-light-gray dark:border-[#2a2a35] pb-4"}>
       <SectionHeader title="Organized By" />
       <div className="bg-light-gray dark:bg-[#1e1e26] rounded-[20px] p-5 flex flex-col lg:flex-row items-center gap-4">
         {/* Avatar - larger on mobile */}
