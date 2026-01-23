@@ -3,8 +3,8 @@
 import * as React from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import ImageIcon from "lucide-react/dist/esm/icons/image";
 import { ImageLightbox } from "./image-lightbox";
+import { ImageIcon } from "lucide-react";
 
 const ALL_BANNER_IMAGES = [
   "/event-image.jpg",
