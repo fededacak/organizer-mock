@@ -538,13 +538,15 @@ function EventPageContent({ eventData }: EventPageClientProps) {
 
         {/* Leva Controls Panel */}
         <Leva
-          collapsed={false}
+          collapsed
+          titleBar={{ title: "Settings" }}
           oneLineLabels={false}
           flat={false}
           theme={{
             sizes: {
-              rootWidth: "320px",
-              controlWidth: "160px",
+              rootWidth: "280px",
+              controlWidth: "140px",
+              titleBarHeight: "32px",
             },
           }}
         />
