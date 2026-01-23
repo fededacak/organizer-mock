@@ -36,9 +36,9 @@ export default async function FolderPage({ params }: FolderPageProps) {
       </div>
 
       {/* Pages Grid */}
-      <div className="px-4 py-8">
+      <div className="px-4 md:py-8 py-4">
         <div className="max-w-[800px] mx-auto">
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {folder.items.map((item) => (
               <PageCard key={item.id} item={item} color={folder.color} />
             ))}

@@ -36,7 +36,7 @@ export function PageCard({ item, color }: PageCardProps) {
       </div>
 
       {/* Page Name */}
-      <span className="text-sm font-medium text-black ml-2 mb-1">
+      <span className="md:text-sm text-base font-medium text-black ml-2 mb-1">
         {item.name}
       </span>
     </Link>

@@ -10,7 +10,7 @@ export default function NavigationPage() {
       </div>
 
       {/* Folder Grid */}
-      <div className="w-full max-w-[1000px] flex gap-5">
+      <div className="w-full max-w-[1000px] flex flex-col sm:flex-row gap-5">
         {FOLDERS.map((folder) => (
           <FolderCard key={folder.id} folder={folder} />
         ))}

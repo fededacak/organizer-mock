@@ -42,7 +42,7 @@ export function FolderCard({ folder }: FolderCardProps) {
       href={`/folder/${folder.id}`}
       className={`
         group
-        relative w-full max-w-[300px] rounded-[28px] overflow-hidden
+        relative w-full sm:max-w-[300px] rounded-[28px] overflow-hidden
         block
         ${colors.bg}
         transition-transform duration-200 ease
