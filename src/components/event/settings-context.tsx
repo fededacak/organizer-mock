@@ -8,6 +8,8 @@ import {
   type ReactNode,
 } from "react";
 
+export type LayoutVariant = "default" | "airbnb-experiences";
+
 export interface EventSettings {
   // General
   eventType: "single" | "multi";
@@ -23,7 +25,9 @@ export interface EventSettings {
   showSponsors: boolean;
   // Display
   theme: "light" | "dark";
-  imageCount: 0 | 1 | 3;
+  imageCount: 0 | 1 | 2 | 3 | 4;
+  // Layout
+  layoutVariant: LayoutVariant;
 }
 
 const DEFAULT_SETTINGS: EventSettings = {
@@ -42,7 +46,11 @@ const DEFAULT_SETTINGS: EventSettings = {
   // Display
   theme: "light",
   imageCount: 3,
+  // Layout
+  layoutVariant: "default",
 };
+
+const VALID_VARIANTS: LayoutVariant[] = ["default", "airbnb-experiences"];
 
 const STORAGE_KEY = "event-page-settings";
 
@@ -77,6 +85,15 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setIsHydrated(true);
   }, []);
 
+  // Read URL param on mount (priority over localStorage)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const variant = params.get("variant");
+    if (variant && VALID_VARIANTS.includes(variant as LayoutVariant)) {
+      setSettings((prev) => ({ ...prev, layoutVariant: variant as LayoutVariant }));
+    }
+  }, []);
+
   // Persist settings to localStorage on change
   useEffect(() => {
     if (isHydrated) {
@@ -87,6 +104,15 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       }
     }
   }, [settings, isHydrated]);
+
+  // Sync URL when variant changes
+  useEffect(() => {
+    if (isHydrated) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("variant", settings.layoutVariant);
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [settings.layoutVariant, isHydrated]);
 
   const updateSettings = <K extends keyof EventSettings>(
     key: K,

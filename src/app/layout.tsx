@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Outfit, Open_Sans } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -30,6 +31,7 @@ export default function RootLayout({
         className={`${outfit.variable} ${openSans.variable} font-outfit antialiased`}
       >
         {children}
+        <Toaster position="bottom-center" />
       </body>
     </html>
   );

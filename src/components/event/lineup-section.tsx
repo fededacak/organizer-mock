@@ -4,11 +4,12 @@ import type { Artist } from "./types";
 
 interface LineupSectionProps {
   lineup: Artist[];
+  hideBorder?: boolean;
 }
 
-export function LineupSection({ lineup }: LineupSectionProps) {
+export function LineupSection({ lineup, hideBorder }: LineupSectionProps) {
   return (
-    <section>
+    <section className={hideBorder ? "" : "pb-4 border-b border-light-gray dark:border-[#2a2a35]"}>
       <SectionHeader title="Lineup" />
       <div className="flex flex-col gap-3">
         {lineup.map((artist) => (

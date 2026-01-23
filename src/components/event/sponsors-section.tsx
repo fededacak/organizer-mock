@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { SectionHeader } from "./section-header";
+import { useEventSettings } from "./settings-context";
 
 const SAMPLE_SPONSORS = [
   { id: "google", name: "Google", logo: "/sponsors/google.png" },
@@ -22,8 +23,10 @@ interface SponsorsSectionProps {
 }
 
 export function SponsorsSection({ sponsors = SAMPLE_SPONSORS }: SponsorsSectionProps) {
+  const { settings } = useEventSettings();
+  
   return (
-    <section className="w-full max-w-[1064px] px-4 md:px-8 lg:px-6">
+    <section className={`w-full px-4 md:px-8 lg:px-6 max-w-[1064px]`}>
       <div className="border-t border-light-gray dark:border-[#2a2a35] py-8 flex flex-col">
         <SectionHeader title="Sponsors" />
         <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useLayoutEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Minus, Plus } from "lucide-react";
 import type { Ticket } from "./types";
 
@@ -27,12 +27,26 @@ export function TicketCard({
   const descriptionRef = useRef<HTMLParagraphElement>(null);
   const [isClamped, setIsClamped] = useState(false);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const el = descriptionRef.current;
-    if (el && !isExpanded) {
-      // Check if text overflows (is clamped)
+    if (!el || isExpanded) return;
+
+    // Use ResizeObserver to reliably detect when layout is stable
+    const checkClamped = () => {
       setIsClamped(el.scrollHeight > el.clientHeight);
-    }
+    };
+
+    // Check immediately after first paint
+    const rafId = requestAnimationFrame(checkClamped);
+
+    // Also observe for size changes (handles font loading, hydration, etc.)
+    const resizeObserver = new ResizeObserver(checkClamped);
+    resizeObserver.observe(el);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      resizeObserver.disconnect();
+    };
   }, [ticket.description, isExpanded]);
 
   return (
@@ -54,7 +68,7 @@ export function TicketCard({
         </div>
         {/* Quantity Stepper or Add Button */}
         {isSelected ? (
-          <div className="bg-light-gray dark:bg-[#1e1e26] rounded-[35px] h-[30px] flex items-center justify-center gap-2 px-2 py-1 shrink-0">
+          <div className="bg-light-gray dark:bg-[#1e1e26] rounded-full h-[30px] flex items-center justify-center gap-2 px-2 py-1 shrink-0">
             <button
               onClick={() => onUpdateQuantity(-1)}
               className="size-[14px] cursor-pointer flex items-center justify-center text-dark-gray dark:text-[#9ca3af] hover:text-black dark:hover:text-white transition-colors duration-200 ease shrink-0"
@@ -91,9 +105,17 @@ export function TicketCard({
         <div className="mt-2.5">
           <p
             ref={descriptionRef}
-            className={`text-sm text-dark-gray dark:text-[#9ca3af] leading-relaxed ${
-              isExpanded ? "" : "line-clamp-2"
-            }`}
+            className="text-sm text-dark-gray dark:text-[#9ca3af] leading-relaxed"
+            style={
+              isExpanded
+                ? undefined
+                : {
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical" as const,
+                    overflow: "hidden",
+                  }
+            }
           >
             {ticket.description}
           </p>

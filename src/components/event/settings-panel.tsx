@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Pickaxe, RotateCcw } from "lucide-react";
+import { Pickaxe, RotateCcw, Link2, ChevronDown, Check } from "lucide-react";
+import { toast } from "sonner";
 import {
   Sheet,
   SheetContent,
@@ -9,7 +10,18 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { useEventSettings } from "./settings-context";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useEventSettings, type LayoutVariant } from "./settings-context";
+
+const LAYOUT_VARIANTS: { value: LayoutVariant; label: string }[] = [
+  { value: "default", label: "Default" },
+  { value: "airbnb-experiences", label: "Airbnb Experiences" },
+];
 
 type TabId = "general" | "sections" | "appearance";
 
@@ -180,6 +192,48 @@ export function SettingsPanel() {
           {/* Display Tab */}
           {activeTab === "appearance" && (
             <>
+              <SettingGroup label="Layout Variant">
+                <div className="flex flex-col gap-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="flex items-center justify-between w-full px-3 py-2 bg-[#1a1a1f] rounded-[12px] text-sm font-semibold text-white hover:bg-[#252530] transition-colors duration-200 ease cursor-pointer">
+                        <span>
+                          {LAYOUT_VARIANTS.find((v) => v.value === settings.layoutVariant)?.label}
+                        </span>
+                        <ChevronDown className="w-4 h-4 text-[#9ca3af]" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="start"
+                      className="w-[--radix-dropdown-menu-trigger-width] bg-[#1a1a1f] border-[#3a3a45]"
+                    >
+                      {LAYOUT_VARIANTS.map((variant) => (
+                        <DropdownMenuItem
+                          key={variant.value}
+                          onClick={() => updateSettings("layoutVariant", variant.value)}
+                          className="flex items-center justify-between text-white hover:bg-[#252530] focus:bg-[#252530]"
+                        >
+                          <span>{variant.label}</span>
+                          {settings.layoutVariant === variant.value && (
+                            <Check className="w-4 h-4 text-white" />
+                          )}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(window.location.href);
+                      toast.success("Link copied to clipboard");
+                    }}
+                    className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-full border border-[#3a3a45] text-xs text-[#9ca3af] hover:text-white hover:border-[#6b7280] transition-colors duration-200 ease cursor-pointer font-medium"
+                  >
+                    <Link2 className="w-3.5 h-3.5" />
+                    Copy link to this variant
+                  </button>
+                </div>
+              </SettingGroup>
+
               <SettingGroup label="Theme">
                 <SegmentedControl
                   options={[
@@ -195,14 +249,24 @@ export function SettingsPanel() {
 
               <SettingGroup label="Banner Images">
                 <SegmentedControl
-                  options={[
-                    { value: "0", label: "0" },
-                    { value: "1", label: "1" },
-                    { value: "3", label: "3" },
-                  ]}
+                  options={
+                    settings.layoutVariant === "airbnb-experiences"
+                      ? [
+                          { value: "0", label: "0" },
+                          { value: "1", label: "1" },
+                          { value: "2", label: "2" },
+                          { value: "3", label: "3" },
+                          { value: "4", label: "4" },
+                        ]
+                      : [
+                          { value: "0", label: "0" },
+                          { value: "1", label: "1" },
+                          { value: "3", label: "3" },
+                        ]
+                  }
                   value={String(settings.imageCount)}
                   onChange={(v) =>
-                    updateSettings("imageCount", Number(v) as 0 | 1 | 3)
+                    updateSettings("imageCount", Number(v) as 0 | 1 | 2 | 3 | 4)
                   }
                 />
               </SettingGroup>

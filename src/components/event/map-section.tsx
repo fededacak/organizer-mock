@@ -7,13 +7,13 @@ interface MapSectionProps {
 
 export function MapSection({ venue }: MapSectionProps) {
   return (
-    <section className="pb-4 border-b border-light-gray dark:border-[#2a2a35] md:border-none">
+    <section className="pb-4 border-b border-light-gray dark:border-[#2a2a35] md:border-none md:pb-0">
       <p className="font-extrabold text-sm text-black dark:text-white">
         {venue.name}
       </p>
       <p className="text-sm text-dark-gray dark:text-[#9ca3af] mt-1">{venue.address}</p>
       {/* Static Map Placeholder */}
-      <div className="mt-2.5 w-full h-36 rounded-2xl bg-light-gray dark:bg-[#1e1e26] overflow-hidden relative">
+      <div className="mt-2.5 w-full h-44 rounded-2xl bg-light-gray dark:bg-[#1e1e26] overflow-hidden relative">
         {/* Map background image */}
         <img
           src="/map.png"

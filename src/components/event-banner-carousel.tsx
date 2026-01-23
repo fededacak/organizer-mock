@@ -9,7 +9,7 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import { Expand, ImageIcon } from "lucide-react";
+import { ImageIcon } from "lucide-react";
 
 const ALL_BANNER_IMAGES = [
   "/event-image.jpg",
@@ -19,7 +19,7 @@ const ALL_BANNER_IMAGES = [
 
 interface EventBannerCarouselProps {
   eventName: string;
-  imageCount?: 0 | 1 | 3;
+  imageCount?: 0 | 1 | 2 | 3 | 4;
 }
 
 export function EventBannerCarousel({
@@ -33,7 +33,8 @@ export function EventBannerCarousel({
   const images = React.useMemo(() => {
     if (imageCount === 0) return [];
     if (imageCount === 1) return [ALL_BANNER_IMAGES[0]];
-    return ALL_BANNER_IMAGES;
+    // For carousel, show up to 3 images regardless of count
+    return ALL_BANNER_IMAGES.slice(0, Math.min(imageCount, 3));
   }, [imageCount]);
 
   React.useEffect(() => {
@@ -78,10 +79,6 @@ export function EventBannerCarousel({
           priority
           unoptimized
         />
-        {/* Zoom button */}
-        <button className="absolute bottom-4 right-4 w-8 h-8 rounded-[10px] bg-black/25 flex items-center justify-center backdrop-blur-sm hover:bg-black transition-all duration-200 ease cursor-pointer hover:scale-[1.02] active:scale-[0.98]">
-          <Expand className="w-4 h-4 text-white" />
-        </button>
       </div>
     );
   }
@@ -118,11 +115,6 @@ export function EventBannerCarousel({
           ))}
         </CarouselContent>
       </Carousel>
-
-      {/* Zoom button */}
-      <button className="absolute bottom-4 right-4 w-8 h-8 rounded-[10px] bg-black/25 flex items-center justify-center backdrop-blur-sm hover:bg-black transition-all duration-200 ease cursor-pointer hover:scale-[1.02] active:scale-[0.98]">
-        <Expand className="w-4 h-4 text-white" />
-      </button>
 
       {/* Pager dots */}
       <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1">
