@@ -56,6 +56,7 @@ const STORAGE_KEY = "event-page-settings";
 
 interface EventSettingsContextValue {
   settings: EventSettings;
+  isHydrated: boolean;
   updateSettings: <K extends keyof EventSettings>(
     key: K,
     value: EventSettings[K]
@@ -127,7 +128,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   return (
     <EventSettingsContext.Provider
-      value={{ settings, updateSettings, resetSettings }}
+      value={{ settings, isHydrated, updateSettings, resetSettings }}
     >
       {children}
     </EventSettingsContext.Provider>

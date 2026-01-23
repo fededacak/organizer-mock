@@ -43,7 +43,7 @@ export function EventPageClient({ eventData }: EventPageClientProps) {
 }
 
 function EventPageContent({ eventData }: EventPageClientProps) {
-  const { settings } = useEventSettings();
+  const { settings, isHydrated } = useEventSettings();
   const isDarkMode = settings.theme === "dark";
   const isMultiDay = settings.eventType === "multi";
 
@@ -183,6 +183,7 @@ function EventPageContent({ eventData }: EventPageClientProps) {
                 <EventBannerCarousel
                   eventName={eventData.name}
                   imageCount={settings.imageCount}
+                  layoutIdPrefix="banner-desktop"
                 />
                 <div className="flex flex-col gap-4">
                   <OrganizerSection
@@ -282,6 +283,7 @@ function EventPageContent({ eventData }: EventPageClientProps) {
                 <EventBannerGrid
                   eventName={eventData.name}
                   imageCount={settings.imageCount}
+                  layoutIdPrefix="banner-desktop"
                 />
                 <div className="flex flex-col gap-4">
                   <OrganizerSection
@@ -384,10 +386,19 @@ function EventPageContent({ eventData }: EventPageClientProps) {
 
           {/* Mobile: Single column with correct order - hidden on desktop */}
           <div className="flex lg:hidden flex-col gap-3 w-full">
-            <EventBannerCarousel
-              eventName={eventData.name}
-              imageCount={settings.imageCount}
-            />
+            {isHydrated && settings.layoutVariant === "airbnb-experiences" ? (
+              <EventBannerGrid
+                eventName={eventData.name}
+                imageCount={settings.imageCount}
+                layoutIdPrefix="banner-mobile"
+              />
+            ) : (
+              <EventBannerCarousel
+                eventName={eventData.name}
+                imageCount={settings.imageCount}
+                layoutIdPrefix="banner-mobile"
+              />
+            )}
 
             <div className="flex flex-col gap-4 px-4 md:px-0">
               <EventHeader

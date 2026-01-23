@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import Autoplay from "embla-carousel-autoplay";
 import {
   Carousel,
@@ -10,6 +11,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { ImageIcon } from "lucide-react";
+import { ImageLightbox } from "./image-lightbox";
 
 const ALL_BANNER_IMAGES = [
   "/event-image.jpg",
@@ -20,15 +22,18 @@ const ALL_BANNER_IMAGES = [
 interface EventBannerCarouselProps {
   eventName: string;
   imageCount?: 0 | 1 | 2 | 3 | 4;
+  layoutIdPrefix?: string;
 }
 
 export function EventBannerCarousel({
   eventName,
   imageCount = 3,
+  layoutIdPrefix = "banner-carousel",
 }: EventBannerCarouselProps) {
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
   const [count, setCount] = React.useState(0);
+  const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null);
 
   const images = React.useMemo(() => {
     if (imageCount === 0) return [];
@@ -55,6 +60,18 @@ export function EventBannerCarousel({
     [api]
   );
 
+  const handleImageClick = (index: number) => {
+    setSelectedIndex(index);
+  };
+
+  const handleClose = () => {
+    setSelectedIndex(null);
+  };
+
+  const handleNavigate = (index: number) => {
+    setSelectedIndex(index);
+  };
+
   // Placeholder when no images
   if (imageCount === 0) {
     return (
@@ -70,65 +87,119 @@ export function EventBannerCarousel({
   // Single image - no carousel
   if (imageCount === 1) {
     return (
-      <div className="relative w-full aspect-1014/400 lg:rounded-2xl md:rounded-[20px] rounded-none overflow-hidden bg-light-gray">
-        <Image
-          src={images[0]}
-          alt={eventName}
-          fill
-          className="object-cover"
-          priority
-          unoptimized
+      <>
+        <div className="relative w-full aspect-1014/400 lg:rounded-2xl md:rounded-[20px] rounded-none overflow-hidden bg-light-gray">
+          <motion.div
+            layoutId={`${layoutIdPrefix}-0`}
+            className="absolute inset-0 cursor-pointer"
+            onClick={() => handleImageClick(0)}
+            role="button"
+            tabIndex={0}
+            aria-label={`View ${eventName} image fullscreen`}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleImageClick(0);
+              }
+            }}
+            whileHover={{ scale: 1.02 }}
+            transition={{
+              layout: { type: "spring", stiffness: 300, damping: 30 },
+              scale: { duration: 0.3, ease: [0.215, 0.61, 0.355, 1] },
+            }}
+          >
+            <Image
+              src={images[0]}
+              alt={eventName}
+              fill
+              className="object-cover"
+              priority
+              unoptimized
+            />
+          </motion.div>
+        </div>
+        <ImageLightbox
+          images={images}
+          selectedIndex={selectedIndex}
+          onClose={handleClose}
+          onNavigate={handleNavigate}
+          layoutId={selectedIndex !== null ? `${layoutIdPrefix}-${selectedIndex}` : undefined}
         />
-      </div>
+      </>
     );
   }
 
   // Multiple images - carousel
   return (
-    <div className="relative w-full aspect-1014/400 lg:rounded-2xl md:rounded-[20px] rounded-none overflow-hidden bg-light-gray">
-      <Carousel
-        setApi={setApi}
-        opts={{
-          loop: true,
-        }}
-        plugins={[
-          Autoplay({
-            delay: 5000,
-          }),
-        ]}
-        className="w-full h-full"
-      >
-        <CarouselContent className="h-full ml-0">
-          {images.map((src, index) => (
-            <CarouselItem key={index} className="h-full pl-0">
-              <div className="relative w-full h-full">
-                <Image
-                  src={src}
-                  alt={`${eventName} - Image ${index + 1}`}
-                  fill
-                  className="object-cover"
-                  priority={index === 0}
-                  unoptimized
-                />
-              </div>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-      </Carousel>
+    <>
+      <div className="relative w-full aspect-1014/400 lg:rounded-2xl md:rounded-[20px] rounded-none overflow-hidden bg-light-gray">
+        <Carousel
+          setApi={setApi}
+          opts={{
+            loop: true,
+          }}
+          plugins={[
+            Autoplay({
+              delay: 5000,
+            }),
+          ]}
+          className="w-full h-full"
+        >
+          <CarouselContent className="h-full ml-0">
+            {images.map((src, index) => (
+              <CarouselItem key={index} className="h-full pl-0">
+                <motion.div
+                  layoutId={`${layoutIdPrefix}-${index}`}
+                  className="relative w-full h-full cursor-pointer"
+                  onClick={() => handleImageClick(index)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`View ${eventName} image ${index + 1} fullscreen`}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleImageClick(index);
+                    }
+                  }}
+                  transition={{
+                    layout: { type: "spring", stiffness: 300, damping: 30 },
+                  }}
+                >
+                  <Image
+                    src={src}
+                    alt={`${eventName} - Image ${index + 1}`}
+                    fill
+                    className="object-cover"
+                    priority={index === 0}
+                    unoptimized
+                  />
+                </motion.div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
 
-      {/* Pager dots */}
-      <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1">
-        {Array.from({ length: count }).map((_, index) => (
-          <button
-            key={index}
-            onClick={() => scrollTo(index)}
-            className={`w-1.5 h-1.5 rounded-full transition-opacity duration-200 ease cursor-pointer ${
-              index === current ? "bg-white" : "bg-white/50"
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
+        {/* Pager dots */}
+        <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1">
+          {Array.from({ length: count }).map((_, index) => (
+            <button
+              key={index}
+              onClick={() => scrollTo(index)}
+              className={`w-1.5 h-1.5 rounded-full transition-opacity duration-200 ease cursor-pointer ${
+                index === current ? "bg-white" : "bg-white/50"
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
       </div>
-    </div>
+      <ImageLightbox
+        images={images}
+        selectedIndex={selectedIndex}
+        onClose={handleClose}
+        onNavigate={handleNavigate}
+        layoutId={selectedIndex !== null ? `${layoutIdPrefix}-${selectedIndex}` : undefined}
+      />
+    </>
   );
 }
