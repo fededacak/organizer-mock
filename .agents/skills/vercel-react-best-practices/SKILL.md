@@ -1,125 +1,134 @@
 ---
 name: vercel-react-best-practices
-description: React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns. Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements.
-license: MIT
-metadata:
-  author: vercel
-  version: "1.0.0"
+description: Apply React and Next.js performance optimization patterns from Vercel Engineering. Use when writing, reviewing, or refactoring React components, Next.js pages, data fetching logic, or optimizing bundle size and load times. Triggers on performance reviews, component architecture decisions, and Next.js API routes.
 ---
 
 # Vercel React Best Practices
 
-Comprehensive performance optimization guide for React and Next.js applications, maintained by Vercel. Contains 45 rules across 8 categories, prioritized by impact to guide automated refactoring and code generation.
+Performance optimization guide for React and Next.js applications containing 45 rules across 8 categories, prioritized by impact.
 
 ## When to Apply
 
-Reference these guidelines when:
+Use these guidelines when:
 - Writing new React components or Next.js pages
 - Implementing data fetching (client or server-side)
 - Reviewing code for performance issues
-- Refactoring existing React/Next.js code
+- Refactoring React/Next.js code
 - Optimizing bundle size or load times
 
 ## Rule Categories by Priority
 
-| Priority | Category | Impact | Prefix |
-|----------|----------|--------|--------|
-| 1 | Eliminating Waterfalls | CRITICAL | `async-` |
-| 2 | Bundle Size Optimization | CRITICAL | `bundle-` |
-| 3 | Server-Side Performance | HIGH | `server-` |
-| 4 | Client-Side Data Fetching | MEDIUM-HIGH | `client-` |
-| 5 | Re-render Optimization | MEDIUM | `rerender-` |
-| 6 | Rendering Performance | MEDIUM | `rendering-` |
-| 7 | JavaScript Performance | LOW-MEDIUM | `js-` |
-| 8 | Advanced Patterns | LOW | `advanced-` |
+| Priority | Category | Impact |
+|----------|----------|--------|
+| 1 | Eliminating Waterfalls | CRITICAL |
+| 2 | Bundle Size Optimization | CRITICAL |
+| 3 | Server-Side Performance | HIGH |
+| 4 | Client-Side Data Fetching | MEDIUM-HIGH |
+| 5 | Re-render Optimization | MEDIUM |
+| 6 | Rendering Performance | MEDIUM |
+| 7 | JavaScript Performance | LOW-MEDIUM |
+| 8 | Advanced Patterns | LOW |
 
-## Quick Reference
+## Critical Rules Summary
 
-### 1. Eliminating Waterfalls (CRITICAL)
+### Eliminating Waterfalls
 
-- `async-defer-await` - Move await into branches where actually used
-- `async-parallel` - Use Promise.all() for independent operations
-- `async-dependencies` - Use better-all for partial dependencies
-- `async-api-routes` - Start promises early, await late in API routes
-- `async-suspense-boundaries` - Use Suspense to stream content
+1. **Defer await until needed** - Move `await` into branches where actually used
+2. **Promise.all for independent ops** - Execute concurrent operations in parallel
+3. **Suspense boundaries** - Use Suspense to stream content, show wrapper UI faster
 
-### 2. Bundle Size Optimization (CRITICAL)
+### Bundle Size Optimization
 
-- `bundle-barrel-imports` - Import directly, avoid barrel files
-- `bundle-dynamic-imports` - Use next/dynamic for heavy components
-- `bundle-defer-third-party` - Load analytics/logging after hydration
-- `bundle-conditional` - Load modules only when feature is activated
-- `bundle-preload` - Preload on hover/focus for perceived speed
+1. **Avoid barrel imports** - Import directly from source files
+   ```tsx
+   // Bad: imports entire library
+   import { Check } from 'lucide-react'
+   
+   // Good: imports only what you need
+   import Check from 'lucide-react/dist/esm/icons/check'
+   ```
 
-### 3. Server-Side Performance (HIGH)
+2. **Dynamic imports for heavy components** - Use `next/dynamic` for large components
+   ```tsx
+   const MonacoEditor = dynamic(
+     () => import('./monaco-editor').then(m => m.MonacoEditor),
+     { ssr: false }
+   )
+   ```
 
-- `server-cache-react` - Use React.cache() for per-request deduplication
-- `server-cache-lru` - Use LRU cache for cross-request caching
-- `server-serialization` - Minimize data passed to client components
-- `server-parallel-fetching` - Restructure components to parallelize fetches
-- `server-after-nonblocking` - Use after() for non-blocking operations
+3. **Defer non-critical libraries** - Load analytics/logging after hydration
 
-### 4. Client-Side Data Fetching (MEDIUM-HIGH)
+### Server-Side Performance
 
-- `client-swr-dedup` - Use SWR for automatic request deduplication
-- `client-event-listeners` - Deduplicate global event listeners
+1. **Authenticate Server Actions** - Always verify auth inside each Server Action
+2. **Minimize RSC serialization** - Only pass fields the client actually uses
+3. **React.cache()** - Deduplicate within a request
+4. **LRU cache** - Deduplicate across requests
+5. **after()** - Schedule non-blocking operations after response
 
-### 5. Re-render Optimization (MEDIUM)
+### Re-render Optimization
 
-- `rerender-defer-reads` - Don't subscribe to state only used in callbacks
-- `rerender-memo` - Extract expensive work into memoized components
-- `rerender-dependencies` - Use primitive dependencies in effects
-- `rerender-derived-state` - Subscribe to derived booleans, not raw values
-- `rerender-functional-setstate` - Use functional setState for stable callbacks
-- `rerender-lazy-state-init` - Pass function to useState for expensive values
-- `rerender-transitions` - Use startTransition for non-urgent updates
+1. **Functional setState** - Use `setItems(curr => [...curr, newItem])` for stable callbacks
+2. **Lazy state initialization** - `useState(() => expensiveComputation())`
+3. **Narrow effect dependencies** - Use primitives, not objects
+4. **startTransition** - Mark non-urgent updates as transitions
 
-### 6. Rendering Performance (MEDIUM)
+### Rendering Performance
 
-- `rendering-animate-svg-wrapper` - Animate div wrapper, not SVG element
-- `rendering-content-visibility` - Use content-visibility for long lists
-- `rendering-hoist-jsx` - Extract static JSX outside components
-- `rendering-svg-precision` - Reduce SVG coordinate precision
-- `rendering-hydration-no-flicker` - Use inline script for client-only data
-- `rendering-activity` - Use Activity component for show/hide
-- `rendering-conditional-render` - Use ternary, not && for conditionals
+1. **content-visibility: auto** - Defer off-screen rendering for long lists
+2. **Hoist static JSX** - Extract static elements outside components
+3. **Animate SVG wrappers** - Wrap SVG in div for hardware acceleration
 
-### 7. JavaScript Performance (LOW-MEDIUM)
+### JavaScript Performance
 
-- `js-batch-dom-css` - Group CSS changes via classes or cssText
-- `js-index-maps` - Build Map for repeated lookups
-- `js-cache-property-access` - Cache object properties in loops
-- `js-cache-function-results` - Cache function results in module-level Map
-- `js-cache-storage` - Cache localStorage/sessionStorage reads
-- `js-combine-iterations` - Combine multiple filter/map into one loop
-- `js-length-check-first` - Check array length before expensive comparison
-- `js-early-exit` - Return early from functions
-- `js-hoist-regexp` - Hoist RegExp creation outside loops
-- `js-min-max-loop` - Use loop for min/max instead of sort
-- `js-set-map-lookups` - Use Set/Map for O(1) lookups
-- `js-tosorted-immutable` - Use toSorted() for immutability
+1. **Set/Map for lookups** - O(1) instead of O(n) with array.includes()
+2. **toSorted() over sort()** - Immutable sorting prevents React bugs
+3. **Early length check** - Compare array lengths before expensive operations
+4. **Cache repeated calls** - Module-level Map for expensive function results
 
-### 8. Advanced Patterns (LOW)
+## Detailed Reference
 
-- `advanced-event-handler-refs` - Store event handlers in refs
-- `advanced-use-latest` - useLatest for stable callback refs
+For complete explanations and code examples, read the full compiled document: [AGENTS.md](./AGENTS.md)
 
-## How to Use
+### Individual Rule Files
 
-Read individual rule files for detailed explanations and code examples:
+Each rule has a dedicated file in the `rules/` directory:
 
-```
-rules/async-parallel.md
-rules/bundle-barrel-imports.md
-rules/_sections.md
-```
+**Critical (Waterfalls & Bundle)**
+- `async-parallel.md` - Promise.all() for independent operations
+- `async-defer-await.md` - Defer await until needed
+- `async-suspense-boundaries.md` - Strategic Suspense placement
+- `bundle-barrel-imports.md` - Avoid barrel file imports
+- `bundle-dynamic-imports.md` - Dynamic imports for heavy components
 
-Each rule file contains:
-- Brief explanation of why it matters
-- Incorrect code example with explanation
-- Correct code example with explanation
-- Additional context and references
+**High (Server)**
+- `server-auth-actions.md` - Authenticate Server Actions
+- `server-serialization.md` - Minimize RSC serialization
+- `server-cache-react.md` - React.cache() deduplication
+- `server-cache-lru.md` - Cross-request LRU caching
+- `server-after-nonblocking.md` - Non-blocking operations
 
-## Full Compiled Document
+**Medium (Re-renders & Rendering)**
+- `rerender-functional-setstate.md` - Functional setState updates
+- `rerender-lazy-state-init.md` - Lazy state initialization
+- `rerender-memo.md` - Extract to memoized components
+- `rendering-content-visibility.md` - CSS content-visibility
+- `rendering-hoist-jsx.md` - Hoist static JSX
 
-For the complete guide with all rules expanded: `AGENTS.md`
+**Low-Medium (JavaScript)**
+- `js-set-map-lookups.md` - Set/Map for O(1) lookups
+- `js-tosorted-immutable.md` - Immutable sorting
+- `js-cache-function-results.md` - Cache expensive function results
+
+## Quick Checklist
+
+Before submitting React/Next.js code, verify:
+
+- [ ] No sequential awaits that could be parallelized
+- [ ] Heavy components use dynamic imports
+- [ ] Server Actions have authentication checks
+- [ ] RSC props only include needed fields
+- [ ] No barrel file imports from large libraries
+- [ ] State updates use functional form when based on previous state
+- [ ] Effects have minimal, primitive dependencies
+- [ ] Long lists use content-visibility or virtualization

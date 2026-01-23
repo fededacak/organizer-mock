@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, Suspense, useMemo, useRef, useEffect } from "react";
+import { useState, Suspense, useMemo, useEffect } from "react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
-import { MapPinIcon } from "@/components/icons/map-pin-icon";
 import { MapPin } from "lucide-react";
 import { format, parse } from "date-fns";
 import { Leva } from "leva";
@@ -15,8 +14,6 @@ import {
   OrganizerSection,
   SpotifySection,
   LineupSection,
-  TicketCard,
-  CheckoutButton,
   AboutSection,
   MapSection,
   HostEventPromo,
@@ -26,6 +23,14 @@ import {
   type EventData,
   type Ticket,
 } from "@/components/event";
+import { TicketsList } from "@/components/event/tickets-list";
+import { LumaLayout } from "@/components/event/layouts/luma-layout";
+import { AirbnbLayout } from "@/components/event/layouts/airbnb-layout";
+import { MobileLayout } from "@/components/event/layouts/mobile-layout";
+import type {
+  LayoutProps,
+  LayoutSections,
+} from "@/components/event/layouts/types";
 
 interface EventPageClientProps {
   eventData: EventData;
@@ -51,6 +56,7 @@ function EventPageContent({ eventData }: EventPageClientProps) {
     window.history.replaceState({}, "", url.toString());
   }, [settings.layoutVariant]);
 
+  // Ticket state
   const [ticketQuantities, setTicketQuantities] = useState<
     Record<string, number>
   >({
@@ -64,16 +70,10 @@ function EventPageContent({ eventData }: EventPageClientProps) {
     sunday: 0,
   });
   const [expandedTicket, setExpandedTicket] = useState<string | null>(null);
-  const [showFullDescription, setShowFullDescription] = useState(false);
   const [ticketDayTab, setTicketDayTab] = useState<"all" | "single">("all");
 
-  // Refs and state for scroll gradient visibility (airbnb layout only)
-  const airbnbScrollRef = useRef<HTMLDivElement>(null);
-  const [isAirbnbScrollable, setIsAirbnbScrollable] = useState(false);
-
-  // Ref and state for floating checkout button visibility (original layout)
-  const inlineCheckoutRef = useRef<HTMLDivElement>(null);
-  const [isCheckoutVisible, setIsCheckoutVisible] = useState(true);
+  // Description state
+  const [showFullDescription, setShowFullDescription] = useState(false);
 
   // Handle tab change and expand first ticket of that category
   const handleTicketDayTabChange = (tab: "all" | "single") => {
@@ -91,12 +91,18 @@ function EventPageContent({ eventData }: EventPageClientProps) {
       return eventData.singleDayTickets || [];
     }
     return eventData.tickets.slice(0, settings.ticketCount);
-  }, [eventData.tickets, eventData.singleDayTickets, settings.ticketCount, isMultiDay, ticketDayTab]);
+  }, [
+    eventData.tickets,
+    eventData.singleDayTickets,
+    settings.ticketCount,
+    isMultiDay,
+    ticketDayTab,
+  ]);
 
   // Group single day tickets by day
   const ticketsByDay = useMemo(() => {
     if (!isMultiDay || ticketDayTab !== "single") return null;
-    
+
     const grouped: Record<string, Ticket[]> = {};
     for (const ticket of displayedTickets) {
       const day = ticket.day || "Other";
@@ -112,50 +118,11 @@ function EventPageContent({ eventData }: EventPageClientProps) {
   const displayedDescription = useMemo(() => {
     if (settings.description === "none") return null;
     if (settings.description === "short") {
-      // Extract first sentence (ends with . ! or ?)
       const match = eventData.description.match(/^[^.!?]*[.!?]/);
       return match ? match[0].trim() : eventData.description;
     }
-    // Line-based truncation is handled by AboutSection with line-clamp
     return eventData.description;
   }, [eventData.description, settings.description]);
-
-  // Check if scroll container is scrollable (airbnb layout only)
-  useEffect(() => {
-    const checkScrollable = () => {
-      if (airbnbScrollRef.current) {
-        setIsAirbnbScrollable(
-          airbnbScrollRef.current.scrollHeight > airbnbScrollRef.current.clientHeight
-        );
-      }
-    };
-
-    checkScrollable();
-
-    // Re-check on resize
-    const resizeObserver = new ResizeObserver(checkScrollable);
-    if (airbnbScrollRef.current) resizeObserver.observe(airbnbScrollRef.current);
-
-    return () => resizeObserver.disconnect();
-  }, [displayedTickets, expandedTicket]);
-
-  // Track visibility of inline checkout button (original layout only)
-  useEffect(() => {
-    if (settings.layoutVariant !== "default") return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsCheckoutVisible(entry.isIntersecting);
-      },
-      { threshold: 0.1 }
-    );
-
-    if (inlineCheckoutRef.current) {
-      observer.observe(inlineCheckoutRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, [settings.layoutVariant]);
 
   const updateQuantity = (ticketId: string, delta: number) => {
     setTicketQuantities((prev) => ({
@@ -166,11 +133,136 @@ function EventPageContent({ eventData }: EventPageClientProps) {
 
   const totalTickets = Object.values(ticketQuantities).reduce(
     (sum, qty) => sum + qty,
-    0
+    0,
   );
   const totalPrice = displayedTickets.reduce((sum, ticket) => {
     return sum + ticket.price * (ticketQuantities[ticket.id] || 0);
   }, 0);
+
+  // Build sections object for layouts
+  const sections: LayoutSections = {
+    bannerCarouselDesktop: (
+      <EventBannerCarousel
+        eventName={eventData.name}
+        imageCount={settings.imageCount}
+        layoutIdPrefix="banner-desktop"
+      />
+    ),
+    bannerCarouselMobile: (
+      <EventBannerCarousel
+        eventName={eventData.name}
+        imageCount={settings.imageCount}
+        layoutIdPrefix="banner-mobile"
+      />
+    ),
+    bannerGridDesktop: (
+      <EventBannerGrid
+        eventName={eventData.name}
+        imageCount={settings.imageCount}
+        layoutIdPrefix="banner-desktop"
+      />
+    ),
+    bannerGridMobile: (
+      <EventBannerGrid
+        eventName={eventData.name}
+        imageCount={settings.imageCount}
+        layoutIdPrefix="banner-mobile"
+      />
+    ),
+    organizer: (
+      <OrganizerSection
+        organizer={eventData.organizer}
+        hideBorder={
+          !settings.showSpotify &&
+          !settings.showLineup &&
+          !displayedDescription &&
+          settings.locationTBD
+        }
+      />
+    ),
+    spotify: settings.showSpotify ? (
+      <SpotifySection playlist={eventData.playlist} />
+    ) : null,
+    lineup: settings.showLineup ? (
+      <LineupSection
+        lineup={eventData.lineup}
+        hideBorder={settings.locationTBD}
+      />
+    ) : null,
+    about: displayedDescription ? (
+      <AboutSection
+        description={displayedDescription}
+        showFull={showFullDescription}
+        onToggle={() => setShowFullDescription(!showFullDescription)}
+        youtubeVideoCount={settings.youtubeVideoCount}
+        hideBorder={settings.locationTBD && !settings.showLineup}
+      />
+    ) : null,
+    map: !settings.locationTBD ? <MapSection venue={eventData.venue} /> : null,
+    addons: settings.showAddons ? <AddonsSection /> : null,
+    sponsors: settings.showSponsors ? <SponsorsSection /> : null,
+    hostPromo: <HostEventPromo />,
+  };
+
+  // Build header
+  const header = (
+    <EventHeader
+      event={eventData}
+      locationTBD={settings.locationTBD}
+      showEndTime={settings.showEndTime}
+      isMultiDay={isMultiDay}
+    />
+  );
+
+  // Build tickets list
+  const ticketsList = (
+    <TicketsList
+      tickets={displayedTickets}
+      ticketsByDay={ticketsByDay}
+      quantities={ticketQuantities}
+      expandedTicket={expandedTicket}
+      isMultiDay={isMultiDay}
+      ticketDayTab={ticketDayTab}
+      onQuantityChange={updateQuantity}
+      onExpandToggle={(id) =>
+        setExpandedTicket(expandedTicket === id ? null : id)
+      }
+      onTabChange={handleTicketDayTabChange}
+    />
+  );
+
+  // Build shared layout props
+  const layoutProps: LayoutProps = {
+    eventData,
+    settings,
+    ticketState: {
+      quantities: ticketQuantities,
+      expandedTicket,
+      displayedTickets,
+      ticketsByDay,
+      ticketDayTab,
+      totalTickets,
+      totalPrice,
+      isMultiDay,
+      onQuantityChange: updateQuantity,
+      onExpandToggle: (id) =>
+        setExpandedTicket(expandedTicket === id ? null : id),
+      onTabChange: handleTicketDayTabChange,
+    },
+    descriptionState: {
+      displayedDescription,
+      showFullDescription,
+      onToggleDescription: () => setShowFullDescription(!showFullDescription),
+    },
+    sections,
+    header,
+    ticketsList,
+    checkoutButton: null, // Handled by each layout
+  };
+
+  // Select desktop layout based on variant
+  const DesktopLayout =
+    settings.layoutVariant === "luma" ? LumaLayout : AirbnbLayout;
 
   return (
     <div className={isDarkMode ? "dark" : ""}>
@@ -178,363 +270,25 @@ function EventPageContent({ eventData }: EventPageClientProps) {
         <MarketplaceNavbar isDarkMode={isDarkMode} />
 
         {/* Main Content */}
-        <main className={`w-full flex flex-col max-w-[1062px] lg:flex-row px-0 md:px-8 lg:px-6 md:pt-5 pb-8 ${settings.layoutVariant === "airbnb-experiences" ? "gap-12" : "gap-8"}`}>
-          {/* Desktop: Two column layout */}
-          {settings.layoutVariant === "default" ? (
-            <>
-              {/* Original Layout - Left Column */}
-              <div className="hidden lg:flex flex-1 flex-col gap-4">
-                <EventBannerCarousel
-                  eventName={eventData.name}
-                  imageCount={settings.imageCount}
-                  layoutIdPrefix="banner-desktop"
-                />
-                <div className="flex flex-col gap-4">
-                  <OrganizerSection
-                    organizer={eventData.organizer}
-                    hideBorder={!settings.showSpotify && !settings.showLineup}
-                  />
-                  {settings.showSpotify && (
-                    <SpotifySection playlist={eventData.playlist} />
-                  )}
-                  {settings.showLineup && (
-                    <LineupSection lineup={eventData.lineup} hideBorder />
-                  )}
-                </div>
-              </div>
+        <main
+          className={`w-full flex flex-col max-w-[1062px] lg:flex-row px-0 md:px-8 lg:px-6 md:pt-5 pb-10 ${
+            settings.layoutVariant === "airbnb" ? "gap-12" : "gap-8"
+          }`}
+        >
+          {/* Desktop Layout */}
+          <DesktopLayout {...layoutProps} />
 
-              {/* Original Layout - Right Column (not sticky) */}
-              <div className="hidden lg:flex w-[500px] flex-col gap-4">
-                <EventHeader event={eventData} locationTBD={settings.locationTBD} showEndTime={settings.showEndTime} isMultiDay={isMultiDay} />
-
-                <div className="flex flex-col gap-3">
-                  {isMultiDay && (
-                    <TicketDayTabs
-                      activeTab={ticketDayTab}
-                      onTabChange={handleTicketDayTabChange}
-                    />
-                  )}
-                  {ticketsByDay ? (
-                    Object.entries(ticketsByDay).map(([day, tickets]) => (
-                      <div key={day} className="flex flex-col gap-2.5">
-                        <p className="font-extrabold text-sm text-black dark:text-white">
-                          {day}
-                        </p>
-                        {tickets.map((ticket) => (
-                          <TicketCard
-                            key={ticket.id}
-                            ticket={ticket}
-                            quantity={ticketQuantities[ticket.id] || 0}
-                            isExpanded={expandedTicket === ticket.id}
-                            onToggleExpand={() =>
-                              setExpandedTicket(
-                                expandedTicket === ticket.id ? null : ticket.id
-                              )
-                            }
-                            onUpdateQuantity={(delta) => updateQuantity(ticket.id, delta)}
-                          />
-                        ))}
-                      </div>
-                    ))
-                  ) : (
-                    displayedTickets.map((ticket) => (
-                      <TicketCard
-                        key={ticket.id}
-                        ticket={ticket}
-                        quantity={ticketQuantities[ticket.id] || 0}
-                        isExpanded={expandedTicket === ticket.id}
-                        onToggleExpand={() =>
-                          setExpandedTicket(
-                            expandedTicket === ticket.id ? null : ticket.id
-                          )
-                        }
-                        onUpdateQuantity={(delta) => updateQuantity(ticket.id, delta)}
-                      />
-                    ))
-                  )}
-                </div>
-
-                {settings.showAddons && <AddonsSection />}
-
-                <div
-                  ref={inlineCheckoutRef}
-                  className="flex flex-col w-full pb-4 border-b border-light-gray dark:border-[#2a2a35]"
-                >
-                  <CheckoutButton
-                    totalTickets={totalTickets}
-                    totalPrice={totalPrice}
-                    ticketTypeCount={settings.ticketCount}
-                  />
-                </div>
-
-                {displayedDescription && (
-                  <AboutSection
-                    description={displayedDescription}
-                    showFull={showFullDescription}
-                    onToggle={() => setShowFullDescription(!showFullDescription)}
-                    youtubeVideoCount={settings.youtubeVideoCount}
-                    hideBorder={settings.locationTBD}
-                  />
-                )}
-
-                {!settings.locationTBD && <MapSection venue={eventData.venue} />}
-              </div>
-            </>
-          ) : (
-            <>
-              {/* Airbnb Experiences Layout - Left Column */}
-              <div className="hidden lg:flex w-[60%] flex-col gap-4">
-                <EventBannerGrid
-                  eventName={eventData.name}
-                  imageCount={settings.imageCount}
-                  layoutIdPrefix="banner-desktop"
-                />
-                <div className="flex flex-col gap-4">
-                  <OrganizerSection
-                    organizer={eventData.organizer}
-                    hideBorder={!settings.showSpotify && !settings.showLineup && !displayedDescription && settings.locationTBD}
-                  />
-                  {settings.showSpotify && (
-                    <SpotifySection playlist={eventData.playlist} />
-                  )}
-                  {displayedDescription && (
-                    <AboutSection
-                      description={displayedDescription}
-                      showFull={showFullDescription}
-                      onToggle={() => setShowFullDescription(!showFullDescription)}
-                      youtubeVideoCount={settings.youtubeVideoCount}
-                      hideBorder={!settings.showLineup && settings.locationTBD}
-                    />
-                  )}
-                  {settings.showLineup && (
-                    <LineupSection lineup={eventData.lineup} hideBorder={settings.locationTBD} />
-                  )}
-                  {!settings.locationTBD && <MapSection venue={eventData.venue} />}
-                </div>
-              </div>
-
-              {/* Airbnb Experiences Layout - Right Column (tickets sticky) */}
-              <div className="hidden lg:flex w-[40%] flex-col gap-4">
-                <EventHeader event={eventData} locationTBD={settings.locationTBD} showEndTime={settings.showEndTime} isMultiDay={isMultiDay} />
-
-                <div className={`sticky flex flex-col gap-4 ${settings.layoutVariant === "airbnb-experiences" ? "top-[102px] mt-4" : "top-[88px]"}`}>
-                  <AirbnbTicketsContainer>
-                    <div className="relative">
-                      <div
-                        ref={airbnbScrollRef}
-                        className={`${settings.showAddons ? "max-h-[calc(100vh-450px)]" : "max-h-[calc(100vh-360px)]"} overflow-y-auto flex flex-col gap-3`}
-                      >
-                        {isMultiDay && (
-                          <TicketDayTabs
-                            activeTab={ticketDayTab}
-                            onTabChange={handleTicketDayTabChange}
-                          />
-                        )}
-                        {ticketsByDay ? (
-                          Object.entries(ticketsByDay).map(([day, tickets]) => (
-                            <div key={day} className="flex flex-col gap-2.5">
-                              <p className="font-extrabold text-sm text-black dark:text-white">
-                                {day}
-                              </p>
-                              {tickets.map((ticket) => (
-                                <TicketCard
-                                  key={ticket.id}
-                                  ticket={ticket}
-                                  quantity={ticketQuantities[ticket.id] || 0}
-                                  isExpanded={expandedTicket === ticket.id}
-                                  onToggleExpand={() =>
-                                    setExpandedTicket(
-                                      expandedTicket === ticket.id ? null : ticket.id
-                                    )
-                                  }
-                                  onUpdateQuantity={(delta) => updateQuantity(ticket.id, delta)}
-                                />
-                              ))}
-                            </div>
-                          ))
-                        ) : (
-                          displayedTickets.map((ticket) => (
-                            <TicketCard
-                              key={ticket.id}
-                              ticket={ticket}
-                              quantity={ticketQuantities[ticket.id] || 0}
-                              isExpanded={expandedTicket === ticket.id}
-                              onToggleExpand={() =>
-                                setExpandedTicket(
-                                  expandedTicket === ticket.id ? null : ticket.id
-                                )
-                              }
-                              onUpdateQuantity={(delta) => updateQuantity(ticket.id, delta)}
-                            />
-                          ))
-                        )}
-                      </div>
-                      {/* Gradient overlay */}
-                      {isAirbnbScrollable && (
-                        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent dark:from-[#0a0a0f]" />
-                      )}
-                    </div>
-
-                    {settings.showAddons && <AddonsSection />}
-
-                    <CheckoutButton
-                      totalTickets={totalTickets}
-                      totalPrice={totalPrice}
-                      ticketTypeCount={settings.ticketCount}
-                    />
-                  </AirbnbTicketsContainer>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Mobile: Single column with correct order - hidden on desktop */}
-          <div className="flex lg:hidden flex-col gap-3 w-full">
-            {settings.layoutVariant === "airbnb-experiences" ? (
-              <EventBannerGrid
-                eventName={eventData.name}
-                imageCount={settings.imageCount}
-                layoutIdPrefix="banner-mobile"
-              />
-            ) : (
-              <EventBannerCarousel
-                eventName={eventData.name}
-                imageCount={settings.imageCount}
-                layoutIdPrefix="banner-mobile"
-              />
-            )}
-
-            <div className="flex flex-col gap-4 px-4 md:px-0">
-              <EventHeader
-                event={eventData}
-                locationTBD={settings.locationTBD}
-                showEndTime={settings.showEndTime}
-                isMultiDay={isMultiDay}
-              />
-
-              <div className="flex flex-col gap-3">
-                {isMultiDay && (
-                  <TicketDayTabs
-                    activeTab={ticketDayTab}
-                    onTabChange={handleTicketDayTabChange}
-                  />
-                )}
-                {ticketsByDay ? (
-                  Object.entries(ticketsByDay).map(([day, tickets]) => (
-                    <div key={day} className="flex flex-col gap-2.5">
-                      <p className="font-extrabold text-sm text-black dark:text-white">
-                        {day}
-                      </p>
-                      {tickets.map((ticket) => (
-                        <TicketCard
-                          key={ticket.id}
-                          ticket={ticket}
-                          quantity={ticketQuantities[ticket.id] || 0}
-                          isExpanded={expandedTicket === ticket.id}
-                          onToggleExpand={() =>
-                            setExpandedTicket(
-                              expandedTicket === ticket.id ? null : ticket.id
-                            )
-                          }
-                          onUpdateQuantity={(delta) =>
-                            updateQuantity(ticket.id, delta)
-                          }
-                        />
-                      ))}
-                    </div>
-                  ))
-                ) : (
-                  displayedTickets.map((ticket) => (
-                    <TicketCard
-                      key={ticket.id}
-                      ticket={ticket}
-                      quantity={ticketQuantities[ticket.id] || 0}
-                      isExpanded={expandedTicket === ticket.id}
-                      onToggleExpand={() =>
-                        setExpandedTicket(
-                          expandedTicket === ticket.id ? null : ticket.id
-                        )
-                      }
-                      onUpdateQuantity={(delta) =>
-                        updateQuantity(ticket.id, delta)
-                      }
-                    />
-                  ))
-                )}
-              </div>
-
-              {settings.showAddons && (
-                <div className="flex flex-col w-full pb-4 border-b border-light-gray dark:border-[#2a2a35]">
-                  <AddonsSection />
-                </div>
-              )}
-
-              {settings.showSpotify && (
-                <SpotifySection playlist={eventData.playlist} />
-              )}
-
-              <OrganizerSection
-                organizer={eventData.organizer}
-                hideBorder={!displayedDescription && settings.locationTBD && !settings.showLineup}
-              />
-
-              {displayedDescription && (
-                <AboutSection
-                  description={displayedDescription}
-                  showFull={showFullDescription}
-                  onToggle={() => setShowFullDescription(!showFullDescription)}
-                  youtubeVideoCount={settings.youtubeVideoCount}
-                  hideBorder={settings.locationTBD && !settings.showLineup}
-                />
-              )}
-              {!settings.locationTBD && <MapSection venue={eventData.venue} />}
-              {settings.showLineup && (
-                <LineupSection lineup={eventData.lineup} hideBorder />
-              )}
-            </div>
-          </div>
+          {/* Mobile Layout */}
+          <MobileLayout {...layoutProps} />
         </main>
 
         {/* Sponsors Section - Full width, outside of two-column layout */}
-        {settings.showSponsors && <SponsorsSection />}
+        {sections.sponsors}
 
         {/* Host Event Promo */}
-        <HostEventPromo />
+        {sections.hostPromo}
 
         <MarketplaceFooter />
-
-        {/* Fixed checkout button for mobile */}
-        <div className="fixed bottom-2 left-2 right-2 bg-white dark:bg-[#0a0a0f] shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] rounded-full p-3 lg:hidden border-t border-light-gray dark:border-[#2a2a35]">
-          <CheckoutButton
-            totalTickets={totalTickets}
-            totalPrice={totalPrice}
-            ticketTypeCount={settings.ticketCount}
-          />
-        </div>
-
-        {/* Floating checkout button for desktop original layout */}
-        {settings.layoutVariant === "default" && (
-          <div className="hidden lg:block fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
-            <div className="max-w-[1092px] mx-auto px-6 flex justify-end">
-              <div
-                className={`w-[532px] pointer-events-auto transition-all duration-300 motion-reduce:transition-none ${
-                  isCheckoutVisible
-                    ? "opacity-0 translate-y-4"
-                    : "opacity-100 translate-y-0"
-                }`}
-                style={{ transitionTimingFunction: "cubic-bezier(.215, .61, .355, 1)" }}
-              >
-                <div className="bg-white dark:bg-[#0a0a0f] rounded-t-[24px] p-4 shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] border border-light-gray dark:border-[#2a2a35]">
-                  <CheckoutButton
-                    totalTickets={totalTickets}
-                    totalPrice={totalPrice}
-                    ticketTypeCount={settings.ticketCount}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Leva Controls Panel */}
         <Leva
@@ -555,50 +309,9 @@ function EventPageContent({ eventData }: EventPageClientProps) {
   );
 }
 
-function TicketDayTabs({
-  activeTab,
-  onTabChange,
-}: {
-  activeTab: "all" | "single";
-  onTabChange: (tab: "all" | "single") => void;
-}) {
-  return (
-    <div className="flex bg-light-gray dark:bg-[#1e1e26] p-1.5 rounded-[20px] shadow-[0px_4px_24px_0px_rgba(155,182,190,0.07)]">
-      <button
-        onClick={() => onTabChange("all")}
-        className={`flex-1 px-4 py-2 text-sm font-bold rounded-[14px] transition-colors duration-200 ease-out cursor-pointer ${
-          activeTab === "all"
-            ? "bg-primary text-white"
-            : "text-dark-gray dark:text-[#9ca3af] hover:text-black dark:hover:text-white"
-        }`}
-      >
-        All Days
-      </button>
-      <button
-        onClick={() => onTabChange("single")}
-        className={`flex-1 px-4 py-2 text-sm font-semibold rounded-[14px] transition-colors duration-200 ease-out cursor-pointer ${
-          activeTab === "single"
-            ? "bg-primary text-white"
-            : "text-dark-gray dark:text-[#9ca3af] hover:text-black dark:hover:text-white"
-        }`}
-      >
-        Single Day
-      </button>
-    </div>
-  );
-}
-
 function formatTime(time: string): string {
   const parsed = parse(time, "HH:mm", new Date());
   return format(parsed, "h:mm a").toLowerCase();
-}
-
-function AirbnbTicketsContainer({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="relative flex flex-col gap-4 before:absolute before:-inset-3.5 before:rounded-[32px] before:border before:border-[#ececec] before:shadow-[0_6px_16px_rgba(0,0,0,0.12)] before:pointer-events-none dark:before:border-[#2a2a35] dark:before:shadow-[0_6px_16px_rgba(0,0,0,0.4)]">
-      {children}
-    </div>
-  );
 }
 
 function EventHeader({
@@ -619,14 +332,14 @@ function EventHeader({
 
   // Format: "Feb 22, 6:00 pm"
   const startDateTime = `${format(startDate, "MMM d")}, ${startTime}`;
-  const endDateTime = endDate && endTime
-    ? `${format(endDate, "MMM d")}, ${endTime}`
-    : null;
+  const endDateTime =
+    endDate && endTime ? `${format(endDate, "MMM d")}, ${endTime}` : null;
 
   // Single day format (with optional end time)
-  const singleDayDisplay = showEndTime && endTime
-    ? `${format(startDate, "MMM d")}, ${startTime} - ${endTime}`
-    : startDateTime;
+  const singleDayDisplay =
+    showEndTime && endTime
+      ? `${format(startDate, "MMM d")}, ${startTime} - ${endTime}`
+      : startDateTime;
 
   return (
     <div className="border-b border-light-gray dark:border-[#2a2a35] pb-4 flex flex-col gap-3">

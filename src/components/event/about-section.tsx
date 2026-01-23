@@ -44,7 +44,7 @@ export function AboutSection({
         <div className="text-sm text-black dark:text-[#d1d5db] leading-relaxed">
           <p
             ref={descriptionRef}
-            className={`whitespace-pre-line ${showFull ? "" : "line-clamp-5"}`}
+            className={`whitespace-pre-line ${showFull ? "" : "line-clamp-8"}`}
           >
             {description}
           </p>

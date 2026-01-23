@@ -1,0 +1,54 @@
+"use client";
+
+import type { LayoutProps } from "./types";
+import { CheckoutButton } from "../checkout-button";
+
+export function MobileLayout({
+  settings,
+  ticketState,
+  sections,
+  header,
+  ticketsList,
+}: LayoutProps) {
+  const isAirbnb = settings.layoutVariant === "airbnb-experiences";
+
+  return (
+    <>
+      {/* Mobile: Single column - hidden on desktop */}
+      <div className="flex lg:hidden flex-col gap-3 w-full">
+        {isAirbnb ? sections.bannerGridMobile : sections.bannerCarouselMobile}
+
+        <div className="flex flex-col gap-4 px-4 md:px-0">
+          {header}
+
+          {ticketsList}
+
+          {sections.addons && (
+            <div className="flex flex-col w-full pb-4 border-b border-light-gray dark:border-[#2a2a35]">
+              {sections.addons}
+            </div>
+          )}
+
+          {sections.spotify}
+
+          {sections.organizer}
+
+          {sections.about}
+
+          {sections.map}
+
+          {sections.lineup}
+        </div>
+      </div>
+
+      {/* Fixed checkout button for mobile */}
+      <div className="fixed bottom-2 left-2 right-2 bg-white dark:bg-[#0a0a0f] shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] rounded-full p-3 lg:hidden border-t border-light-gray dark:border-[#2a2a35]">
+        <CheckoutButton
+          totalTickets={ticketState.totalTickets}
+          totalPrice={ticketState.totalPrice}
+          ticketTypeCount={settings.ticketCount}
+        />
+      </div>
+    </>
+  );
+}

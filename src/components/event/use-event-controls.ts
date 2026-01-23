@@ -2,7 +2,7 @@
 
 import { useControls, folder } from "leva";
 
-export type LayoutVariant = "default" | "airbnb-experiences";
+export type LayoutVariant = "luma" | "airbnb";
 
 export interface EventControlsSettings {
   // General
@@ -20,7 +20,7 @@ export interface EventControlsSettings {
   // Appearance
   layoutVariant: LayoutVariant;
   theme: "light" | "dark";
-  imageCount: 0 | 1 | 2 | 3 | 4;
+  imageCount: 0 | 1 | 2 | 3;
 }
 
 export function useEventControls(): EventControlsSettings {
@@ -44,11 +44,11 @@ export function useEventControls(): EventControlsSettings {
     }),
     Appearance: folder({
       layoutVariant: {
-        value: "default",
-        options: ["default", "airbnb-experiences"] as const,
+        value: "luma",
+        options: ["luma", "airbnb"] as const,
       },
       theme: { value: "light", options: ["light", "dark"] as const },
-      imageCount: { value: 3, options: [0, 1, 2, 3, 4] as const },
+      imageCount: { value: 3, options: [0, 1, 2, 3] as const },
     }),
   });
 
