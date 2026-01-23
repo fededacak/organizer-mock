@@ -563,10 +563,10 @@ function TicketDayTabs({
   onTabChange: (tab: "all" | "single") => void;
 }) {
   return (
-    <div className="flex bg-light-gray dark:bg-[#1e1e26] p-1.5 rounded-[16px] shadow-[0px_4px_24px_0px_rgba(155,182,190,0.07)]">
+    <div className="flex bg-light-gray dark:bg-[#1e1e26] p-1.5 rounded-[20px] shadow-[0px_4px_24px_0px_rgba(155,182,190,0.07)]">
       <button
         onClick={() => onTabChange("all")}
-        className={`flex-1 px-4 py-2 text-sm font-bold rounded-[12px] transition-colors duration-200 ease-out cursor-pointer ${
+        className={`flex-1 px-4 py-2 text-sm font-bold rounded-[14px] transition-colors duration-200 ease-out cursor-pointer ${
           activeTab === "all"
             ? "bg-primary text-white"
             : "text-dark-gray dark:text-[#9ca3af] hover:text-black dark:hover:text-white"
@@ -576,7 +576,7 @@ function TicketDayTabs({
       </button>
       <button
         onClick={() => onTabChange("single")}
-        className={`flex-1 px-4 py-2 text-sm font-semibold rounded-[12px] transition-colors duration-200 ease-out cursor-pointer ${
+        className={`flex-1 px-4 py-2 text-sm font-semibold rounded-[14px] transition-colors duration-200 ease-out cursor-pointer ${
           activeTab === "single"
             ? "bg-primary text-white"
             : "text-dark-gray dark:text-[#9ca3af] hover:text-black dark:hover:text-white"
