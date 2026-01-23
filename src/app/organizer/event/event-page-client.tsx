@@ -5,6 +5,7 @@ import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { MapPinIcon } from "@/components/icons/map-pin-icon";
 import { MapPin } from "lucide-react";
 import { format, parse } from "date-fns";
+import { Leva } from "leva";
 import { EventBannerCarousel } from "@/components/event-banner-carousel";
 import { EventBannerGrid } from "@/components/event-banner-grid";
 import { MarketplaceNavbar } from "@/components/marketplace-navbar";
@@ -19,11 +20,9 @@ import {
   AboutSection,
   MapSection,
   HostEventPromo,
-  SettingsProvider,
-  SettingsPanel,
   AddonsSection,
   SponsorsSection,
-  useEventSettings,
+  useEventControls,
   type EventData,
   type Ticket,
 } from "@/components/event";
@@ -34,18 +33,23 @@ interface EventPageClientProps {
 
 export function EventPageClient({ eventData }: EventPageClientProps) {
   return (
-    <SettingsProvider>
-      <Suspense fallback={<EventPageSkeleton />}>
-        <EventPageContent eventData={eventData} />
-      </Suspense>
-    </SettingsProvider>
+    <Suspense fallback={<EventPageSkeleton />}>
+      <EventPageContent eventData={eventData} />
+    </Suspense>
   );
 }
 
 function EventPageContent({ eventData }: EventPageClientProps) {
-  const { settings, isHydrated } = useEventSettings();
+  const settings = useEventControls();
   const isDarkMode = settings.theme === "dark";
   const isMultiDay = settings.eventType === "multi";
+
+  // Sync layoutVariant to URL params
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("variant", settings.layoutVariant);
+    window.history.replaceState({}, "", url.toString());
+  }, [settings.layoutVariant]);
 
   const [ticketQuantities, setTicketQuantities] = useState<
     Record<string, number>
@@ -386,7 +390,7 @@ function EventPageContent({ eventData }: EventPageClientProps) {
 
           {/* Mobile: Single column with correct order - hidden on desktop */}
           <div className="flex lg:hidden flex-col gap-3 w-full">
-            {isHydrated && settings.layoutVariant === "airbnb-experiences" ? (
+            {settings.layoutVariant === "airbnb-experiences" ? (
               <EventBannerGrid
                 eventName={eventData.name}
                 imageCount={settings.imageCount}
@@ -532,8 +536,18 @@ function EventPageContent({ eventData }: EventPageClientProps) {
           </div>
         )}
 
-        {/* Settings Panel */}
-        <SettingsPanel />
+        {/* Leva Controls Panel */}
+        <Leva
+          collapsed={false}
+          oneLineLabels={false}
+          flat={false}
+          theme={{
+            sizes: {
+              rootWidth: "320px",
+              controlWidth: "160px",
+            },
+          }}
+        />
       </div>
     </div>
   );

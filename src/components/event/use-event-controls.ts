@@ -1,0 +1,57 @@
+"use client";
+
+import { useControls, folder } from "leva";
+
+export type LayoutVariant = "default" | "airbnb-experiences";
+
+export interface EventControlsSettings {
+  // General
+  eventType: "single" | "multi";
+  showEndTime: boolean;
+  locationTBD: boolean;
+  ticketCount: 1 | 2 | 6;
+  // Sections
+  description: "none" | "short" | "long";
+  youtubeVideoCount: 0 | 1 | 2;
+  showLineup: boolean;
+  showSpotify: boolean;
+  showAddons: boolean;
+  showSponsors: boolean;
+  // Appearance
+  layoutVariant: LayoutVariant;
+  theme: "light" | "dark";
+  imageCount: 0 | 1 | 2 | 3 | 4;
+}
+
+export function useEventControls(): EventControlsSettings {
+  const settings = useControls({
+    General: folder({
+      eventType: { value: "single", options: ["single", "multi"] as const },
+      showEndTime: false,
+      locationTBD: false,
+      ticketCount: { value: 2, options: [1, 2, 6] as const },
+    }),
+    Sections: folder({
+      description: {
+        value: "long",
+        options: ["none", "short", "long"] as const,
+      },
+      youtubeVideoCount: { value: 0, options: [0, 1, 2] as const },
+      showLineup: false,
+      showSpotify: true,
+      showAddons: false,
+      showSponsors: false,
+    }),
+    Appearance: folder({
+      layoutVariant: {
+        value: "default",
+        options: ["default", "airbnb-experiences"] as const,
+      },
+      theme: { value: "light", options: ["light", "dark"] as const },
+      imageCount: { value: 3, options: [0, 1, 2, 3, 4] as const },
+    }),
+  });
+
+  // Cast to proper types since Leva returns broader types for numeric options
+  return settings as unknown as EventControlsSettings;
+}

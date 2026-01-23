@@ -9,7 +9,6 @@ export * from "./checkout-button";
 export * from "./about-section";
 export * from "./map-section";
 export * from "./host-event-promo";
-export * from "./settings-context";
-export * from "./settings-panel";
+export * from "./use-event-controls";
 export * from "./addons-section";
 export * from "./sponsors-section";
