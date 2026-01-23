@@ -10,7 +10,7 @@ export function MobileLayout({
   header,
   ticketsList,
 }: LayoutProps) {
-  const isAirbnb = settings.layoutVariant === "airbnb-experiences";
+  const isAirbnb = settings.layoutVariant === "airbnb";
 
   return (
     <>
