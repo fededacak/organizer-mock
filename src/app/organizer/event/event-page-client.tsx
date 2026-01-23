@@ -407,9 +407,6 @@ function EventPageContent({ eventData }: EventPageClientProps) {
                 showEndTime={settings.showEndTime}
                 isMultiDay={isMultiDay}
               />
-              {settings.showSpotify && (
-                <SpotifySection playlist={eventData.playlist} />
-              )}
 
               <div className="flex flex-col gap-3">
                 {isMultiDay && (
@@ -466,6 +463,10 @@ function EventPageContent({ eventData }: EventPageClientProps) {
                 <div className="flex flex-col w-full pb-4 border-b border-light-gray dark:border-[#2a2a35]">
                   <AddonsSection />
                 </div>
+              )}
+
+              {settings.showSpotify && (
+                <SpotifySection playlist={eventData.playlist} />
               )}
 
               <OrganizerSection

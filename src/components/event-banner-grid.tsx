@@ -79,11 +79,11 @@ export function EventBannerGrid({
   if (imageCount === 2) {
     return (
       <>
-        <div className="grid grid-cols-1 gap-1">
-          <div className="relative aspect-5/2 overflow-hidden rounded-b-[4px] lg:rounded-t-2xl md:rounded-t-[20px] bg-light-gray dark:bg-[#1e1e26]">
+        <div className="grid grid-cols-1 gap-0.5 md:gap-1">
+          <div className="relative aspect-5/2 overflow-hidden md:rounded-b-[4px] lg:rounded-t-2xl md:rounded-t-[20px] bg-light-gray dark:bg-[#1e1e26]">
             <GridImage src={images[0]} alt={`${eventName} - Image 1`} priority index={0} onClick={() => handleImageClick(0)} layoutIdPrefix={layoutIdPrefix} />
           </div>
-          <div className="relative aspect-5/2 overflow-hidden rounded-t-[4px] lg:rounded-b-2xl md:rounded-b-[20px] rounded-none bg-light-gray dark:bg-[#1e1e26]">
+          <div className="relative aspect-5/2 overflow-hidden md:rounded-t-[4px] lg:rounded-b-2xl md:rounded-b-[20px] rounded-none bg-light-gray dark:bg-[#1e1e26]">
             <GridImage src={images[1]} alt={`${eventName} - Image 2`} index={1} onClick={() => handleImageClick(1)} layoutIdPrefix={layoutIdPrefix} />
           </div>
         </div>
@@ -102,15 +102,15 @@ export function EventBannerGrid({
   if (imageCount === 3) {
     return (
       <>
-        <div className="flex flex-col gap-1">
-          <div className="relative aspect-5/2 overflow-hidden rounded-b-[4px] md:rounded-t-[20px] rounded-none bg-light-gray dark:bg-[#1e1e26]">
+        <div className="flex flex-col gap-0.5 md:gap-1">
+          <div className="relative aspect-5/2 overflow-hidden md:rounded-b-[4px] lg:rounded-t-2xl md:rounded-t-[20px] rounded-none bg-light-gray dark:bg-[#1e1e26]">
             <GridImage src={images[0]} alt={`${eventName} - Image 1`} priority index={0} onClick={() => handleImageClick(0)} layoutIdPrefix={layoutIdPrefix} />
           </div>
-          <div className="grid grid-cols-2 gap-1">
-            <div className="relative aspect-5/2 overflow-hidden rounded-t-[4px] rounded-br-[4px] md:rounded-bl-[20px] bg-light-gray dark:bg-[#1e1e26]">
+          <div className="grid grid-cols-2 gap-0.5 md:gap-1">
+            <div className="relative aspect-5/2 overflow-hidden md:rounded-t-[4px] rounded-br-[4px] md:rounded-bl-[20px] bg-light-gray dark:bg-[#1e1e26]">
               <GridImage src={images[1]} alt={`${eventName} - Image 2`} index={1} onClick={() => handleImageClick(1)} layoutIdPrefix={layoutIdPrefix} />
             </div>
-            <div className="relative aspect-5/2 overflow-hidden rounded-t-[4px] rounded-bl-[4px] md:rounded-br-[20px] rounded-none bg-light-gray dark:bg-[#1e1e26]">
+            <div className="relative aspect-5/2 overflow-hidden md:rounded-t-[4px] rounded-bl-[4px] md:rounded-br-[20px] rounded-none bg-light-gray dark:bg-[#1e1e26]">
               <GridImage src={images[2]} alt={`${eventName} - Image 3`} index={2} onClick={() => handleImageClick(2)} layoutIdPrefix={layoutIdPrefix} />
             </div>
           </div>
@@ -129,17 +129,17 @@ export function EventBannerGrid({
   // 4 images - 2x2 grid, each 5:2
   return (
     <>
-      <div className="grid grid-cols-2 gap-1">
-        <div className="relative aspect-5/2 overflow-hidden lg:rounded-tl-2xl md:rounded-tl-[20px] rounded-[4px] bg-light-gray dark:bg-[#1e1e26]">
+      <div className="grid grid-cols-2 gap-0.5 md:gap-1">
+        <div className="relative aspect-5/2 overflow-hidden lg:rounded-tl-2xl md:rounded-tl-[20px] md:rounded-[4px] bg-light-gray dark:bg-[#1e1e26]">
           <GridImage src={images[0]} alt={`${eventName} - Image 1`} priority index={0} onClick={() => handleImageClick(0)} layoutIdPrefix={layoutIdPrefix} />
         </div>
-        <div className="relative aspect-5/2 overflow-hidden lg:rounded-tr-2xl md:rounded-tr-[20px] rounded-[4px] bg-light-gray dark:bg-[#1e1e26]">
+        <div className="relative aspect-5/2 overflow-hidden lg:rounded-tr-2xl md:rounded-tr-[20px] md:rounded-[4px] bg-light-gray dark:bg-[#1e1e26]">
           <GridImage src={images[1]} alt={`${eventName} - Image 2`} index={1} onClick={() => handleImageClick(1)} layoutIdPrefix={layoutIdPrefix} />
         </div>
-        <div className="relative aspect-5/2 overflow-hidden lg:rounded-bl-2xl md:rounded-bl-[20px] rounded-[4px] bg-light-gray dark:bg-[#1e1e26]">
+        <div className="relative aspect-5/2 overflow-hidden lg:rounded-bl-2xl md:rounded-bl-[20px] md:rounded-[4px] bg-light-gray dark:bg-[#1e1e26]">
           <GridImage src={images[2]} alt={`${eventName} - Image 3`} index={2} onClick={() => handleImageClick(2)} layoutIdPrefix={layoutIdPrefix} />
         </div>
-        <div className="relative aspect-5/2 overflow-hidden lg:rounded-br-2xl md:rounded-br-[20px] rounded-[4px] bg-light-gray dark:bg-[#1e1e26]">
+        <div className="relative aspect-5/2 overflow-hidden lg:rounded-br-2xl md:rounded-br-[20px] md:rounded-[4px] bg-light-gray dark:bg-[#1e1e26]">
           <GridImage src={images[3]} alt={`${eventName} - Image 4`} index={3} onClick={() => handleImageClick(3)} layoutIdPrefix={layoutIdPrefix} />
         </div>
       </div>
