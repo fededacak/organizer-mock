@@ -19,11 +19,24 @@ export function CheckoutButton({
   return (
     <button
       disabled={isDisabled}
-      className={`w-full bg-tp-blue rounded-full h-[50px] md:h-[46px] px-2.5 flex items-center justify-between text-white transition-colors duration-200 ease ${
-        isDisabled
-          ? "opacity-30 cursor-not-allowed"
-          : "cursor-pointer hover:bg-tp-blue/90"
+      className={`w-full rounded-full h-[50px] md:h-[46px] px-2.5 flex items-center justify-between text-white transition-colors duration-200 ease ${
+        isDisabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
       }`}
+      style={
+        {
+          backgroundColor: "var(--color-tp-blue)",
+          "--hover-bg": "color-mix(in srgb, var(--color-tp-blue) 90%, black)",
+        } as React.CSSProperties
+      }
+      onMouseEnter={(e) => {
+        if (!isDisabled) {
+          e.currentTarget.style.backgroundColor =
+            "color-mix(in srgb, var(--color-tp-blue) 90%, white)";
+        }
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = "var(--color-tp-blue)";
+      }}
     >
       <div
         className={`w-[26px] h-[26px] rounded-full bg-black/10 flex items-center justify-center ${

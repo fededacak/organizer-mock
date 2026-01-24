@@ -44,7 +44,9 @@ export function TicketsList({
                   quantity={quantities[ticket.id] || 0}
                   isExpanded={expandedTicket === ticket.id}
                   onToggleExpand={() => onExpandToggle(ticket.id)}
-                  onUpdateQuantity={(delta) => onQuantityChange(ticket.id, delta)}
+                  onUpdateQuantity={(delta) =>
+                    onQuantityChange(ticket.id, delta)
+                  }
                 />
               ))}
             </div>
@@ -76,9 +78,14 @@ function TicketDayTabs({
         onClick={() => onTabChange("all")}
         className={`flex-1 px-4 py-2 text-sm font-bold rounded-[14px] transition-colors duration-200 ease-out cursor-pointer ${
           activeTab === "all"
-            ? "bg-primary text-white"
+            ? "text-white"
             : "text-dark-gray dark:text-[#9ca3af] hover:text-black dark:hover:text-white"
         }`}
+        style={
+          activeTab === "all"
+            ? { backgroundColor: "var(--color-tp-blue)" }
+            : undefined
+        }
       >
         All Days
       </button>
@@ -86,9 +93,14 @@ function TicketDayTabs({
         onClick={() => onTabChange("single")}
         className={`flex-1 px-4 py-2 text-sm font-semibold rounded-[14px] transition-colors duration-200 ease-out cursor-pointer ${
           activeTab === "single"
-            ? "bg-primary text-white"
+            ? "text-white"
             : "text-dark-gray dark:text-[#9ca3af] hover:text-black dark:hover:text-white"
         }`}
+        style={
+          activeTab === "single"
+            ? { backgroundColor: "var(--color-tp-blue)" }
+            : undefined
+        }
       >
         Single Day
       </button>

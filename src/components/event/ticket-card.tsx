@@ -122,7 +122,8 @@ export function TicketCard({
           {isClamped && (
             <button
               onClick={onToggleExpand}
-              className="font-bold text-[10px] text-tp-blue uppercase mt-1.5 hover:underline cursor-pointer"
+              className="font-bold text-[10px] uppercase mt-1.5 hover:underline cursor-pointer"
+              style={{ color: "var(--color-tp-blue)" }}
             >
               {isExpanded ? "show less" : "show more"}
             </button>

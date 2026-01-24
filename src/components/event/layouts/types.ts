@@ -23,6 +23,8 @@ export interface DescriptionState {
 }
 
 export interface LayoutSections {
+  bannerDesktop: ReactNode;
+  bannerMobile: ReactNode;
   bannerCarouselDesktop: ReactNode;
   bannerCarouselMobile: ReactNode;
   bannerGridDesktop: ReactNode;

@@ -25,8 +25,8 @@ export function MainHeader({
   return (
     <header className="flex items-center justify-between px-[160px] py-4 h-20 bg-white">
       {/* Logo */}
-      <Link href="/" className="shrink-0">
-        <TickPickLogo width={180} height={40} variant="dark" />
+      <Link href="/" className="shrink-0 text-black">
+        <TickPickLogo width={180} height={40} />
       </Link>
 
       {/* Tab Navigation */}
@@ -77,4 +77,3 @@ export function MainHeader({
     </header>
   );
 }
-

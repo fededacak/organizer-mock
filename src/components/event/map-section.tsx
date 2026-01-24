@@ -11,9 +11,11 @@ export function MapSection({ venue }: MapSectionProps) {
       <p className="font-extrabold text-sm text-black dark:text-white">
         {venue.name}
       </p>
-      <p className="text-sm text-dark-gray dark:text-[#9ca3af] mt-1">{venue.address}</p>
+      <p className="text-sm text-dark-gray dark:text-[#9ca3af] mt-1">
+        {venue.address}
+      </p>
       {/* Static Map Placeholder */}
-      <div className="mt-2.5 w-full h-44 rounded-2xl bg-light-gray dark:bg-[#1e1e26] overflow-hidden relative">
+      <div className="mt-2.5 w-full h-[200px] rounded-2xl bg-light-gray dark:bg-[#1e1e26] overflow-hidden relative">
         {/* Map background image */}
         <img
           src="/map.png"

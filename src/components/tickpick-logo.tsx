@@ -2,17 +2,16 @@ interface TickPickLogoProps {
   width?: number;
   height?: number;
   className?: string;
-  variant?: "dark" | "light";
 }
 
 export function TickPickLogo({
   width = 120,
   height = 27,
   className,
-  variant = "dark",
 }: TickPickLogoProps) {
-  const textColor = variant === "light" ? "#ffffff" : "#000000";
-  
+  // Uses currentColor for text paths, allowing color to be controlled via CSS
+  const textColor = "currentColor";
+
   return (
     <svg
       width={width}

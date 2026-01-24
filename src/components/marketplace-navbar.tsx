@@ -1,20 +1,14 @@
 import { TickPickLogo } from "@/components/tickpick-logo";
 import { Button } from "@/components/ui/button";
 
-interface MarketplaceNavbarProps {
-  isDarkMode?: boolean;
-}
-
-export function MarketplaceNavbar({ isDarkMode = false }: MarketplaceNavbarProps) {
+export function MarketplaceNavbar() {
   return (
     <header className="sticky top-0 left-0 w-full bg-white dark:bg-[#0a0a0f] transition-colors duration-300 ease-out z-50">
       <div className="h-[72px] flex items-center justify-between px-4 md:px-8 lg:px-6 xl:px-[72px]">
         <div className="flex items-center gap-6">
-          <TickPickLogo
-            width={145}
-            height={32}
-            variant={isDarkMode ? "light" : "dark"}
-          />
+          <div className="text-black dark:text-white">
+            <TickPickLogo width={145} height={32} />
+          </div>
           <nav className="hidden lg:flex items-center gap-5">
             {["MLB", "NHL", "NBA", "NFL", "Concerts", "Other"].map((item) => (
               <a

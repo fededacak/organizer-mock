@@ -32,6 +32,15 @@ import type {
   LayoutSections,
 } from "@/components/event/layouts/types";
 
+const PRIMARY_COLOR_MAP: Record<string, string> = {
+  blue: "#3399ff",
+  purple: "#8B5CF6",
+  pink: "#EC4899",
+  orange: "#F97316",
+  green: "#10B981",
+  red: "#EF4444",
+};
+
 interface EventPageClientProps {
   eventData: EventData;
 }
@@ -141,6 +150,34 @@ function EventPageContent({ eventData }: EventPageClientProps) {
 
   // Build sections object for layouts
   const sections: LayoutSections = {
+    bannerDesktop:
+      settings.bannerStyle === "grid" ? (
+        <EventBannerGrid
+          eventName={eventData.name}
+          imageCount={settings.imageCount}
+          layoutIdPrefix="banner-desktop"
+        />
+      ) : (
+        <EventBannerCarousel
+          eventName={eventData.name}
+          imageCount={settings.imageCount}
+          layoutIdPrefix="banner-desktop"
+        />
+      ),
+    bannerMobile:
+      settings.bannerStyle === "grid" ? (
+        <EventBannerGrid
+          eventName={eventData.name}
+          imageCount={settings.imageCount}
+          layoutIdPrefix="banner-mobile"
+        />
+      ) : (
+        <EventBannerCarousel
+          eventName={eventData.name}
+          imageCount={settings.imageCount}
+          layoutIdPrefix="banner-mobile"
+        />
+      ),
     bannerCarouselDesktop: (
       <EventBannerCarousel
         eventName={eventData.name}
@@ -264,10 +301,20 @@ function EventPageContent({ eventData }: EventPageClientProps) {
   const DesktopLayout =
     settings.layoutVariant === "luma" ? LumaLayout : AirbnbLayout;
 
+  const primaryColorValue = PRIMARY_COLOR_MAP[settings.primaryColor];
+
   return (
-    <div className={isDarkMode ? "dark" : ""}>
+    <div
+      className={isDarkMode ? "dark" : ""}
+      style={
+        {
+          "--color-tp-blue": primaryColorValue,
+          "--primary": primaryColorValue,
+        } as React.CSSProperties
+      }
+    >
       <div className="min-h-screen bg-white dark:bg-[#0a0a0f] flex flex-col items-center transition-colors duration-300 ease-out">
-        <MarketplaceNavbar isDarkMode={isDarkMode} />
+        <MarketplaceNavbar />
 
         {/* Main Content */}
         <main

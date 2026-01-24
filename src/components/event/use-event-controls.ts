@@ -4,6 +4,8 @@ import { useControls, folder } from "leva";
 
 export type LayoutVariant = "luma" | "airbnb";
 
+export type BannerStyle = "carousel" | "grid";
+
 export interface EventControlsSettings {
   // General
   eventType: "single" | "multi";
@@ -19,8 +21,10 @@ export interface EventControlsSettings {
   showSponsors: boolean;
   // Appearance
   layoutVariant: LayoutVariant;
+  bannerStyle: BannerStyle;
   theme: "light" | "dark";
   imageCount: 0 | 1 | 2 | 3;
+  primaryColor: "blue" | "purple" | "pink" | "orange" | "green" | "red";
 }
 
 export function useEventControls(): EventControlsSettings {
@@ -47,8 +51,16 @@ export function useEventControls(): EventControlsSettings {
         value: "luma",
         options: ["luma", "airbnb"] as const,
       },
+      bannerStyle: {
+        value: "carousel",
+        options: ["carousel", "grid"] as const,
+      },
       theme: { value: "light", options: ["light", "dark"] as const },
       imageCount: { value: 3, options: [0, 1, 2, 3] as const },
+      primaryColor: {
+        value: "blue",
+        options: ["blue", "purple", "pink", "orange", "green", "red"] as const,
+      },
     }),
   });
 

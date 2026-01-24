@@ -130,7 +130,7 @@ export function EventBannerGrid({
     return (
       <>
         <div className="flex flex-col gap-0.5 md:gap-1">
-          <div className="relative aspect-5/2 overflow-hidden md:rounded-b-[4px] lg:rounded-t-2xl md:rounded-t-[20px] rounded-none bg-light-gray dark:bg-[#1e1e26]">
+          <div className="relative aspect-5/2 overflow-hidden md:rounded-b-[4px] md:rounded-t-[20px] rounded-none bg-light-gray dark:bg-[#1e1e26]">
             <GridImage
               src={images[0]}
               alt={`${eventName} - Image 1`}

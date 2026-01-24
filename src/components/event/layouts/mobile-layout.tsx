@@ -10,18 +10,18 @@ export function MobileLayout({
   header,
   ticketsList,
 }: LayoutProps) {
-  const isAirbnb = settings.layoutVariant === "airbnb";
-
   return (
     <>
       {/* Mobile: Single column - hidden on desktop */}
       <div className="flex lg:hidden flex-col gap-3 w-full">
-        {isAirbnb ? sections.bannerGridMobile : sections.bannerCarouselMobile}
+        {sections.bannerMobile}
 
         <div className="flex flex-col gap-4 px-4 md:px-0">
           {header}
 
-          {ticketsList}
+          <div className="pb-4 border-b border-light-gray dark:border-[#2a2a35]">
+            {ticketsList}
+          </div>
 
           {sections.addons && (
             <div className="flex flex-col w-full pb-4 border-b border-light-gray dark:border-[#2a2a35]">

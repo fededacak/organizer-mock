@@ -21,7 +21,7 @@ export function LumaLayout({
       ([entry]) => {
         setIsCheckoutVisible(entry.isIntersecting);
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     if (inlineCheckoutRef.current) {
@@ -37,7 +37,7 @@ export function LumaLayout({
       <div className="hidden lg:contents">
         {/* Left Column */}
         <div className="flex flex-1 flex-col gap-4">
-          {sections.bannerCarouselDesktop}
+          {sections.bannerDesktop}
           <div className="flex flex-col gap-4">
             {sections.organizer}
             {sections.spotify}
