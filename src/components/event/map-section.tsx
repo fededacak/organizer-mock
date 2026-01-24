@@ -7,7 +7,7 @@ interface MapSectionProps {
 
 export function MapSection({ venue }: MapSectionProps) {
   return (
-    <section className="pb-4 border-b border-light-gray dark:border-[#2a2a35] md:border-none md:pb-0">
+    <section className="pb-6 lg:pb-4 border-b border-light-gray dark:border-[#2a2a35] md:border-none md:pb-0">
       <p className="font-extrabold text-sm text-black dark:text-white">
         {venue.name}
       </p>

@@ -38,7 +38,7 @@ export function AboutSection({
   const videosToShow = YOUTUBE_THUMBNAILS.slice(0, youtubeVideoCount);
 
   return (
-    <section className={`flex flex-col gap-3 ${hideBorder ? "" : "pb-4 border-b border-light-gray dark:border-[#2a2a35]"}`}>
+    <section className={`flex flex-col gap-3 ${hideBorder ? "" : "pb-6 lg:pb-4 border-b border-light-gray dark:border-[#2a2a35]"}`}>
       <div>
         <SectionHeader title="About" />
         <div className="text-sm text-black dark:text-[#d1d5db] leading-relaxed">

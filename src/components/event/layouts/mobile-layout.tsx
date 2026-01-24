@@ -16,15 +16,15 @@ export function MobileLayout({
       <div className="flex lg:hidden flex-col gap-3 w-full">
         {sections.bannerMobile}
 
-        <div className="flex flex-col gap-4 px-4 md:px-0">
+        <div className="flex flex-col gap-6 px-4 md:px-0">
           {header}
 
-          <div className="pb-4 border-b border-light-gray dark:border-[#2a2a35]">
+          <div className="pb-6 border-b border-light-gray dark:border-[#2a2a35]">
             {ticketsList}
           </div>
 
           {sections.addons && (
-            <div className="flex flex-col w-full pb-4 border-b border-light-gray dark:border-[#2a2a35]">
+            <div className="flex flex-col w-full pb-6 border-b border-light-gray dark:border-[#2a2a35]">
               {sections.addons}
             </div>
           )}
@@ -35,9 +35,9 @@ export function MobileLayout({
 
           {sections.about}
 
-          {sections.map}
-
           {sections.lineup}
+
+          {sections.map}
         </div>
       </div>
 

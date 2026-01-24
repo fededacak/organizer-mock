@@ -8,7 +8,7 @@ import { CheckoutButton } from "../checkout-button";
 
 function AirbnbTicketsContainer({ children }: { children: ReactNode }) {
   return (
-    <div className="relative flex flex-col gap-4 before:absolute before:-inset-3.5 before:rounded-[32px] before:border before:border-[#ececec] before:shadow-[0_6px_16px_rgba(0,0,0,0.12)] before:pointer-events-none dark:before:border-[#2a2a35] dark:before:shadow-[0_6px_16px_rgba(0,0,0,0.4)]">
+    <div className="relative flex flex-col gap-4 before:absolute before:-inset-3.5 before:rounded-[32px] before:border before:border-[#ececec] before:shadow-[0_4px_16px_rgba(0,0,0,0.1)] before:pointer-events-none dark:before:border-[#2a2a35] dark:before:shadow-[0_6px_16px_rgba(0,0,0,0.4)]">
       {children}
     </div>
   );

@@ -9,7 +9,7 @@ interface SpotifySectionProps {
 
 export function SpotifySection({ playlist }: SpotifySectionProps) {
   return (
-    <section className="border-b border-light-gray dark:border-[#2a2a35] pb-4">
+    <section className="border-b border-light-gray dark:border-[#2a2a35] pb-6 lg:pb-4">
       <SectionHeader title="Playlist" />
       <div
         className="rounded-2xl overflow-hidden h-20"

@@ -389,7 +389,7 @@ function EventHeader({
       : startDateTime;
 
   return (
-    <div className="border-b border-light-gray dark:border-[#2a2a35] pb-4 flex flex-col gap-3">
+    <div className="border-b border-light-gray dark:border-[#2a2a35] pb-6 lg:pb-4 flex flex-col gap-3">
       <div className="flex flex-col gap-1">
         <h1 className="font-black text-[30px] text-black dark:text-white leading-tight">
           {event.name}

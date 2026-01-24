@@ -26,7 +26,7 @@ export function SponsorsSection({
 }: SponsorsSectionProps) {
   return (
     <section className={`w-full px-4 md:px-8 lg:px-6 max-w-[1064px]`}>
-      <div className="border-t border-light-gray dark:border-[#2a2a35] pt-8 pb-10 flex flex-col">
+      <div className="border-t-0 lg:border-t border-light-gray dark:border-[#2a2a35] pt-0 lg:pt-8 pb-10 flex flex-col">
         <SectionHeader title="Sponsors" />
         <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {sponsors.map((sponsor) => (
