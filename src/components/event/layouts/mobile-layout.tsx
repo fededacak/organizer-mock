@@ -21,13 +21,10 @@ export function MobileLayout({
 
           <div className="pb-6 border-b border-light-gray dark:border-[#2a2a35]">
             {ticketsList}
+            {sections.addons && (
+              <div className="flex flex-col w-full pt-3">{sections.addons}</div>
+            )}
           </div>
-
-          {sections.addons && (
-            <div className="flex flex-col w-full pb-6 border-b border-light-gray dark:border-[#2a2a35]">
-              {sections.addons}
-            </div>
-          )}
 
           {sections.spotify}
 
