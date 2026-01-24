@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useControls, folder } from "leva";
 
 export type LayoutVariant = "luma" | "airbnb";
@@ -27,8 +28,13 @@ export interface EventControlsSettings {
   primaryColor: "blue" | "purple" | "pink" | "orange" | "green" | "red";
 }
 
+const LAYOUT_BANNER_DEFAULTS: Record<LayoutVariant, BannerStyle> = {
+  luma: "carousel",
+  airbnb: "grid",
+};
+
 export function useEventControls(): EventControlsSettings {
-  const settings = useControls({
+  const [settings, set] = useControls(() => ({
     General: folder({
       eventType: { value: "single", options: ["single", "multi"] as const },
       showEndTime: false,
@@ -62,7 +68,20 @@ export function useEventControls(): EventControlsSettings {
         options: ["blue", "purple", "pink", "orange", "green", "red"] as const,
       },
     }),
-  });
+  }));
+
+  // Track previous layout to detect layout changes
+  const prevLayoutVariant = useRef(settings.layoutVariant);
+
+  // Sync bannerStyle when layoutVariant changes
+  useEffect(() => {
+    if (prevLayoutVariant.current !== settings.layoutVariant) {
+      const defaultBannerStyle =
+        LAYOUT_BANNER_DEFAULTS[settings.layoutVariant as LayoutVariant];
+      set({ bannerStyle: defaultBannerStyle });
+      prevLayoutVariant.current = settings.layoutVariant;
+    }
+  }, [settings.layoutVariant, set]);
 
   // Cast to proper types since Leva returns broader types for numeric options
   return settings as unknown as EventControlsSettings;
