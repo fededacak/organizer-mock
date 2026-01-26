@@ -42,19 +42,22 @@ const EVENT_DATA: EventData = {
       id: "vip",
       name: "VIP Experience",
       price: 75,
-      description: "Premium VIP access with exclusive backstage meet & greet, complimentary drinks, and reserved seating.",
+      description:
+        "Premium VIP access with exclusive backstage meet & greet, complimentary drinks, and reserved seating.",
     },
     {
       id: "group",
       name: "Group Pass (4 people)",
       price: 65,
-      description: "Discounted admission for groups of 4. All attendees must enter together.",
+      description:
+        "Discounted admission for groups of 4. All attendees must enter together.",
     },
     {
       id: "late-night",
       name: "Late Night Entry",
       price: 8,
-      description: "Entry after 10pm only. Perfect for those who want to catch the final acts.",
+      description:
+        "Entry after 10pm only. Perfect for those who want to catch the final acts.",
     },
   ],
   singleDayTickets: [
@@ -74,8 +77,34 @@ const EVENT_DATA: EventData = {
     },
   ],
   lineup: [
-    { id: "1", name: "Shakira", hasImage: false },
-    { id: "2", name: "Eminem", hasImage: true },
+    {
+      id: "1",
+      name: "Shakira",
+      hasImage: false,
+      description:
+        "Shakira is a Colombian singer-songwriter and dancer who has captivated audiences worldwide with her unique blend of Latin, rock, and pop music. Known for her powerful vocals and electrifying stage presence, she has sold over 80 million records and won multiple Grammy Awards throughout her illustrious career.",
+      spotifyTrack: {
+        trackName: "Hips Don't Lie",
+        artist: "Shakira ft. Wyclef Jean",
+      },
+      youtubeVideoId: "DUT5rXLdlW0",
+      instagramHandle: "shakira",
+      tiktokHandle: "shakira",
+    },
+    {
+      id: "2",
+      name: "Eminem",
+      hasImage: true,
+      description:
+        "Eminem is an American rapper, songwriter, and record producer widely regarded as one of the greatest hip-hop artists of all time. With his rapid-fire delivery and provocative lyrics, he has pushed the boundaries of the genre while selling over 220 million records worldwide and earning 15 Grammy Awards.",
+      spotifyTrack: {
+        trackName: "Lose Yourself",
+        artist: "Eminem",
+      },
+      youtubeVideoId: "_Yhyp-_hX2s",
+      instagramHandle: "eminem",
+      tiktokHandle: "eminem",
+    },
   ],
   description: `Lyric Night is a space for artists and creatives alike to come together and work on their writing skills. It's a space where we practice writing exercises, share our work and meet other artists and creatives.
 

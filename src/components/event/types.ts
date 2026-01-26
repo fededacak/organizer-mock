@@ -22,6 +22,11 @@ export interface Artist {
   id: string;
   name: string;
   hasImage: boolean;
+  description?: string;
+  spotifyTrack?: Playlist;
+  youtubeVideoId?: string;
+  instagramHandle?: string;
+  tiktokHandle?: string;
 }
 
 export interface Playlist {

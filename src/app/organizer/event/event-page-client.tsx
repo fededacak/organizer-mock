@@ -224,6 +224,13 @@ function EventPageContent({ eventData }: EventPageClientProps) {
       <LineupSection
         lineup={eventData.lineup}
         hideBorder={settings.locationTBD}
+        displaySettings={{
+          showDescription: settings.lineupHasDescription,
+          showSpotify: settings.lineupHasSpotify,
+          showYouTube: settings.lineupHasYouTube,
+          showInstagram: settings.lineupHasInstagram,
+          showTiktok: settings.lineupHasTiktok,
+        }}
       />
     ) : null,
     about: displayedDescription ? (

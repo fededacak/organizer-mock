@@ -20,6 +20,12 @@ export interface EventControlsSettings {
   showSpotify: boolean;
   showAddons: boolean;
   showSponsors: boolean;
+  // Lineup (Artist Modal)
+  lineupHasDescription: boolean;
+  lineupHasSpotify: boolean;
+  lineupHasYouTube: boolean;
+  lineupHasInstagram: boolean;
+  lineupHasTiktok: boolean;
   // Appearance
   layoutVariant: LayoutVariant;
   bannerStyle: BannerStyle;
@@ -51,6 +57,13 @@ export function useEventControls(): EventControlsSettings {
       showSpotify: true,
       showAddons: false,
       showSponsors: false,
+    }),
+    Lineup: folder({
+      lineupHasDescription: { value: true, label: "Has Description" },
+      lineupHasSpotify: { value: true, label: "Has Spotify" },
+      lineupHasYouTube: { value: true, label: "Has YouTube" },
+      lineupHasInstagram: { value: true, label: "Has Instagram" },
+      lineupHasTiktok: { value: true, label: "Has TikTok" },
     }),
     Appearance: folder({
       layoutVariant: {
