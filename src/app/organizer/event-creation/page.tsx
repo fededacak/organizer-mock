@@ -226,7 +226,7 @@ export default function EventCreationPage() {
 
           {/* Desktop: Back button */}
           <Link
-            href="/folder/organizer"
+            href="/organizer"
             className="hidden sm:flex items-center gap-2.5 px-2 pr-3.5 py-2 rounded-full hover:bg-light-gray transition-colors duration-200 ease"
           >
             <div className="w-[22px] h-[22px] bg-mid-gray rounded-full flex items-center justify-center">

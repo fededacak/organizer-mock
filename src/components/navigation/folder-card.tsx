@@ -39,7 +39,7 @@ export function FolderCard({ folder }: FolderCardProps) {
 
   return (
     <Link
-      href={`/folder/${folder.id}`}
+      href={`/${folder.id}`}
       className={`
         group
         relative w-full sm:max-w-[300px] rounded-[28px] overflow-hidden

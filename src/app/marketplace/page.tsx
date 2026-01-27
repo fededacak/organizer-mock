@@ -1,21 +1,10 @@
-import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { FOLDERS, FOLDER_COLORS } from "@/components/navigation";
 import { PageCard } from "@/components/navigation/page-card";
 
-type FolderPageProps = {
-  params: Promise<{ id: string }>;
-};
-
-export default async function FolderPage({ params }: FolderPageProps) {
-  const { id } = await params;
-  const folder = FOLDERS.find((f) => f.id === id);
-
-  if (!folder) {
-    notFound();
-  }
-
+export default function MarketplacePage() {
+  const folder = FOLDERS.find((f) => f.id === "marketplace")!;
   const colors = FOLDER_COLORS[folder.color];
 
   return (

@@ -27,12 +27,9 @@ export function PageCard({ item, color }: PageCardProps) {
     >
       {/* File Icon */}
       <div
-        className={`w-full h-[80px] rounded-[10px] ${iconColors.bg} flex items-center justify-center`}
+        className={`w-full h-[80px] sm:h-[120px] rounded-[10px] ${iconColors.bg} flex items-center justify-center`}
       >
-        <Globe
-          className={`w-7 h-7 ${iconColors.icon} `}
-          strokeWidth={1.8}
-        />
+        <Globe className={`w-7 h-7 ${iconColors.icon} `} strokeWidth={1.8} />
       </div>
 
       {/* Page Name */}
