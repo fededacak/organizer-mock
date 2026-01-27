@@ -1,11 +1,18 @@
-import type { FolderData, FolderColorConfig, PageIconColorConfig, FolderColor } from "./types";
+import type {
+  FolderData,
+  FolderColorConfig,
+  PageIconColorConfig,
+  FolderColor,
+} from "./types";
 
 export const FOLDERS: FolderData[] = [
   {
     id: "marketplace",
     name: "Marketplace",
     color: "coral",
-    items: [{ id: "marketplace-home", name: "Home", href: "/marketplace/home" }],
+    items: [
+      { id: "marketplace-home", name: "Home", href: "/marketplace/home" },
+    ],
   },
   {
     id: "organizer",
@@ -20,6 +27,11 @@ export const FOLDERS: FolderData[] = [
         href: "/organizer/event-creation",
       },
       { id: "organizer-seatmap", name: "Seatmap", href: "/organizer/seatmap" },
+      {
+        id: "seat-settings",
+        name: "Seatmap Settings",
+        href: "/organizer/seat-settings",
+      },
     ],
   },
 ];
