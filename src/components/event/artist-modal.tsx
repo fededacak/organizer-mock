@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { Play, Share2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,7 +13,7 @@ import { SpotifyIcon } from "../icons/spotify-icon";
 
 const springTransition = {
   type: "spring" as const,
-  stiffness: 300,
+  stiffness: 400,
   damping: 30,
 };
 
@@ -89,228 +90,266 @@ export function ArtistModal({
     showTiktok: true,
   },
 }: ArtistModalProps) {
-  const artist = artists[selectedIndex];
+  const artist = open ? artists[selectedIndex] : null;
+  const ref = useRef<HTMLDivElement>(null);
+  const thumbnailsRef = useRef<HTMLDivElement>(null);
 
-  const handleClose = () => {
-    onOpenChange(false);
-  };
-
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      handleClose();
+  // Close on escape key
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        onOpenChange(false);
+      }
     }
-  };
 
-  if (!open || !artist) return null;
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [onOpenChange]);
+
+  // Close on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+      const isInsideModal = ref.current?.contains(target);
+      const isInsideThumbnails = thumbnailsRef.current?.contains(target);
+
+      if (!isInsideModal && !isInsideThumbnails) {
+        onOpenChange(false);
+      }
+    }
+
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [open, onOpenChange]);
 
   return (
     <>
       {/* Overlay */}
-      <div
-        className="fixed inset-0 z-50 bg-black/60 animate-in fade-in duration-200 backdrop-blur-sm"
-        onClick={handleOverlayClick}
-      />
+      <AnimatePresence>
+        {artist ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+          />
+        ) : null}
+      </AnimatePresence>
 
-      {/* Modal Container with Thumbnails */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-        {/* Thumbnail Navigation - Left side */}
-        {artists.length > 1 && (
-          <div
-            className="absolute left-8 flex flex-col gap-3 pointer-events-auto animate-in fade-in slide-in-from-left-4 duration-300"
-            style={{
-              animationTimingFunction: "cubic-bezier(.165, .84, .44, 1)",
-            }}
-          >
-            {artists.map((a, index) => (
-              <ArtistThumbnail
-                key={a.id}
-                artist={a}
-                isSelected={index === selectedIndex}
-                onClick={() => onSelectArtist(index)}
-              />
-            ))}
-          </div>
-        )}
-        {/* Modal Panel */}
-        <div className="bg-white dark:bg-[#1a1a22] rounded-[28px] shadow-lg w-full max-w-[1000px] mx-4 pointer-events-auto animate-in fade-in zoom-in-95 duration-200 overflow-hidden relative">
-          {/* Left Side - Image drives the height */}
-          <div className="w-1/2 relative overflow-hidden">
-            <AnimatePresence mode="popLayout" initial={false}>
+      {/* Modal Content */}
+      <AnimatePresence>
+        {artist ? (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            {/* Thumbnail Navigation - Left side */}
+            {artists.length > 1 && (
               <motion.div
-                key={artist.id + "-image"}
-                initial={{ opacity: 0, scale: 1.1 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={springTransition}
-                className="w-full aspect-square"
+                ref={thumbnailsRef}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
+                className="absolute left-8 flex flex-col gap-3"
               >
-                {artist.hasImage ? (
-                  <div className="w-full h-full bg-mid-gray dark:bg-[#3a3a45]">
-                    <Image
-                      src="/lineup-avatar.jpg"
-                      alt={artist.name}
-                      width={500}
-                      height={500}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full h-full bg-tp-orange flex items-center justify-center">
-                    <MusicNoteIcon
-                      size={80}
-                      className="text-white opacity-90"
-                    />
-                  </div>
-                )}
+                {artists.map((a, index) => (
+                  <ArtistThumbnail
+                    key={a.id}
+                    artist={a}
+                    isSelected={index === selectedIndex}
+                    onClick={() => onSelectArtist(index)}
+                  />
+                ))}
               </motion.div>
-            </AnimatePresence>
-          </div>
+            )}
 
-          {/* Right Side - Content (absolute to match image height) */}
-          <div className="absolute top-0 right-0 w-1/2 h-full flex flex-col">
-            {/* Close Button */}
-            <button
-              onClick={handleClose}
-              className="absolute right-4 top-4 w-6 h-6 bg-light-gray dark:bg-[#2a2a35] rounded-full flex items-center justify-center hover:bg-soft-gray dark:hover:bg-[#3a3a45] transition-colors duration-200 ease cursor-pointer z-20"
+            {/* Modal Panel - layoutId matches the card */}
+            <motion.div
+              ref={ref}
+              layoutId={`card-${artist.id}`}
+              className="bg-white dark:bg-[#1a1a22] shadow-lg w-full max-w-[1000px] mx-4 overflow-hidden relative"
+              style={{ borderRadius: 28 }}
             >
-              <X className="w-4 h-4 text-gray dark:text-[#888]" />
-            </button>
+              {/* Left Side - Image */}
+              <div className="w-1/2 relative overflow-hidden py-3 pl-3">
+                <div className="w-full aspect-square rounded-[16px] overflow-hidden">
+                  {artist.hasImage ? (
+                    <motion.div
+                      layoutId={`image-${artist.id}`}
+                      className="w-full h-full bg-mid-gray dark:bg-[#3a3a45]"
+                      style={{ borderRadius: 0 }}
+                    >
+                      <Image
+                        src="/lineup-avatar.jpg"
+                        alt={artist.name}
+                        width={500}
+                        height={500}
+                        className="w-full h-full object-cover"
+                      />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      layoutId={`image-${artist.id}`}
+                      className="w-full h-full bg-tp-orange flex items-center justify-center"
+                      style={{ borderRadius: 0 }}
+                    >
+                      <MusicNoteIcon
+                        size={80}
+                        className="text-white opacity-90"
+                      />
+                    </motion.div>
+                  )}
+                </div>
+              </div>
 
-            {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto">
-              <AnimatePresence mode="popLayout" initial={false}>
-                <motion.div
-                  key={artist.id + "-content"}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={springTransition}
-                  className="min-h-full flex flex-col justify-center pb-6"
+              {/* Right Side - Content */}
+              <div className="absolute top-0 right-0 w-1/2 h-full flex flex-col">
+                {/* Close Button */}
+                <button
+                  onClick={() => onOpenChange(false)}
+                  className="absolute right-4 top-4 w-6 h-6 bg-light-gray dark:bg-[#2a2a35] rounded-full flex items-center justify-center hover:bg-soft-gray dark:hover:bg-[#3a3a45] transition-colors duration-200 ease cursor-pointer z-20"
                 >
-                  {/* Sticky Name */}
-                  <div className="sticky top-0 z-10 bg-white dark:bg-[#1a1a22] pb-4 pt-10 pl-8 pr-14">
-                    <h2 className="font-outfit font-extrabold text-[24px] text-black dark:text-white">
-                      {artist.name}
-                    </h2>
-                  </div>
+                  <X className="w-4 h-4 text-gray dark:text-[#888]" />
+                </button>
 
-                  {/* Content */}
-                  <div className="flex flex-col gap-5 px-8">
-                    {/* Description */}
-                    {displaySettings.showDescription && artist.description && (
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {artist.description}
-                      </p>
-                    )}
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto">
+                  <div className="min-h-full flex flex-col justify-center pb-6">
+                    {/* Name */}
+                    <div className="sticky top-0 z-10 bg-white dark:bg-[#1a1a22] pb-4 pt-10 pl-8 pr-14">
+                      <motion.h2
+                        layoutId={`name-${artist.id}`}
+                        layout="position"
+                        className="font-outfit font-extrabold text-[24px] text-black dark:text-white"
+                      >
+                        {artist.name}
+                      </motion.h2>
+                    </div>
 
-                    {/* Social Links */}
-                    {((displaySettings.showInstagram &&
-                      artist.instagramHandle) ||
-                      (displaySettings.showTiktok && artist.tiktokHandle)) && (
-                      <div className="flex items-center gap-3">
-                        {displaySettings.showInstagram &&
-                          artist.instagramHandle && (
-                            <a
-                              href={`https://instagram.com/${artist.instagramHandle}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 ease"
-                            >
-                              <InstagramIcon size={16} />
-                              <span>@{artist.instagramHandle}</span>
-                            </a>
-                          )}
-                        {displaySettings.showTiktok && artist.tiktokHandle && (
-                          <a
-                            href={`https://tiktok.com/@${artist.tiktokHandle}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 ease"
-                          >
-                            <TiktokIcon size={16} />
-                            <span>@{artist.tiktokHandle}</span>
-                          </a>
+                    {/* Additional Content - fades in */}
+                    <motion.div
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, transition: { duration: 0.05 } }}
+                      transition={{ duration: 0.5 }}
+                      className="flex flex-col gap-5 px-8"
+                    >
+                      {/* Description */}
+                      {displaySettings.showDescription &&
+                        artist.description && (
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {artist.description}
+                          </p>
                         )}
-                      </div>
-                    )}
 
-                    {/* Spotify Track */}
-                    {displaySettings.showSpotify && artist.spotifyTrack && (
-                      <div className="w-full">
-                        <h3 className="text-sm font-black text-black tracking-wide mb-2">
-                          Playlist
-                        </h3>
-                        <div
-                          className="rounded-2xl overflow-hidden h-20"
-                          style={{
-                            background:
-                              "linear-gradient(rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.8) 100%), linear-gradient(90deg, rgb(175, 94, 114) 0%, rgb(175, 94, 114) 100%)",
-                          }}
-                        >
-                          <div className="flex h-full">
-                            {/* Album Art */}
-                            <div className="relative w-20 h-20 bg-gray shrink-0">
-                              <Image
-                                src="/album-cover.jpg"
-                                alt="Album cover"
-                                width={80}
-                                height={80}
-                                className="absolute inset-0 w-full h-full object-cover"
-                              />
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-10 h-10 rounded-full bg-black/30 flex items-center justify-center">
-                                  <Play className="w-5 h-5 text-white fill-white" />
+                      {/* Social Links */}
+                      {((displaySettings.showInstagram &&
+                        artist.instagramHandle) ||
+                        (displaySettings.showTiktok &&
+                          artist.tiktokHandle)) && (
+                        <div className="flex items-center gap-3">
+                          {displaySettings.showInstagram &&
+                            artist.instagramHandle && (
+                              <a
+                                href={`https://instagram.com/${artist.instagramHandle}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 ease"
+                              >
+                                <InstagramIcon size={16} />
+                                <span>@{artist.instagramHandle}</span>
+                              </a>
+                            )}
+                          {displaySettings.showTiktok &&
+                            artist.tiktokHandle && (
+                              <a
+                                href={`https://tiktok.com/@${artist.tiktokHandle}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 ease"
+                              >
+                                <TiktokIcon size={16} />
+                                <span>@{artist.tiktokHandle}</span>
+                              </a>
+                            )}
+                        </div>
+                      )}
+
+                      {/* Spotify Track */}
+                      {displaySettings.showSpotify && artist.spotifyTrack && (
+                        <div className="w-full">
+                          <h3 className="text-sm font-black text-black tracking-wide mb-2">
+                            Playlist
+                          </h3>
+                          <div
+                            className="rounded-2xl overflow-hidden h-20"
+                            style={{
+                              background:
+                                "linear-gradient(rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.8) 100%), linear-gradient(90deg, rgb(175, 94, 114) 0%, rgb(175, 94, 114) 100%)",
+                            }}
+                          >
+                            <div className="flex h-full">
+                              <div className="relative w-20 h-20 bg-gray shrink-0">
+                                <Image
+                                  src="/album-cover.jpg"
+                                  alt="Album cover"
+                                  width={80}
+                                  height={80}
+                                  className="absolute inset-0 w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <div className="w-10 h-10 rounded-full bg-black/30 flex items-center justify-center">
+                                    <Play className="w-5 h-5 text-white fill-white" />
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                            {/* Track Info */}
-                            <div className="flex-1 p-2 flex flex-col justify-between">
-                              <div className="flex items-start justify-between">
-                                <div className="overflow-hidden">
-                                  <p className="text-sm font-bold text-white truncate drop-shadow-sm">
-                                    {artist.spotifyTrack.trackName}
-                                  </p>
-                                  <p className="text-sm text-white truncate drop-shadow-sm">
-                                    {artist.spotifyTrack.artist}
-                                  </p>
+                              <div className="flex-1 p-2 flex flex-col justify-between">
+                                <div className="flex items-start justify-between">
+                                  <div className="overflow-hidden">
+                                    <p className="text-sm font-bold text-white truncate drop-shadow-sm">
+                                      {artist.spotifyTrack.trackName}
+                                    </p>
+                                    <p className="text-sm text-white truncate drop-shadow-sm">
+                                      {artist.spotifyTrack.artist}
+                                    </p>
+                                  </div>
+                                  <div className="w-[18px] h-[18px] rounded-full bg-[#1DB954] flex items-center justify-center shrink-0">
+                                    <SpotifyIcon
+                                      size={12}
+                                      className="text-white"
+                                    />
+                                  </div>
                                 </div>
-                                {/* Spotify icon */}
-                                <div className="w-[18px] h-[18px] rounded-full bg-[#1DB954] flex items-center justify-center shrink-0">
-                                  <SpotifyIcon
-                                    size={12}
-                                    className="text-white"
-                                  />
+                                <div className="flex items-center gap-2">
+                                  <div className="flex-1 h-1 bg-white/30 rounded-full">
+                                    <div className="w-0 h-full bg-white rounded-full" />
+                                  </div>
+                                  <Share2 className="w-4 h-4 text-white" />
                                 </div>
-                              </div>
-                              {/* Progress bar and share */}
-                              <div className="flex items-center gap-2">
-                                <div className="flex-1 h-1 bg-white/30 rounded-full">
-                                  <div className="w-0 h-full bg-white rounded-full" />
-                                </div>
-                                <Share2 className="w-4 h-4 text-white" />
                               </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {/* YouTube Video */}
-                    {displaySettings.showYouTube && artist.youtubeVideoId && (
-                      <div className="w-full">
-                        <h3 className="text-sm font-black text-black tracking-wide mb-2">
-                          Featured Video
-                        </h3>
-                        <YouTubeEmbed videoId={artist.youtubeVideoId} />
-                      </div>
-                    )}
+                      {/* YouTube Video */}
+                      {displaySettings.showYouTube && artist.youtubeVideoId && (
+                        <div className="w-full">
+                          <h3 className="text-sm font-black text-black tracking-wide mb-2">
+                            Featured Video
+                          </h3>
+                          <YouTubeEmbed videoId={artist.youtubeVideoId} />
+                        </div>
+                      )}
+                    </motion.div>
                   </div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      </div>
+        ) : null}
+      </AnimatePresence>
     </>
   );
 }

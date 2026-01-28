@@ -88,6 +88,102 @@ const springTransition = {
 };
 
 // ============================================================================
+// Context Hint Component
+// ============================================================================
+
+interface ContextHintProps {
+  eventContext: Pick<BannerEventContext, "title" | "description">;
+  onClose: () => void;
+  onFocusTitleInput?: () => void;
+  onOpenDescriptionModal?: () => void;
+}
+
+function ContextHint({
+  eventContext,
+  onClose,
+  onFocusTitleInput,
+  onOpenDescriptionModal,
+}: ContextHintProps) {
+  if (eventContext.title && eventContext.description) {
+    return null;
+  }
+
+  const handleTitleClick = () => {
+    onClose();
+    onFocusTitleInput?.();
+  };
+
+  const handleDescriptionClick = () => {
+    onClose();
+    onOpenDescriptionModal?.();
+  };
+
+  const renderMissingFields = () => {
+    if (!eventContext.title && !eventContext.description) {
+      return (
+        <>
+          an{" "}
+          <button
+            type="button"
+            onClick={handleTitleClick}
+            className="underline hover:opacity-80 transition-opacity duration-200 ease cursor-pointer"
+          >
+            event title
+          </button>{" "}
+          and{" "}
+          <button
+            type="button"
+            onClick={handleDescriptionClick}
+            className="underline hover:opacity-80 transition-opacity duration-200 ease cursor-pointer"
+          >
+            description
+          </button>
+        </>
+      );
+    }
+
+    if (!eventContext.title) {
+      return (
+        <>
+          an{" "}
+          <button
+            type="button"
+            onClick={handleTitleClick}
+            className="underline hover:opacity-80 transition-opacity duration-200 ease cursor-pointer"
+          >
+            event title
+          </button>
+        </>
+      );
+    }
+
+    return (
+      <>
+        an event{" "}
+        <button
+          type="button"
+          onClick={handleDescriptionClick}
+          className="underline hover:opacity-80 transition-opacity duration-200 ease cursor-pointer"
+        >
+          description
+        </button>
+      </>
+    );
+  };
+
+  return (
+    <div className="px-4 md:px-6 pb-2">
+      <div className="flex items-center gap-2 px-3 py-2.5 rounded-[14px] bg-[#FFB222]/10">
+        <CircleAlert className="w-4 h-4 text-[#FFB222] shrink-0" />
+        <p className="text-sm text-black">
+          For better results, add {renderMissingFields()}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
 // Main Component
 // ============================================================================
 
@@ -404,70 +500,12 @@ export function BannerGeneratorModal({
             </div>
 
             {/* Context Hint */}
-            {(!eventContext.title || !eventContext.description) && (
-              <div className="px-4 md:px-6 pb-2">
-                <div className="flex items-center gap-2 px-3 py-2.5 rounded-[14px] bg-[#FFB222]/10">
-                  <CircleAlert className="w-4 h-4 text-[#FFB222] shrink-0" />
-                  <p className="text-sm text-black">
-                    For better results, add{" "}
-                    {!eventContext.title && !eventContext.description ? (
-                      <>
-                        an{" "}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            handleClose();
-                            onFocusTitleInput?.();
-                          }}
-                          className="underline hover:opacity-80 transition-opacity duration-200 ease cursor-pointer"
-                        >
-                          event title
-                        </button>{" "}
-                        and{" "}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            handleClose();
-                            onOpenDescriptionModal?.();
-                          }}
-                          className="underline hover:opacity-80 transition-opacity duration-200 ease cursor-pointer"
-                        >
-                          description
-                        </button>
-                      </>
-                    ) : !eventContext.title ? (
-                      <>
-                        an{" "}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            handleClose();
-                            onFocusTitleInput?.();
-                          }}
-                          className="underline hover:opacity-80 transition-opacity duration-200 ease cursor-pointer"
-                        >
-                          event title
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        an event{" "}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            handleClose();
-                            onOpenDescriptionModal?.();
-                          }}
-                          className="underline hover:opacity-80 transition-opacity duration-200 ease cursor-pointer"
-                        >
-                          description
-                        </button>
-                      </>
-                    )}
-                  </p>
-                </div>
-              </div>
-            )}
+            <ContextHint
+              eventContext={eventContext}
+              onClose={handleClose}
+              onFocusTitleInput={onFocusTitleInput}
+              onOpenDescriptionModal={onOpenDescriptionModal}
+            />
 
             {/* Footer */}
             <motion.div
