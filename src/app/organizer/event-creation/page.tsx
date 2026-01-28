@@ -63,13 +63,11 @@ import {
   MoreVertical,
   Pencil,
   Plus,
-  RefreshCcw,
   Trash2,
   Users,
-  Wand2,
 } from "lucide-react";
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { EventBannerUpload } from "@/components/event-banner-upload";
 
 type VisibilityOption = "public" | "private" | "draft";
 
@@ -125,22 +123,7 @@ export default function EventCreationPage() {
   const [ticketModalOpen, setTicketModalOpen] = useState(false);
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
   const [bannerModalOpen, setBannerModalOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setEventImage(imageUrl);
-    }
-  };
-
-  const handleRemoveImage = () => {
-    setEventImage(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
+  const titleInputRef = useRef<HTMLTextAreaElement>(null);
 
   // When showEndDate is toggled off, sync endDate to startDate and clear endTime
   const handleShowEndDateChange = (checked: boolean) => {
@@ -252,121 +235,11 @@ export default function EventCreationPage() {
         <main className="md:flex-1 md:min-h-0 md:overflow-y-auto flex justify-center items-start px-4 py-4 md:px-8 md:py-8">
           <div className="w-full max-w-[1000px] flex flex-col lg:flex-row gap-4 lg:gap-8 mb-8">
             {/* Left Column - Event Image */}
-            <div className="w-full lg:flex-1">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-              />
-              <div className="aspect-5/2 bg-light-gray rounded-none md:rounded-2xl relative overflow-hidden group -mx-4 -mt-4 md:mx-0 md:mt-0">
-                {eventImage ? (
-                  <>
-                    {/* Image Preview */}
-                    <Image
-                      src={eventImage}
-                      alt="Event cover"
-                      fill
-                      className="object-cover"
-                    />
-                    {/* Overlay with actions on hover (always visible on touch devices, positioned bottom-right without overlay) */}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200 ease flex items-center justify-center [@media(hover:none)]:items-end [@media(hover:none)]:justify-end [@media(hover:none)]:p-3 gap-2.5 opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100">
-                      {/* Replace image button */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          fileInputRef.current?.click();
-                        }}
-                        className="cursor-pointer w-[42px] h-[42px] md:w-[38px] md:h-[38px] bg-white rounded-full shadow-sm flex items-center justify-center hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200"
-                      >
-                        <RefreshCcw
-                          className="w-5 h-5 md:w-4 md:h-4 text-black"
-                          strokeWidth={2}
-                        />
-                      </button>
-                      {/* Delete image button */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveImage();
-                        }}
-                        className="group/delete cursor-pointer w-[42px] h-[42px] md:w-[38px] md:h-[38px] bg-white rounded-full shadow-sm flex items-center justify-center hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200"
-                      >
-                        <Trash2
-                          className="w-5 h-5 md:w-4 md:h-4 text-black group-hover/delete:text-tp-red transition-colors duration-200 ease"
-                          strokeWidth={2}
-                        />
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    {/* Decorative wave pattern */}
-                    <svg
-                      className="absolute inset-0 w-full h-full"
-                      viewBox="0 0 614 246"
-                      fill="none"
-                      preserveAspectRatio="xMidYMid slice"
-                    >
-                      <path
-                        d="M0 246V180C80 190 160 160 240 140C320 120 400 110 480 100C560 90 614 80 614 80V246H0Z"
-                        fill="rgba(209, 209, 209, 0.15)"
-                      />
-                      <path
-                        d="M0 246V200C100 210 200 180 300 160C400 140 500 130 614 120V246H0Z"
-                        fill="rgba(209, 209, 209, 0.1)"
-                      />
-                    </svg>
-
-                    {/* Action buttons */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-3">
-                      {/* Upload image button */}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              fileInputRef.current?.click();
-                            }}
-                            className="cursor-pointer w-[42px] h-[42px] md:w-[38px] md:h-[38px] bg-white rounded-full shadow-sm flex items-center justify-center hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200"
-                          >
-                            <Plus
-                              className="w-5 h-5 text-black"
-                              strokeWidth={2}
-                            />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom">
-                          Upload image
-                        </TooltipContent>
-                      </Tooltip>
-
-                      {/* Generate with AI button */}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setBannerModalOpen(true);
-                            }}
-                            className="btn-shimmer relative cursor-pointer w-[42px] h-[42px] md:w-[38px] md:h-[38px] bg-white rounded-full shadow-sm flex items-center justify-center hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200"
-                          >
-                            <Wand2
-                              className="w-5 h-5 md:w-4 md:h-4 text-black"
-                              strokeWidth={2}
-                            />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom">
-                          Generate with AI
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
+            <EventBannerUpload
+              image={eventImage}
+              onImageChange={setEventImage}
+              onOpenBannerModal={() => setBannerModalOpen(true)}
+            />
 
             {/* Right Column - Form */}
             <div className="w-full lg:w-[500px] flex flex-col gap-5">
@@ -374,6 +247,7 @@ export default function EventCreationPage() {
               <div className="flex flex-col gap-5">
                 {/* Event Title Input */}
                 <textarea
+                  ref={titleInputRef}
                   value={eventTitle}
                   onChange={(e) => {
                     setEventTitle(e.target.value);
@@ -671,7 +545,10 @@ export default function EventCreationPage() {
           startDate,
           startTime,
           location: location?.venue?.name || location?.address,
+          description,
         }}
+        onOpenDescriptionModal={() => setDescriptionModalOpen(true)}
+        onFocusTitleInput={() => titleInputRef.current?.focus()}
       />
     </div>
   );

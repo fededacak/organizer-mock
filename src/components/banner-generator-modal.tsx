@@ -7,6 +7,7 @@ import {
   RefreshCw,
   X,
   CircleHelp,
+  CircleAlert,
   Check,
   Download,
 } from "lucide-react";
@@ -34,6 +35,8 @@ interface BannerGeneratorModalProps {
   onOpenChange: (open: boolean) => void;
   onGenerate: (imageUrl: string) => void;
   eventContext: BannerEventContext;
+  onOpenDescriptionModal?: () => void;
+  onFocusTitleInput?: () => void;
 }
 
 type ModalView = "style-selection" | "loading" | "preview";
@@ -93,6 +96,8 @@ export function BannerGeneratorModal({
   onOpenChange,
   onGenerate,
   eventContext,
+  onOpenDescriptionModal,
+  onFocusTitleInput,
 }: BannerGeneratorModalProps) {
   // View state
   const [view, setView] = useState<ModalView>("style-selection");
@@ -103,7 +108,7 @@ export function BannerGeneratorModal({
   const [customInstructions, setCustomInstructions] = useState("");
   const [adjustments, setAdjustments] = useState("");
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(
-    null
+    null,
   );
 
   // Reset state when modal closes
@@ -351,25 +356,19 @@ export function BannerGeneratorModal({
               </div>
 
               {/* Additional Instructions */}
-              <div className="flex flex-col gap-1">
-                <div className="flex flex-col gap-1.5 w-full">
-                  <label className="block text-sm font-bold text-black">
-                    Additional instructions
-                  </label>
-                  <textarea
-                    value={customInstructions}
-                    onChange={(e) => setCustomInstructions(e.target.value)}
-                    maxLength={CUSTOM_INSTRUCTIONS_MAX_LENGTH}
-                    placeholder="outdoor, no people, minimal style..."
-                    rows={3}
-                    className="w-full px-3 py-2 pr-16 border border-neutral-200 rounded-[14px] text-base text-black placeholder:text-gray/80 focus:outline-none focus:border-tp-blue/40 focus:ring-[3px] focus:ring-tp-blue/20 transition-all duration-200 ease resize-none"
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  * We already use your event title and description for context.
-                </p>
+              <div className="flex flex-col gap-1.5 w-full">
+                <label className="block text-sm font-bold text-black">
+                  Additional instructions
+                </label>
+                <textarea
+                  value={customInstructions}
+                  onChange={(e) => setCustomInstructions(e.target.value)}
+                  maxLength={CUSTOM_INSTRUCTIONS_MAX_LENGTH}
+                  placeholder="outdoor, no people, minimal style..."
+                  rows={3}
+                  className="w-full px-3 py-2 pr-16 border border-neutral-200 rounded-[14px] text-base text-black placeholder:text-gray/80 focus:outline-none focus:border-tp-blue/40 focus:ring-[3px] focus:ring-tp-blue/20 transition-all duration-200 ease resize-none"
+                />
               </div>
-
               {/* Text Overlay Input */}
               <div>
                 <div className="flex items-center gap-1.5 mb-1.5">
@@ -403,6 +402,72 @@ export function BannerGeneratorModal({
                 </div>
               </div>
             </div>
+
+            {/* Context Hint */}
+            {(!eventContext.title || !eventContext.description) && (
+              <div className="px-4 md:px-6 pb-2">
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-[14px] bg-[#FFB222]/10">
+                  <CircleAlert className="w-4 h-4 text-[#FFB222] shrink-0" />
+                  <p className="text-sm text-black">
+                    For better results, add{" "}
+                    {!eventContext.title && !eventContext.description ? (
+                      <>
+                        an{" "}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleClose();
+                            onFocusTitleInput?.();
+                          }}
+                          className="underline hover:opacity-80 transition-opacity duration-200 ease cursor-pointer"
+                        >
+                          event title
+                        </button>{" "}
+                        and{" "}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleClose();
+                            onOpenDescriptionModal?.();
+                          }}
+                          className="underline hover:opacity-80 transition-opacity duration-200 ease cursor-pointer"
+                        >
+                          description
+                        </button>
+                      </>
+                    ) : !eventContext.title ? (
+                      <>
+                        an{" "}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleClose();
+                            onFocusTitleInput?.();
+                          }}
+                          className="underline hover:opacity-80 transition-opacity duration-200 ease cursor-pointer"
+                        >
+                          event title
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        an event{" "}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleClose();
+                            onOpenDescriptionModal?.();
+                          }}
+                          className="underline hover:opacity-80 transition-opacity duration-200 ease cursor-pointer"
+                        >
+                          description
+                        </button>
+                      </>
+                    )}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Footer */}
             <motion.div
