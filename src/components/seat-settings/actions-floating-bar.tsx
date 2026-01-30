@@ -1,4 +1,4 @@
-import { X, ToggleLeft, Pause } from "lucide-react";
+import { X, Pause } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Icon wrapper component
@@ -29,7 +29,6 @@ interface ActionsFloatingBarProps {
   onClear: () => void;
   onEditPrice: () => void;
   onHold: () => void;
-  onSetStatus: () => void;
 }
 
 export function ActionsFloatingBar({
@@ -37,8 +36,8 @@ export function ActionsFloatingBar({
   onClear,
   onEditPrice,
   onHold,
-  onSetStatus,
 }: ActionsFloatingBarProps) {
+
   return (
     <div
       className={cn(
@@ -52,10 +51,11 @@ export function ActionsFloatingBar({
     >
       <div className="flex items-center gap-3 w-full">
         <span className="font-outfit text-sm font-semibold text-dark-gray whitespace-nowrap">
-          {selectedCount} section{selectedCount !== 1 ? "s" : ""}
+          {selectedCount} seat{selectedCount !== 1 ? "s" : ""}
         </span>
 
         <div className="flex items-center gap-3 w-full justify-end">
+          {/* Edit/Price button */}
           <button
             type="button"
             onClick={onEditPrice}
@@ -76,10 +76,11 @@ export function ActionsFloatingBar({
               </svg>
             </IconWrapper>
             <span className="font-outfit text-sm font-semibold text-black">
-              Edit
+              Price
             </span>
           </button>
 
+          {/* Hold button */}
           <button
             type="button"
             onClick={onHold}

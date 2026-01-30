@@ -1,8 +1,42 @@
 // Individual seat status for inventory tracking
-export type SeatStatus = "available" | "sold" | "reserved" | "held";
+export type SeatStatus = "on-sale" | "sold" | "held";
 
 // Section-level status for sales management
 export type SectionStatus = "on-sale" | "off-sale" | "sold-out";
+
+// View mode for the seatmap display
+export type ViewMode = "status" | "price";
+
+// Hold type determines behavior and visibility
+export type HoldType = "internal" | "password-protected";
+
+// What happens when a hold expires
+export type ReleaseAction = "auto-release" | "manual";
+
+// Complete hold configuration
+export interface Hold {
+  id: string;
+  name: string; // e.g., "VIP Guest List", "Sponsor Block"
+  type: HoldType;
+  password?: string; // Required if type is "password-protected"
+  startDate?: Date; // Optional start date
+  endDate?: Date; // Optional expiration date
+  maxPurchaseLimit?: number; // Max tickets per redemption (e.g., 4 per code)
+  releaseAction: ReleaseAction;
+  notes?: string; // Internal notes
+  color: string; // Visual differentiation on seatmap
+  createdAt: Date;
+  seatIds: string[]; // Seats in this hold
+}
+
+// Pre-defined hold colors for visual differentiation
+export const HOLD_COLORS = [
+  { name: "Purple", value: "#8B5CF6", label: "VIP" },
+  { name: "Blue", value: "#3B82F6", label: "Sponsors" },
+  { name: "Teal", value: "#14B8A6", label: "Comps" },
+  { name: "Amber", value: "#F59E0B", label: "Reserved" },
+  { name: "Pink", value: "#EC4899", label: "Staff" },
+] as const;
 
 // Individual seat within a section
 export interface Seat {
@@ -10,7 +44,8 @@ export interface Seat {
   row: string; // e.g., "A", "B", "1"
   number: string; // e.g., "1", "2", "101"
   status: SeatStatus;
-  // Price inherited from section (no individual price)
+  priceOverride?: number; // Optional seat-level price override
+  holdId?: string; // Reference to Hold
 }
 
 // Section containing multiple seats

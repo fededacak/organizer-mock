@@ -1,4 +1,41 @@
-import type { Section, Seat, SeatStatus } from "./types";
+import type { Section, Seat, SeatStatus, Hold } from "./types";
+import { HOLD_COLORS } from "./types";
+
+// Sample holds - these will be associated with specific seats
+export const mockHolds: Hold[] = [
+  {
+    id: "hold-vip-guests",
+    name: "VIP Guest List",
+    type: "internal",
+    releaseAction: "manual",
+    notes: "Reserved for artist's personal guests",
+    color: HOLD_COLORS[0].value, // Purple
+    createdAt: new Date("2026-01-15"),
+    seatIds: ["floor-A1", "floor-A2", "floor-A3", "floor-A4"],
+  },
+  {
+    id: "hold-sponsors",
+    name: "Sponsor Block",
+    type: "password-protected",
+    password: "SPONSOR2026",
+    maxPurchaseLimit: 4,
+    startDate: new Date("2026-01-20"),
+    endDate: new Date("2026-02-15"),
+    releaseAction: "auto-release",
+    notes: "Reserved for Gold sponsors - code shared via email",
+    color: HOLD_COLORS[1].value, // Blue
+    createdAt: new Date("2026-01-10"),
+    seatIds: ["vip-A1", "vip-A2", "vip-A3"],
+  },
+];
+
+// Create a map for quick holdId lookup
+const seatToHoldMap = new Map<string, string>();
+mockHolds.forEach((hold) => {
+  hold.seatIds.forEach((seatId) => {
+    seatToHoldMap.set(seatId, hold.id);
+  });
+});
 
 // Helper to generate seats for a section
 function generateSeats(
@@ -6,7 +43,6 @@ function generateSeats(
   rows: number,
   seatsPerRow: number,
   soldPercentage: number = 0.2,
-  reservedPercentage: number = 0.05,
   heldPercentage: number = 0.02
 ): Seat[] {
   const seats: Seat[] = [];
@@ -15,19 +51,32 @@ function generateSeats(
   for (let r = 0; r < rows; r++) {
     const rowLabel = rowLabels[r] || `${r + 1}`;
     for (let s = 1; s <= seatsPerRow; s++) {
+      const seatId = `${sectionPrefix}-${rowLabel}${s}`;
+      const holdId = seatToHoldMap.get(seatId);
+      
+      // If seat has a holdId, it's held
+      if (holdId) {
+        seats.push({
+          id: seatId,
+          row: rowLabel,
+          number: `${s}`,
+          status: "held",
+          holdId,
+        });
+        continue;
+      }
+      
       const random = Math.random();
-      let status: SeatStatus = "available";
+      let status: SeatStatus = "on-sale";
 
       if (random < soldPercentage) {
         status = "sold";
-      } else if (random < soldPercentage + reservedPercentage) {
-        status = "reserved";
-      } else if (random < soldPercentage + reservedPercentage + heldPercentage) {
+      } else if (random < soldPercentage + heldPercentage) {
         status = "held";
       }
 
       seats.push({
-        id: `${sectionPrefix}-${rowLabel}${s}`,
+        id: seatId,
         row: rowLabel,
         number: `${s}`,
         status,
@@ -39,23 +88,23 @@ function generateSeats(
 }
 
 // Floor: 10 rows, 12 seats each = 120 seats
-const floorSeats = generateSeats("floor", 10, 12, 0.28, 0.05, 0.02);
+const floorSeats = generateSeats("floor", 10, 12, 0.28, 0.02);
 const floorSold = floorSeats.filter((s) => s.status === "sold").length;
 
 // Balcony Left: 2 rows, 6 seats each = 12 seats
-const balconyLeftSeats = generateSeats("bl", 2, 6, 0.1, 0.05, 0.02);
+const balconyLeftSeats = generateSeats("bl", 2, 6, 0.1, 0.02);
 const balconyLeftSold = balconyLeftSeats.filter((s) => s.status === "sold").length;
 
 // Balcony Right: 2 rows, 6 seats each = 12 seats (sold out)
-const balconyRightSeats = generateSeats("br", 2, 6, 1, 0, 0); // 100% sold
+const balconyRightSeats = generateSeats("br", 2, 6, 1, 0); // 100% sold
 const balconyRightSold = balconyRightSeats.filter((s) => s.status === "sold").length;
 
 // VIP Box: 2 rows, 5 seats each = 10 seats
-const vipSeats = generateSeats("vip", 2, 5, 0.4, 0.1, 0.1);
+const vipSeats = generateSeats("vip", 2, 5, 0.4, 0.1);
 const vipSold = vipSeats.filter((s) => s.status === "sold").length;
 
-// Upper Deck: 4 rows, 10 seats each = 40 seats (off-sale, all available)
-const upperDeckSeats = generateSeats("ud", 4, 10, 0, 0, 0);
+// Upper Deck: 4 rows, 10 seats each = 40 seats (off-sale, all on-sale status)
+const upperDeckSeats = generateSeats("ud", 4, 10, 0, 0);
 
 export const mockSections: Section[] = [
   {

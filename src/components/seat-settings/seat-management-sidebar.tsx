@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 
-import { Checkbox } from "./checkbox";
-import { SectionItem } from "./section-item";
-import { SeatSearchBar } from "./seat-search-bar";
 import { ActionsFloatingBar } from "./actions-floating-bar";
-import { SectionEditModal } from "./section-price-modal";
-import type { Section } from "./types";
+import { HoldModal } from "./hold-modal";
+import { SeatEditModal } from "./seat-edit-modal";
+import { SelectedSeatsList } from "./selected-seats-list";
+import type { Section, Seat, Hold } from "./types";
 
 // Manage Event header pill
 function ManageEventHeader() {
@@ -32,101 +31,73 @@ function ManageEventHeader() {
   );
 }
 
-// Select all header
-function SelectAllHeader({
-  isAllSelected,
-  onToggleAll,
-  sectionCount,
-}: {
-  isAllSelected: boolean;
-  onToggleAll: () => void;
-  sectionCount: number;
-}) {
-  return (
-    <div className="flex h-[60px] items-center justify-between pl-4 pr-2">
-      <div className="flex items-center gap-4">
-        <Checkbox checked={isAllSelected} onChange={onToggleAll} />
-        <span className="font-outfit text-sm text-gray">
-          Select All Sections
-        </span>
-      </div>
-      <span className="font-outfit text-xs text-gray">
-        {sectionCount} sections
-      </span>
-    </div>
-  );
-}
-
 interface SeatManagementSidebarProps {
   sections: Section[];
-  filteredSections: Section[];
-  selectedSections: Set<string>;
-  searchQuery: string;
-  isAllSelected: boolean;
-  onSearchChange: (query: string) => void;
-  onToggleSection: (sectionId: string) => void;
-  onToggleAll: () => void;
+  holds: Hold[];
+  selectedSeats: Set<string>;
   onClearSelection: () => void;
-  onUpdateSections: (updater: (prev: Section[]) => Section[]) => void;
-  getSelectedSectionObjects: () => Section[];
+  onDeselectRow: (sectionId: string, row: string) => void;
+  onUpdateSelectedSeats: (
+    updater: (seat: Section["seats"][0]) => Section["seats"][0],
+  ) => void;
+  getSelectedSeatsBySection: () => Map<Section, Seat[]>;
+  onSelectSeats: (seatIds: string[], additive?: boolean) => void;
+  onCreateHold: (holdData: Omit<Hold, "id" | "createdAt">) => void;
+  onUpdateHold: (holdId: string, holdData: Omit<Hold, "id" | "createdAt">) => void;
+  onDeleteHold: (holdId: string) => void;
 }
 
 // Main sidebar component
 export function SeatManagementSidebar({
   sections,
-  filteredSections,
-  selectedSections,
-  searchQuery,
-  isAllSelected,
-  onSearchChange,
-  onToggleSection,
-  onToggleAll,
+  holds,
+  selectedSeats,
   onClearSelection,
-  onUpdateSections,
-  getSelectedSectionObjects,
+  onDeselectRow,
+  onUpdateSelectedSeats,
+  getSelectedSeatsBySection,
+  onSelectSeats,
+  onCreateHold,
+  onDeleteHold,
 }: SeatManagementSidebarProps) {
-  const [isPriceModalOpen, setIsPriceModalOpen] = useState(false);
+  const [isSeatPriceModalOpen, setIsSeatPriceModalOpen] = useState(false);
+  const [isHoldModalOpen, setIsHoldModalOpen] = useState(false);
+  const [editingHold, setEditingHold] = useState<Hold | undefined>(undefined);
 
-  // Action handlers
-  const handleEditPrice = () => {
-    setIsPriceModalOpen(true);
+  // Seat action handlers
+  const handleSeatEditPrice = () => {
+    setIsSeatPriceModalOpen(true);
   };
 
-  const handlePriceUpdate = (
-    newPrice: number,
-    _feeOption: "pass_to_buyer" | "absorb",
-    newName?: string
-  ) => {
-    onUpdateSections((prev) =>
-      prev.map((section) =>
-        selectedSections.has(section.id)
-          ? {
-              ...section,
-              price: newPrice,
-              ...(newName ? { name: newName } : {}),
-            }
-          : section
-      )
-    );
-    setIsPriceModalOpen(false);
-  };
-
-  const handleHold = () => {
-    console.log("Hold sections:", Array.from(selectedSections));
-    // Update section status to indicate held seats
-    onUpdateSections((prev) =>
-      prev.map((section) =>
-        selectedSections.has(section.id)
-          ? { ...section, status: "off-sale" as const }
-          : section
-      )
-    );
+  const handleSeatPriceUpdate = (newPrice: number) => {
+    onUpdateSelectedSeats((seat) => ({
+      ...seat,
+      priceOverride: newPrice,
+    }));
+    setIsSeatPriceModalOpen(false);
     onClearSelection();
   };
 
-  const handleSetStatus = () => {
-    console.log("Set status for sections:", Array.from(selectedSections));
+  const handleOpenHoldModal = () => {
+    setEditingHold(undefined);
+    setIsHoldModalOpen(true);
   };
+
+  const handleHoldConfirm = (holdData: Omit<Hold, "id" | "createdAt">) => {
+    onCreateHold(holdData);
+    setIsHoldModalOpen(false);
+    setEditingHold(undefined);
+  };
+
+  const handleHoldDelete = () => {
+    if (editingHold) {
+      onDeleteHold(editingHold.id);
+    }
+    setIsHoldModalOpen(false);
+    setEditingHold(undefined);
+  };
+
+  const selectedSeatsBySection = getSelectedSeatsBySection();
 
   return (
     <>
@@ -134,46 +105,54 @@ export function SeatManagementSidebar({
         <div className="flex h-full w-[380px] flex-col gap-3 rounded-[20px] bg-white p-2.5 shadow-card">
           <ManageEventHeader />
 
-          <div className="flex min-h-0 flex-1 flex-col">
-            <SeatSearchBar
-              value={searchQuery}
-              onChange={onSearchChange}
-              placeholder="Search sections..."
+          <div className="flex min-h-0 flex-1 flex-col gap-3">
+            <SelectedSeatsList
+              sections={sections}
+              holds={holds}
+              selectedSeatsBySection={selectedSeatsBySection}
+              onClearSection={(sectionId: string) => {
+                // Clear all seats from a specific section
+                const section = sections.find((s) => s.id === sectionId);
+                if (section) {
+                  // Get all rows in this section and deselect them
+                  const rows = new Set(section.seats.map((s) => s.row));
+                  rows.forEach((row) => onDeselectRow(sectionId, row));
+                }
+              }}
+              onClearRow={onDeselectRow}
+              onSelectSeats={onSelectSeats}
+              onClearAll={onClearSelection}
             />
-
-            <SelectAllHeader
-              isAllSelected={isAllSelected}
-              onToggleAll={onToggleAll}
-              sectionCount={filteredSections.length}
-            />
-
-            <div className="flex flex-1 flex-col gap-2 overflow-y-auto pr-1">
-              {filteredSections.map((section) => (
-                <SectionItem
-                  key={section.id}
-                  section={section}
-                  isSelected={selectedSections.has(section.id)}
-                  onToggle={() => onToggleSection(section.id)}
-                />
-              ))}
-            </div>
           </div>
         </div>
       </div>
 
+      {/* Floating bar for seat actions */}
       <ActionsFloatingBar
-        selectedCount={selectedSections.size}
+        selectedCount={selectedSeats.size}
         onClear={onClearSelection}
-        onEditPrice={handleEditPrice}
-        onHold={handleHold}
-        onSetStatus={handleSetStatus}
+        onEditPrice={handleSeatEditPrice}
+        onHold={handleOpenHoldModal}
       />
 
-      <SectionEditModal
-        isOpen={isPriceModalOpen}
-        onClose={() => setIsPriceModalOpen(false)}
-        onConfirm={handlePriceUpdate}
-        sections={getSelectedSectionObjects()}
+      <SeatEditModal
+        isOpen={isSeatPriceModalOpen}
+        onClose={() => setIsSeatPriceModalOpen(false)}
+        onConfirm={handleSeatPriceUpdate}
+        selectedSeatsBySection={selectedSeatsBySection}
+        sections={sections}
+      />
+
+      <HoldModal
+        isOpen={isHoldModalOpen}
+        onClose={() => {
+          setIsHoldModalOpen(false);
+          setEditingHold(undefined);
+        }}
+        onConfirm={handleHoldConfirm}
+        onDelete={editingHold ? handleHoldDelete : undefined}
+        selectedSeatsBySection={selectedSeatsBySection}
+        existingHold={editingHold}
       />
     </>
   );
