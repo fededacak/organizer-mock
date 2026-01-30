@@ -211,6 +211,34 @@ export function SeatmapLegend({
     return holds.filter((hold) => hold.seatIds.length > 0);
   }, [holds]);
 
+  // Count seats by status
+  const statusCounts = useMemo(() => {
+    const counts = { "on-sale": 0, sold: 0, held: 0 };
+    for (const section of sections) {
+      for (const seat of section.seats) {
+        counts[seat.status]++;
+      }
+    }
+    return counts;
+  }, [sections]);
+
+  // Count seats by price tier
+  const priceTierCounts = useMemo(() => {
+    const counts = PRICE_COLORS.map(() => 0);
+    for (const section of sections) {
+      for (const seat of section.seats) {
+        const effectivePrice = seat.priceOverride ?? section.price;
+        const tierIndex = getPriceTierIndex(
+          effectivePrice,
+          priceRange.min,
+          priceRange.max,
+        );
+        counts[tierIndex]++;
+      }
+    }
+    return counts;
+  }, [sections, priceRange]);
+
   return (
     <div className="mt-2 flex flex-col items-center gap-1">
       <div className="flex items-center gap-1">
@@ -219,17 +247,20 @@ export function SeatmapLegend({
             <LegendItem
               label="On Sale"
               isWhite
+              seatCount={statusCounts["on-sale"]}
               onClick={() => handleStatusClick("on-sale")}
             />
             <LegendItem
               color="#9ca3af"
               label="Sold"
+              seatCount={statusCounts.sold}
               onClick={() => handleStatusClick("sold")}
             />
             {activeHolds.length === 0 && (
               <LegendItem
                 color="#f87171"
                 label="Held"
+                seatCount={statusCounts.held}
                 onClick={() => handleStatusClick("held")}
               />
             )}
@@ -241,6 +272,7 @@ export function SeatmapLegend({
                 key={tier.label}
                 color={tier.color}
                 label={priceTierLabels[index]}
+                seatCount={priceTierCounts[index]}
                 onClick={() => handlePriceTierClick(index)}
               />
             ))}
@@ -251,6 +283,7 @@ export function SeatmapLegend({
       {/* Show holds in status view */}
       {viewMode === "status" && activeHolds.length > 0 && (
         <div className="flex items-center gap-1 flex-wrap justify-center">
+          <span className="text-[10px] text-gray-400 mr-1">Holds</span>
           {activeHolds.map((hold) => (
             <LegendItem
               key={hold.id}

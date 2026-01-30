@@ -105,11 +105,6 @@ function calculateSectionTotal(seats: Seat[], sectionPrice: number): number {
   );
 }
 
-// Check if any seat in the array has a price override
-function hasAnyOverride(seats: Seat[]): boolean {
-  return seats.some((seat) => seat.priceOverride !== undefined);
-}
-
 export function SelectedSeatsList({
   sections,
   holds,
@@ -308,8 +303,6 @@ export function SelectedSeatsList({
           const sortedRows = Array.from(seatsByRow.entries()).sort(([a], [b]) =>
             a.localeCompare(b),
           );
-          const sectionTotal = calculateSectionTotal(seats, section.price);
-          const sectionHasOverrides = hasAnyOverride(seats);
 
           return (
             <div
@@ -333,40 +326,30 @@ export function SelectedSeatsList({
                 </button>
               </div>
               <div className="flex flex-col gap-0.5">
-                {sortedRows.map(([rowLabel, rowSeats]) => {
-                  const rowHasOverrides = hasAnyOverride(rowSeats);
-
-                  return (
-                    <div
-                      key={rowLabel}
-                      className="group flex items-center justify-between gap-2 text-xs rounded-md px-1.5 py-1 -mx-1.5 hover:bg-light-gray/50 transition-colors duration-200 ease"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-dark-gray w-12">
-                          Row {rowLabel}:
-                        </span>
-                        <span className="text-gray">
-                          Seat{rowSeats.length > 1 ? "s" : ""}{" "}
-                          {formatSeatNumbers(rowSeats)}
-                        </span>
-                        {rowHasOverrides && (
-                          <span
-                            className="size-2 rounded-full bg-tp-orange"
-                            title="Contains price overrides"
-                          />
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => onClearRow(section.id, rowLabel)}
-                        className="flex size-4 items-center justify-center rounded-full opacity-0 group-hover:opacity-100 hover:bg-gray/20 transition-opacity duration-200 ease cursor-pointer"
-                        aria-label={`Remove Row ${rowLabel}`}
-                      >
-                        <X className="size-3 text-gray" />
-                      </button>
+                {sortedRows.map(([rowLabel, rowSeats]) => (
+                  <div
+                    key={rowLabel}
+                    className="group flex items-center justify-between gap-2 text-xs rounded-md px-1.5 py-1 -mx-1.5 hover:bg-light-gray/50 transition-colors duration-200 ease"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-dark-gray w-12">
+                        Row {rowLabel}:
+                      </span>
+                      <span className="text-gray">
+                        Seat{rowSeats.length > 1 ? "s" : ""}{" "}
+                        {formatSeatNumbers(rowSeats)}
+                      </span>
                     </div>
-                  );
-                })}
+                    <button
+                      type="button"
+                      onClick={() => onClearRow(section.id, rowLabel)}
+                      className="flex size-4 items-center justify-center rounded-full opacity-0 group-hover:opacity-100 hover:bg-gray/20 transition-opacity duration-200 ease cursor-pointer"
+                      aria-label={`Remove Row ${rowLabel}`}
+                    >
+                      <X className="size-3 text-gray" />
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
           );

@@ -1,10 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
-import { ActionsFloatingBar } from "./actions-floating-bar";
-import { HoldModal } from "./hold-modal";
-import { SeatEditModal } from "./seat-edit-modal";
 import { SelectedSeatsList } from "./selected-seats-list";
 import type { Section, Seat, Hold } from "./types";
 
@@ -34,126 +29,46 @@ function ManageEventHeader() {
 interface SeatManagementSidebarProps {
   sections: Section[];
   holds: Hold[];
-  selectedSeats: Set<string>;
+  selectedSeatsBySection: Map<Section, Seat[]>;
   onClearSelection: () => void;
   onDeselectRow: (sectionId: string, row: string) => void;
-  onUpdateSelectedSeats: (
-    updater: (seat: Section["seats"][0]) => Section["seats"][0],
-  ) => void;
-  getSelectedSeatsBySection: () => Map<Section, Seat[]>;
   onSelectSeats: (seatIds: string[], additive?: boolean) => void;
-  onCreateHold: (holdData: Omit<Hold, "id" | "createdAt">) => void;
-  onUpdateHold: (holdId: string, holdData: Omit<Hold, "id" | "createdAt">) => void;
-  onDeleteHold: (holdId: string) => void;
 }
 
 // Main sidebar component
 export function SeatManagementSidebar({
   sections,
   holds,
-  selectedSeats,
+  selectedSeatsBySection,
   onClearSelection,
   onDeselectRow,
-  onUpdateSelectedSeats,
-  getSelectedSeatsBySection,
   onSelectSeats,
-  onCreateHold,
-  onDeleteHold,
 }: SeatManagementSidebarProps) {
-  const [isSeatPriceModalOpen, setIsSeatPriceModalOpen] = useState(false);
-  const [isHoldModalOpen, setIsHoldModalOpen] = useState(false);
-  const [editingHold, setEditingHold] = useState<Hold | undefined>(undefined);
-
-  // Seat action handlers
-  const handleSeatEditPrice = () => {
-    setIsSeatPriceModalOpen(true);
-  };
-
-  const handleSeatPriceUpdate = (newPrice: number) => {
-    onUpdateSelectedSeats((seat) => ({
-      ...seat,
-      priceOverride: newPrice,
-    }));
-    setIsSeatPriceModalOpen(false);
-    onClearSelection();
-  };
-
-  const handleOpenHoldModal = () => {
-    setEditingHold(undefined);
-    setIsHoldModalOpen(true);
-  };
-
-  const handleHoldConfirm = (holdData: Omit<Hold, "id" | "createdAt">) => {
-    onCreateHold(holdData);
-    setIsHoldModalOpen(false);
-    setEditingHold(undefined);
-  };
-
-  const handleHoldDelete = () => {
-    if (editingHold) {
-      onDeleteHold(editingHold.id);
-    }
-    setIsHoldModalOpen(false);
-    setEditingHold(undefined);
-  };
-
-  const selectedSeatsBySection = getSelectedSeatsBySection();
-
   return (
-    <>
-      <div className="flex h-full shrink-0 p-2.5">
-        <div className="flex h-full w-[380px] flex-col gap-3 rounded-[20px] bg-white p-2.5 shadow-card">
-          <ManageEventHeader />
+    <div className="flex h-full shrink-0 py-2.5 pl-2.5">
+      <div className="flex h-full w-[380px] flex-col gap-3 rounded-[20px] bg-white p-2.5 shadow-card">
+        <ManageEventHeader />
 
-          <div className="flex min-h-0 flex-1 flex-col gap-3">
-            <SelectedSeatsList
-              sections={sections}
-              holds={holds}
-              selectedSeatsBySection={selectedSeatsBySection}
-              onClearSection={(sectionId: string) => {
-                // Clear all seats from a specific section
-                const section = sections.find((s) => s.id === sectionId);
-                if (section) {
-                  // Get all rows in this section and deselect them
-                  const rows = new Set(section.seats.map((s) => s.row));
-                  rows.forEach((row) => onDeselectRow(sectionId, row));
-                }
-              }}
-              onClearRow={onDeselectRow}
-              onSelectSeats={onSelectSeats}
-              onClearAll={onClearSelection}
-            />
-          </div>
+        <div className="flex min-h-0 flex-1 flex-col gap-3">
+          <SelectedSeatsList
+            sections={sections}
+            holds={holds}
+            selectedSeatsBySection={selectedSeatsBySection}
+            onClearSection={(sectionId: string) => {
+              // Clear all seats from a specific section
+              const section = sections.find((s) => s.id === sectionId);
+              if (section) {
+                // Get all rows in this section and deselect them
+                const rows = new Set(section.seats.map((s) => s.row));
+                rows.forEach((row) => onDeselectRow(sectionId, row));
+              }
+            }}
+            onClearRow={onDeselectRow}
+            onSelectSeats={onSelectSeats}
+            onClearAll={onClearSelection}
+          />
         </div>
       </div>
-
-      {/* Floating bar for seat actions */}
-      <ActionsFloatingBar
-        selectedCount={selectedSeats.size}
-        onClear={onClearSelection}
-        onEditPrice={handleSeatEditPrice}
-        onHold={handleOpenHoldModal}
-      />
-
-      <SeatEditModal
-        isOpen={isSeatPriceModalOpen}
-        onClose={() => setIsSeatPriceModalOpen(false)}
-        onConfirm={handleSeatPriceUpdate}
-        selectedSeatsBySection={selectedSeatsBySection}
-        sections={sections}
-      />
-
-      <HoldModal
-        isOpen={isHoldModalOpen}
-        onClose={() => {
-          setIsHoldModalOpen(false);
-          setEditingHold(undefined);
-        }}
-        onConfirm={handleHoldConfirm}
-        onDelete={editingHold ? handleHoldDelete : undefined}
-        selectedSeatsBySection={selectedSeatsBySection}
-        existingHold={editingHold}
-      />
-    </>
+    </div>
   );
 }

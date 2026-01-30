@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Leva } from "leva";
 import {
   SeatManagementSidebar,
   SeatmapDisplay,
+  ActionsFloatingBar,
+  HoldModal,
+  SeatEditModal,
   mockSections,
   mockHolds,
   useSeatSettingsControls,
@@ -37,47 +40,54 @@ export default function SeatSettingsPage() {
   }, []);
 
   // Select multiple seats (for lasso/range selection)
-  const selectSeats = useCallback((seatIds: string[], additive: boolean = false) => {
-    setSelectedSeats((prev) => {
-      if (additive) {
-        const next = new Set(prev);
-        seatIds.forEach((id) => next.add(id));
-        return next;
-      }
-      return new Set(seatIds);
-    });
-  }, []);
+  const selectSeats = useCallback(
+    (seatIds: string[], additive: boolean = false) => {
+      setSelectedSeats((prev) => {
+        if (additive) {
+          const next = new Set(prev);
+          seatIds.forEach((id) => next.add(id));
+          return next;
+        }
+        return new Set(seatIds);
+      });
+    },
+    [],
+  );
 
   // Deselect all seats in a specific section and row
-  const deselectRow = useCallback((sectionId: string, row: string) => {
-    const section = sections.find((s) => s.id === sectionId);
-    if (!section) return;
-    
-    const seatsToRemove = section.seats
-      .filter((seat) => seat.row === row && selectedSeats.has(seat.id))
-      .map((seat) => seat.id);
-    
-    setSelectedSeats((prev) => {
-      const next = new Set(prev);
-      seatsToRemove.forEach((id) => next.delete(id));
-      return next;
-    });
-  }, [sections, selectedSeats]);
+  const deselectRow = useCallback(
+    (sectionId: string, row: string) => {
+      const section = sections.find((s) => s.id === sectionId);
+      if (!section) return;
+
+      const seatsToRemove = section.seats
+        .filter((seat) => seat.row === row && selectedSeats.has(seat.id))
+        .map((seat) => seat.id);
+
+      setSelectedSeats((prev) => {
+        const next = new Set(prev);
+        seatsToRemove.forEach((id) => next.delete(id));
+        return next;
+      });
+    },
+    [sections, selectedSeats],
+  );
 
   // Get selected seat objects grouped by section
-  const getSelectedSeatsBySection = useCallback(() => {
+  const selectedSeatsBySection = useMemo(() => {
     const result: Map<Section, Seat[]> = new Map();
-    
+
     for (const section of sections) {
-      const seatsInSection = section.seats.filter((s) => selectedSeats.has(s.id));
+      const seatsInSection = section.seats.filter((s) =>
+        selectedSeats.has(s.id),
+      );
       if (seatsInSection.length > 0) {
         result.set(section, seatsInSection);
       }
     }
-    
+
     return result;
   }, [sections, selectedSeats]);
-
 
   // Update selected seats (for status changes, price overrides, holds)
   const updateSelectedSeats = useCallback(
@@ -86,12 +96,12 @@ export default function SeatSettingsPage() {
         prev.map((section) => ({
           ...section,
           seats: section.seats.map((seat) =>
-            selectedSeats.has(seat.id) ? updater(seat) : seat
+            selectedSeats.has(seat.id) ? updater(seat) : seat,
           ),
-        }))
+        })),
       );
     },
-    [selectedSeats]
+    [selectedSeats],
   );
 
   // Create a new hold
@@ -113,15 +123,15 @@ export default function SeatSettingsPage() {
           seats: section.seats.map((seat) =>
             holdData.seatIds.includes(seat.id)
               ? { ...seat, status: "held" as const, holdId: newHold.id }
-              : seat
+              : seat,
           ),
-        }))
+        })),
       );
 
       // Clear selection after creating hold
       clearSelection();
     },
-    [clearSelection]
+    [clearSelection],
   );
 
   // Update an existing hold
@@ -129,10 +139,8 @@ export default function SeatSettingsPage() {
     (holdId: string, holdData: Omit<Hold, "id" | "createdAt">) => {
       setHolds((prev) =>
         prev.map((hold) =>
-          hold.id === holdId
-            ? { ...hold, ...holdData }
-            : hold
-        )
+          hold.id === holdId ? { ...hold, ...holdData } : hold,
+        ),
       );
 
       // Update seat associations if seatIds changed
@@ -150,31 +158,78 @@ export default function SeatSettingsPage() {
             }
             return seat;
           }),
-        }))
+        })),
       );
     },
-    []
+    [],
   );
 
   // Delete a hold and release its seats
-  const deleteHold = useCallback((holdId: string) => {
-    // Remove hold
-    setHolds((prev) => prev.filter((hold) => hold.id !== holdId));
+  const deleteHold = useCallback(
+    (holdId: string) => {
+      // Remove hold
+      setHolds((prev) => prev.filter((hold) => hold.id !== holdId));
 
-    // Release seats
-    setSections((prev) =>
-      prev.map((section) => ({
-        ...section,
-        seats: section.seats.map((seat) =>
-          seat.holdId === holdId
-            ? { ...seat, status: "on-sale" as const, holdId: undefined }
-            : seat
-        ),
-      }))
-    );
+      // Release seats
+      setSections((prev) =>
+        prev.map((section) => ({
+          ...section,
+          seats: section.seats.map((seat) =>
+            seat.holdId === holdId
+              ? { ...seat, status: "on-sale" as const, holdId: undefined }
+              : seat,
+          ),
+        })),
+      );
 
-    clearSelection();
-  }, [clearSelection]);
+      clearSelection();
+    },
+    [clearSelection],
+  );
+
+  // Modal states for floating action bar
+  const [isSeatPriceModalOpen, setIsSeatPriceModalOpen] = useState(false);
+  const [isHoldModalOpen, setIsHoldModalOpen] = useState(false);
+  const [editingHold, setEditingHold] = useState<Hold | undefined>(undefined);
+
+  // Floating action bar handlers
+  const handleSeatEditPrice = useCallback(() => {
+    setIsSeatPriceModalOpen(true);
+  }, []);
+
+  const handleSeatPriceUpdate = useCallback(
+    (newPrice: number) => {
+      updateSelectedSeats((seat) => ({
+        ...seat,
+        priceOverride: newPrice,
+      }));
+      setIsSeatPriceModalOpen(false);
+      clearSelection();
+    },
+    [updateSelectedSeats, clearSelection],
+  );
+
+  const handleOpenHoldModal = useCallback(() => {
+    setEditingHold(undefined);
+    setIsHoldModalOpen(true);
+  }, []);
+
+  const handleHoldConfirm = useCallback(
+    (holdData: Omit<Hold, "id" | "createdAt">) => {
+      createHold(holdData);
+      setIsHoldModalOpen(false);
+      setEditingHold(undefined);
+    },
+    [createHold],
+  );
+
+  const handleHoldDelete = useCallback(() => {
+    if (editingHold) {
+      deleteHold(editingHold.id);
+    }
+    setIsHoldModalOpen(false);
+    setEditingHold(undefined);
+  }, [editingHold, deleteHold]);
 
   return (
     <div className="flex h-screen bg-light-gray">
@@ -182,15 +237,10 @@ export default function SeatSettingsPage() {
         <SeatManagementSidebar
           sections={sections}
           holds={holds}
-          selectedSeats={selectedSeats}
+          selectedSeatsBySection={selectedSeatsBySection}
           onClearSelection={clearSelection}
           onDeselectRow={deselectRow}
-          onUpdateSelectedSeats={updateSelectedSeats}
-          getSelectedSeatsBySection={getSelectedSeatsBySection}
           onSelectSeats={selectSeats}
-          onCreateHold={createHold}
-          onUpdateHold={updateHold}
-          onDeleteHold={deleteHold}
         />
       )}
       <SeatmapDisplay
@@ -202,6 +252,34 @@ export default function SeatSettingsPage() {
         onToggleSeat={toggleSeat}
         onSelectSeats={selectSeats}
         settings={settings}
+      />
+
+      {/* Floating bar for seat actions - always visible */}
+      <ActionsFloatingBar
+        selectedCount={selectedSeats.size}
+        onClear={clearSelection}
+        onEditPrice={handleSeatEditPrice}
+        onHold={handleOpenHoldModal}
+      />
+
+      <SeatEditModal
+        isOpen={isSeatPriceModalOpen}
+        onClose={() => setIsSeatPriceModalOpen(false)}
+        onConfirm={handleSeatPriceUpdate}
+        selectedSeatsBySection={selectedSeatsBySection}
+        sections={sections}
+      />
+
+      <HoldModal
+        isOpen={isHoldModalOpen}
+        onClose={() => {
+          setIsHoldModalOpen(false);
+          setEditingHold(undefined);
+        }}
+        onConfirm={handleHoldConfirm}
+        onDelete={editingHold ? handleHoldDelete : undefined}
+        selectedSeatsBySection={selectedSeatsBySection}
+        existingHold={editingHold}
       />
 
       {/* Leva Controls Panel */}

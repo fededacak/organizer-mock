@@ -17,7 +17,6 @@ interface SeatmapDisplayProps {
   settings?: SeatSettingsControlsSettings;
 }
 
-
 // View mode toggle component
 function ViewModeToggle({
   mode,
@@ -58,7 +57,10 @@ function ViewModeToggle({
 
 // Get status color for individual seats (status view)
 // If seat is held and has a holdColor, that takes priority
-function getSeatStatusColor(status: Seat["status"], holdColor?: string): string {
+function getSeatStatusColor(
+  status: Seat["status"],
+  holdColor?: string,
+): string {
   if (status === "held" && holdColor) {
     return ""; // Use inline style for hold color
   }
@@ -126,7 +128,8 @@ function SeatButton({
     : undefined;
 
   // For status view, use hold color if available
-  const statusBgColor = !isPriceView && seat.status === "held" && holdColor ? holdColor : undefined;
+  const statusBgColor =
+    !isPriceView && seat.status === "held" && holdColor ? holdColor : undefined;
   const statusClass = getSeatStatusColor(seat.status, holdColor);
 
   // Build tooltip
@@ -159,12 +162,7 @@ function SeatButton({
       }}
       title={tooltip}
       data-seat-id={seat.id}
-    >
-      {/* Price override indicator */}
-      {hasOverride && (
-        <div className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-tp-orange border border-white" />
-      )}
-    </button>
+    />
   );
 }
 
@@ -483,7 +481,7 @@ export function SeatmapDisplay({
   );
 
   return (
-    <div className="flex flex-1 flex-col gap-2 py-2.5 pr-2.5">
+    <div className="flex flex-1 flex-col gap-2 p-2.5">
       {/* View Mode Toggle Header */}
 
       {/* Seatmap Container */}
