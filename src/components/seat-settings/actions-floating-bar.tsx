@@ -37,12 +37,11 @@ export function ActionsFloatingBar({
   onEditPrice,
   onHold,
 }: ActionsFloatingBarProps) {
-
   return (
     <div
       className={cn(
-        "fixed bottom-6 left-1/2 -translate-x-1/2 z-50",
-        "flex items-center justify-between gap-3 rounded-[20px] md:min-w-[400px] bg-white px-4 py-3 shadow-[0px_1px_5px_0px_rgba(0,0,0,0.08)]",
+        "fixed bottom-2.5 left-1/2 -translate-x-1/2 z-50",
+        "flex items-center justify-between gap-3 rounded-[20px] md:min-w-[400px] border border-soft-gray bg-white px-4 py-3 shadow-card",
         "transition-all duration-300 cubic-bezier(.23,1,.32,1)",
         selectedCount > 0
           ? "translate-y-0 opacity-100"

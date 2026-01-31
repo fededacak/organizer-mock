@@ -12,6 +12,8 @@ export { HoldModal } from "./hold-modal";
 export { SeatEditModal } from "./seat-edit-modal";
 export { SelectedSeatsList } from "./selected-seats-list";
 export { SeatmapLegend, PRICE_COLORS, getPriceColor } from "./seatmap-legend";
+export { ViewModeToggle } from "./view-mode-toggle";
+export { ZoomControls } from "./zoom-controls";
 
 // Types
 export type {

@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  X,
-  MousePointerClick,
-  Hand,
-  DollarSign,
-  Grid3X3,
-  Lock,
-} from "lucide-react";
+import { X, MousePointerClick } from "lucide-react";
 import type { Section, Seat, Hold } from "./types";
 
 interface SelectedSeatsListProps {
@@ -18,49 +11,6 @@ interface SelectedSeatsListProps {
   onClearRow: (sectionId: string, row: string) => void;
   onSelectSeats: (seatIds: string[], additive?: boolean) => void;
   onClearAll: () => void;
-}
-
-// Compute venue stats for quick actions
-function computeVenueStats(sections: Section[], holds: Hold[]) {
-  let heldSeatsWithoutHold: string[] = [];
-  let overrideSeats: string[] = [];
-  let availableBySection: { section: Section; seatIds: string[] }[] = [];
-  let holdGroups: { hold: Hold; seatIds: string[] }[] = [];
-
-  // Create holdId to Hold map
-  const holdMap = new Map<string, Hold>();
-  for (const hold of holds) {
-    holdMap.set(hold.id, hold);
-    holdGroups.push({ hold, seatIds: [...hold.seatIds] });
-  }
-
-  for (const section of sections) {
-    const sectionAvailable: string[] = [];
-
-    for (const seat of section.seats) {
-      if (seat.status === "held" && !seat.holdId) {
-        // Held seat without a hold (legacy)
-        heldSeatsWithoutHold.push(seat.id);
-      }
-      if (seat.priceOverride !== undefined) {
-        overrideSeats.push(seat.id);
-      }
-      if (seat.status === "on-sale") {
-        sectionAvailable.push(seat.id);
-      }
-    }
-
-    if (sectionAvailable.length > 0 && section.status === "on-sale") {
-      availableBySection.push({ section, seatIds: sectionAvailable });
-    }
-  }
-
-  return {
-    heldSeatsWithoutHold,
-    overrideSeats,
-    availableBySection,
-    holdGroups,
-  };
 }
 
 // Group seats by row for cleaner display
@@ -122,28 +72,10 @@ export function SelectedSeatsList({
     return acc + calculateSectionTotal(seats, section.price);
   }, 0);
 
-  // Compute venue stats for quick actions
-  const {
-    heldSeatsWithoutHold,
-    overrideSeats,
-    availableBySection,
-    holdGroups,
-  } = computeVenueStats(sections, holds);
-
-  // Filter hold groups that have seats
-  const activeHoldGroups = holdGroups.filter((g) => g.seatIds.length > 0);
-
   if (totalSeats === 0) {
-    const hasQuickActions =
-      heldSeatsWithoutHold.length > 0 ||
-      overrideSeats.length > 0 ||
-      availableBySection.length > 0 ||
-      activeHoldGroups.length > 0;
-
     return (
-      <div className="flex flex-1 flex-col">
-        {/* Header */}
-        <div className="mb-3 flex flex-col justify-center items-center gap-2 h-full">
+      <div className="flex flex-1 flex-col items-center justify-center">
+        <div className="flex flex-col justify-center items-center gap-2">
           <div className="flex size-[56px] items-center justify-center rounded-full bg-light-gray">
             <MousePointerClick className="size-7 text-gray" />
           </div>
@@ -154,129 +86,6 @@ export function SelectedSeatsList({
             </p>
           </div>
         </div>
-
-        {/* Quick Select Actions */}
-        {hasQuickActions && (
-          <div className="flex flex-col gap-2">
-            <p className="text-xs font-semibold text-dark-gray uppercase tracking-wide">
-              Quick Select
-            </p>
-
-            <div className="flex flex-col gap-1.5">
-              {/* Select by hold - show each hold group */}
-              {activeHoldGroups.map(({ hold, seatIds }) => (
-                <button
-                  key={hold.id}
-                  type="button"
-                  onClick={() => onSelectSeats(seatIds)}
-                  className="flex items-center gap-2.5 rounded-xl bg-light-gray px-3 py-2.5 text-left transition-colors duration-200 ease hover:bg-soft-gray cursor-pointer group"
-                >
-                  <div
-                    className="flex size-8 items-center justify-center rounded-full"
-                    style={{ backgroundColor: `${hold.color}20` }}
-                  >
-                    {hold.type === "password-protected" ? (
-                      <Lock className="size-4" style={{ color: hold.color }} />
-                    ) : (
-                      <Hand className="size-4" style={{ color: hold.color }} />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-black truncate">
-                      {hold.name}
-                    </p>
-                    <p className="text-xs text-gray">
-                      {seatIds.length} seat{seatIds.length !== 1 ? "s" : ""} on
-                      hold
-                    </p>
-                  </div>
-                </button>
-              ))}
-
-              {/* Select held seats without a hold (legacy) */}
-              {heldSeatsWithoutHold.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => onSelectSeats(heldSeatsWithoutHold)}
-                  className="flex items-center gap-2.5 rounded-xl bg-light-gray px-3 py-2.5 text-left transition-colors duration-200 ease hover:bg-soft-gray cursor-pointer group"
-                >
-                  <div className="flex size-8 items-center justify-center rounded-full bg-red-100">
-                    <Hand className="size-4 text-red-500" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-black">
-                      Other held seats
-                    </p>
-                    <p className="text-xs text-gray">
-                      {heldSeatsWithoutHold.length} seat
-                      {heldSeatsWithoutHold.length !== 1 ? "s" : ""} on hold
-                    </p>
-                  </div>
-                </button>
-              )}
-
-              {/* Select seats with price overrides */}
-              {overrideSeats.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => onSelectSeats(overrideSeats)}
-                  className="flex items-center gap-2.5 rounded-xl bg-light-gray px-3 py-2.5 text-left transition-colors duration-200 ease hover:bg-soft-gray cursor-pointer group"
-                >
-                  <div className="flex size-8 items-center justify-center rounded-full bg-orange-100">
-                    <DollarSign className="size-4 text-tp-orange" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-black">
-                      Custom pricing
-                    </p>
-                    <p className="text-xs text-gray">
-                      {overrideSeats.length} seat
-                      {overrideSeats.length !== 1 ? "s" : ""} with overrides
-                    </p>
-                  </div>
-                </button>
-              )}
-
-              {/* Select all in section - show up to 3 sections */}
-              {availableBySection.slice(0, 3).map(({ section, seatIds }) => (
-                <button
-                  key={section.id}
-                  type="button"
-                  onClick={() => onSelectSeats(seatIds)}
-                  className="flex items-center gap-2.5 rounded-xl bg-light-gray px-3 py-2.5 text-left transition-colors duration-200 ease hover:bg-soft-gray cursor-pointer group"
-                >
-                  <div
-                    className="flex size-8 items-center justify-center rounded-full"
-                    style={{ backgroundColor: `${section.color}20` }}
-                  >
-                    <Grid3X3
-                      className="size-4"
-                      style={{ color: section.color }}
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-black truncate">
-                      {section.name}
-                    </p>
-                    <p className="text-xs text-gray">
-                      {seatIds.length} available seat
-                      {seatIds.length !== 1 ? "s" : ""}
-                    </p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Fallback if no quick actions available */}
-        {!hasQuickActions && (
-          <div className="flex flex-1 flex-col items-center justify-center text-center">
-            <p className="text-xs text-gray">
-              No quick actions available. Use the seatmap to select seats.
-            </p>
-          </div>
-        )}
       </div>
     );
   }

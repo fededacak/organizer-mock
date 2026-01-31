@@ -20,6 +20,7 @@ export default function SeatSettingsPage() {
   const [holds, setHolds] = useState<Hold[]>(mockHolds);
   const [selectedSeats, setSelectedSeats] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<ViewMode>("status");
+  const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
 
   // Clear all selections
   const clearSelection = useCallback(() => {
@@ -232,17 +233,7 @@ export default function SeatSettingsPage() {
   }, [editingHold, deleteHold]);
 
   return (
-    <div className="flex h-screen bg-light-gray">
-      {settings.showSidebar && (
-        <SeatManagementSidebar
-          sections={sections}
-          holds={holds}
-          selectedSeatsBySection={selectedSeatsBySection}
-          onClearSelection={clearSelection}
-          onDeselectRow={deselectRow}
-          onSelectSeats={selectSeats}
-        />
-      )}
+    <div className="relative h-screen overflow-hidden bg-light-gray">
       <SeatmapDisplay
         sections={sections}
         holds={holds}
@@ -252,6 +243,17 @@ export default function SeatSettingsPage() {
         onToggleSeat={toggleSeat}
         onSelectSeats={selectSeats}
         settings={settings}
+      />
+
+      <SeatManagementSidebar
+        sections={sections}
+        holds={holds}
+        selectedSeatsBySection={selectedSeatsBySection}
+        onClearSelection={clearSelection}
+        onDeselectRow={deselectRow}
+        onSelectSeats={selectSeats}
+        isMinimized={isSidebarMinimized}
+        onToggleMinimize={() => setIsSidebarMinimized((prev) => !prev)}
       />
 
       {/* Floating bar for seat actions - always visible */}

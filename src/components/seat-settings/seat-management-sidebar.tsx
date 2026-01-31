@@ -1,28 +1,21 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { SelectedSeatsList } from "./selected-seats-list";
 import type { Section, Seat, Hold } from "./types";
+import { ListChevronsDownUp, ListChevronsUpDown } from "lucide-react";
 
-// Manage Event header pill
-function ManageEventHeader() {
+// Manage Event header pill with minimize button
+function ManageEventHeader({ onMinimize }: { onMinimize: () => void }) {
   return (
-    <div className="flex h-[38px] items-center gap-2.5 rounded-full bg-white p-2">
-      <div className="flex size-[22px] items-center justify-center rounded-full bg-mid-gray">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="11"
-          height="9"
-          viewBox="0 0 11 9"
-          fill="none"
-        >
-          <path
-            d="M3.62021 0.255247L0.320214 3.55525C0.115213 3.76025 0.000213377 4.04025 0.00021339 4.33025C0.000213402 4.62025 0.115213 4.90025 0.320214 5.10525L3.62021 8.40525C3.82021 8.64025 4.10521 8.77525 4.41521 8.79025C4.72521 8.80525 5.02022 8.68525 5.23522 8.47025C5.45022 8.25525 5.57022 7.95525 5.55522 7.65025C5.54522 7.34525 5.40521 7.05525 5.17021 6.85525L3.75021 5.43525L9.90022 5.43525C10.2952 5.43525 10.6552 5.22525 10.8552 4.88525C11.0502 4.54525 11.0502 4.12525 10.8552 3.78525C10.6602 3.44525 10.2952 3.23525 9.90022 3.23525L3.75021 3.23525L5.17021 1.81525C5.41521 1.53025 5.49521 1.14525 5.39021 0.790247C5.28521 0.430247 5.00521 0.155248 4.64521 0.045248C4.29021 -0.0597518 3.90021 0.0202488 3.62021 0.265249V0.255247Z"
-            fill="white"
-          />
-        </svg>
-      </div>
-      <span className="font-outfit text-sm text-black">Manage Event</span>
-    </div>
+    <button
+      type="button"
+      onClick={onMinimize}
+      className="flex size-10 items-center justify-center rounded-full text-foreground transition-colors duration-200 ease cursor-pointer hover:text-foreground border border-soft-gray"
+      aria-label="Minimize panel"
+    >
+      <ListChevronsDownUp className="size-5" />
+    </button>
   );
 }
 
@@ -33,9 +26,14 @@ interface SeatManagementSidebarProps {
   onClearSelection: () => void;
   onDeselectRow: (sectionId: string, row: string) => void;
   onSelectSeats: (seatIds: string[], additive?: boolean) => void;
+  isMinimized: boolean;
+  onToggleMinimize: () => void;
 }
 
-// Main sidebar component
+// Easing for animations
+const EASE_OUT_CUBIC = "cubic-bezier(.215, .61, .355, 1)";
+
+// Main sidebar component - floating panel
 export function SeatManagementSidebar({
   sections,
   holds,
@@ -43,12 +41,45 @@ export function SeatManagementSidebar({
   onClearSelection,
   onDeselectRow,
   onSelectSeats,
+  isMinimized,
+  onToggleMinimize,
 }: SeatManagementSidebarProps) {
   return (
-    <div className="flex h-full shrink-0 py-2.5 pl-2.5">
-      <div className="flex h-full w-[380px] flex-col gap-3 rounded-[20px] bg-white p-2.5 shadow-card">
-        <ManageEventHeader />
+    <>
+      {/* Expand button - visible only when minimized */}
+      <button
+        type="button"
+        onClick={onToggleMinimize}
+        className={cn(
+          "fixed left-[21px] bottom-[21px] z-40 cursor-pointer border border-soft-gray",
+          "flex size-10 items-center justify-center",
+          "rounded-full bg-white shadow-card",
+          "text-foreground transition-all duration-250",
+          "motion-reduce:transition-none",
+          "origin-bottom-left",
+          isMinimized
+            ? "pointer-events-auto scale-100 opacity-100"
+            : "pointer-events-none scale-95 opacity-0",
+        )}
+        style={{ transitionTimingFunction: EASE_OUT_CUBIC }}
+        aria-label="Expand panel"
+      >
+        <ListChevronsUpDown className="size-5" />
+      </button>
 
+      {/* Floating panel - visible when expanded */}
+      <div
+        className={cn(
+          "fixed bottom-2.5 left-2.5 top-2.5 z-40 w-[380px]",
+          "flex flex-col gap-3 rounded-[20px] bg-white p-2.5 shadow-card border border-soft-gray",
+          "origin-bottom-left transition-all duration-250",
+          "motion-reduce:transition-none",
+          isMinimized
+            ? "pointer-events-none scale-95 opacity-0"
+            : "pointer-events-auto scale-100 opacity-100",
+        )}
+        style={{ transitionTimingFunction: EASE_OUT_CUBIC }}
+      >
         <div className="flex min-h-0 flex-1 flex-col gap-3">
           <SelectedSeatsList
             sections={sections}
@@ -68,7 +99,8 @@ export function SeatManagementSidebar({
             onClearAll={onClearSelection}
           />
         </div>
+        <ManageEventHeader onMinimize={onToggleMinimize} />
       </div>
-    </div>
+    </>
   );
 }
