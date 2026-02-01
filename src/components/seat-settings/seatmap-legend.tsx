@@ -49,6 +49,7 @@ interface SeatmapLegendProps {
   viewMode: ViewMode;
   priceRange: { min: number; max: number };
   onSelectSeats: (seatIds: string[], additive?: boolean) => void;
+  onViewModeChange: (mode: ViewMode) => void;
 }
 
 // Individual legend item button
@@ -72,23 +73,20 @@ function LegendItem({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex items-center gap-1.5 rounded-full px-2 py-1 cursor-pointer",
+        "flex items-center gap-1.5 rounded-full px-3 py-2 cursor-pointer",
         "transition-all duration-200 ease",
         "hover:bg-gray-100 active:bg-gray-200",
       )}
     >
       <div
         className={cn(
-          "size-2.5 rounded-[2px] relative flex items-center justify-center",
+          "size-4 rounded-[4px] relative flex items-center justify-center",
           isWhite && "shadow-[0_0_0_1px_rgba(0,0,0,0.2)]",
         )}
         style={{ backgroundColor: isWhite ? "white" : color }}
       >
-        {isPasswordProtected && (
-          <Lock className="size-1.5 text-white" strokeWidth={3} />
-        )}
       </div>
-      <span className="text-[10px] text-gray-500">{label}</span>
+      <span className="text-xs font-medium text-foreground">{label}</span>
       {seatCount !== undefined && (
         <span className="text-[10px] text-gray-400">({seatCount})</span>
       )}
@@ -103,6 +101,7 @@ export function SeatmapLegend({
   viewMode,
   priceRange,
   onSelectSeats,
+  onViewModeChange,
 }: SeatmapLegendProps) {
   // Get all seats matching a specific status
   const getSeatsByStatus = useCallback(
@@ -239,9 +238,44 @@ export function SeatmapLegend({
     return counts;
   }, [sections, priceRange]);
 
+  // Check if we have multiple rows (holds visible in status view)
+  const hasMultipleRows = viewMode === "status" && activeHolds.length > 0;
+
   return (
-    <div className="mt-2 flex flex-col items-center gap-1">
-      <div className="flex items-center gap-1">
+    <div
+      className={cn(
+        "flex flex-col items-center gap-2 bg-white border border-soft-gray p-2 shadow-floating rounded-[16px] w-[180px]"
+      )}
+    >
+      {/* View Mode Toggle */}
+      <div className="flex w-full rounded-[12px] bg-light-gray p-1 border border-transparent">
+        <button
+          type="button"
+          onClick={() => onViewModeChange("status")}
+          className={cn(
+            "flex-1 h-[28px] px-4 rounded-[8px] text-xs font-semibold transition-all duration-200 ease cursor-pointer",
+            viewMode === "status"
+              ? "bg-white text-black shadow-sm"
+              : "text-gray hover:text-muted-foreground",
+          )}
+        >
+          Status
+        </button>
+        <button
+          type="button"
+          onClick={() => onViewModeChange("price")}
+          className={cn(
+            "flex-1 h-[28px] px-4 rounded-[8px] text-xs font-semibold transition-all duration-200 ease cursor-pointer",
+            viewMode === "price"
+              ? "bg-white text-black shadow-sm"
+              : "text-gray hover:text-muted-foreground",
+          )}
+        >
+          Price
+        </button>
+      </div>
+
+      <div className="flex flex-col w-full">
         {viewMode === "status" ? (
           <>
             <LegendItem
@@ -282,8 +316,8 @@ export function SeatmapLegend({
 
       {/* Show holds in status view */}
       {viewMode === "status" && activeHolds.length > 0 && (
-        <div className="flex items-center gap-1 flex-wrap justify-center">
-          <span className="text-[10px] text-gray-400 mr-1">Holds</span>
+        <div className="flex flex-wrap flex-col w-full">
+          <span className="text-[10px] text-gray-400 mx-2">Holds</span>
           {activeHolds.map((hold) => (
             <LegendItem
               key={hold.id}

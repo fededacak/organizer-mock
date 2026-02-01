@@ -160,6 +160,13 @@
   box-shadow: 0px 4px 24px 0px rgba(155, 182, 190, 0.07);
 }
 
+/* Custom shadow for floating elements (popovers, floating bars, tooltips) */
+.shadow-floating {
+  box-shadow:
+    0px 8px 32px 0px rgba(155, 182, 190, 0.15),
+    0px 2px 8px 0px rgba(0, 0, 0, 0.04);
+}
+
 /* Status indicator pulse animation */
 @keyframes status-pulse {
   0%,

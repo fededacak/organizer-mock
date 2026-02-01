@@ -7,7 +7,6 @@ export const mockHolds: Hold[] = [
     id: "hold-vip-guests",
     name: "VIP Guest List",
     type: "internal",
-    releaseAction: "manual",
     notes: "Reserved for artist's personal guests",
     color: HOLD_COLORS[0].value, // Purple
     createdAt: new Date("2026-01-15"),
@@ -18,10 +17,8 @@ export const mockHolds: Hold[] = [
     name: "Sponsor Block",
     type: "password-protected",
     password: "SPONSOR2026",
-    maxPurchaseLimit: 4,
     startDate: new Date("2026-01-20"),
     endDate: new Date("2026-02-15"),
-    releaseAction: "auto-release",
     notes: "Reserved for Gold sponsors - code shared via email",
     color: HOLD_COLORS[1].value, // Blue
     createdAt: new Date("2026-01-10"),
@@ -53,7 +50,7 @@ function generateSeats(
     for (let s = 1; s <= seatsPerRow; s++) {
       const seatId = `${sectionPrefix}-${rowLabel}${s}`;
       const holdId = seatToHoldMap.get(seatId);
-      
+
       // If seat has a holdId, it's held
       if (holdId) {
         seats.push({
@@ -65,7 +62,7 @@ function generateSeats(
         });
         continue;
       }
-      
+
       const random = Math.random();
       let status: SeatStatus = "on-sale";
 
@@ -93,11 +90,15 @@ const floorSold = floorSeats.filter((s) => s.status === "sold").length;
 
 // Balcony Left: 2 rows, 6 seats each = 12 seats
 const balconyLeftSeats = generateSeats("bl", 2, 6, 0.1, 0.02);
-const balconyLeftSold = balconyLeftSeats.filter((s) => s.status === "sold").length;
+const balconyLeftSold = balconyLeftSeats.filter(
+  (s) => s.status === "sold"
+).length;
 
 // Balcony Right: 2 rows, 6 seats each = 12 seats (sold out)
 const balconyRightSeats = generateSeats("br", 2, 6, 1, 0); // 100% sold
-const balconyRightSold = balconyRightSeats.filter((s) => s.status === "sold").length;
+const balconyRightSold = balconyRightSeats.filter(
+  (s) => s.status === "sold"
+).length;
 
 // VIP Box: 2 rows, 5 seats each = 10 seats
 const vipSeats = generateSeats("vip", 2, 5, 0.4, 0.1);
@@ -160,7 +161,10 @@ export const mockSections: Section[] = [
 ];
 
 // Export seat grid dimensions for layout
-export const sectionGridConfig: Record<string, { rows: number; seatsPerRow: number }> = {
+export const sectionGridConfig: Record<
+  string,
+  { rows: number; seatsPerRow: number }
+> = {
   "section-floor": { rows: 10, seatsPerRow: 12 },
   "section-balcony-left": { rows: 2, seatsPerRow: 6 },
   "section-balcony-right": { rows: 2, seatsPerRow: 6 },

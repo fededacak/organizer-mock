@@ -107,7 +107,8 @@ export function SeatEditModal({
             {/* Selected seats summary */}
             <div className="rounded-[14px] bg-light-gray p-4">
               <p className="text-sm text-black font-bold mb-2">
-                Setting price override for {totalSeats} seat{totalSeats !== 1 ? "s" : ""}:
+                Editing {totalSeats} seat
+                {totalSeats !== 1 ? "s" : ""}:
               </p>
               <div className="flex flex-wrap gap-2">
                 {entries.map(([section, seats]) => (
@@ -115,10 +116,6 @@ export function SeatEditModal({
                     key={section.id}
                     className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5"
                   >
-                    <div
-                      className="size-2 rounded-full"
-                      style={{ backgroundColor: section.color }}
-                    />
                     <span className="text-sm font-medium text-black">
                       {section.name}
                     </span>
@@ -145,7 +142,8 @@ export function SeatEditModal({
                     </TooltipTrigger>
                     <TooltipContent side="right">
                       <p className="max-w-[200px]">
-                        This price overrides the section price for these specific seats.
+                        This price overrides the section price for these
+                        specific seats.
                       </p>
                     </TooltipContent>
                   </Tooltip>
@@ -161,13 +159,14 @@ export function SeatEditModal({
                     } as React.ChangeEvent<HTMLInputElement>);
                   }}
                   placeholder="$0.00"
-                  className="w-full h-[47px] px-4 text-sm text-black placeholder:text-gray bg-light-gray rounded-[14px] focus:outline-none focus:ring-1 focus:ring-tp-blue transition-all duration-200 ease"
+                  className="w-full h-[47px] px-4 text-sm text-black placeholder:text-gray bg-white border border-neutral-200 rounded-[14px] focus:outline-none focus:border-tp-blue transition-colors duration-200 ease"
                   autoFocus
                 />
               </div>
 
               <p className="text-xs text-gray">
-                These seats will keep this custom price even if section prices change.
+                These seats will keep this custom price even if section prices
+                change.
               </p>
             </div>
           </div>

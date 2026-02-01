@@ -7,12 +7,19 @@ import {
   SeatmapDisplay,
   ActionsFloatingBar,
   HoldModal,
+  DeleteHoldModal,
   SeatEditModal,
   mockSections,
   mockHolds,
   useSeatSettingsControls,
 } from "@/components/seat-settings";
-import type { Section, ViewMode, Seat, Hold } from "@/components/seat-settings";
+import type {
+  Section,
+  ViewMode,
+  Seat,
+  Hold,
+  HoldState,
+} from "@/components/seat-settings";
 
 export default function SeatSettingsPage() {
   const settings = useSeatSettingsControls();
@@ -52,7 +59,7 @@ export default function SeatSettingsPage() {
         return new Set(seatIds);
       });
     },
-    [],
+    []
   );
 
   // Deselect all seats in a specific section and row
@@ -71,7 +78,7 @@ export default function SeatSettingsPage() {
         return next;
       });
     },
-    [sections, selectedSeats],
+    [sections, selectedSeats]
   );
 
   // Get selected seat objects grouped by section
@@ -80,7 +87,7 @@ export default function SeatSettingsPage() {
 
     for (const section of sections) {
       const seatsInSection = section.seats.filter((s) =>
-        selectedSeats.has(s.id),
+        selectedSeats.has(s.id)
       );
       if (seatsInSection.length > 0) {
         result.set(section, seatsInSection);
@@ -97,12 +104,12 @@ export default function SeatSettingsPage() {
         prev.map((section) => ({
           ...section,
           seats: section.seats.map((seat) =>
-            selectedSeats.has(seat.id) ? updater(seat) : seat,
+            selectedSeats.has(seat.id) ? updater(seat) : seat
           ),
-        })),
+        }))
       );
     },
-    [selectedSeats],
+    [selectedSeats]
   );
 
   // Create a new hold
@@ -124,15 +131,15 @@ export default function SeatSettingsPage() {
           seats: section.seats.map((seat) =>
             holdData.seatIds.includes(seat.id)
               ? { ...seat, status: "held" as const, holdId: newHold.id }
-              : seat,
+              : seat
           ),
-        })),
+        }))
       );
 
       // Clear selection after creating hold
       clearSelection();
     },
-    [clearSelection],
+    [clearSelection]
   );
 
   // Update an existing hold
@@ -140,8 +147,8 @@ export default function SeatSettingsPage() {
     (holdId: string, holdData: Omit<Hold, "id" | "createdAt">) => {
       setHolds((prev) =>
         prev.map((hold) =>
-          hold.id === holdId ? { ...hold, ...holdData } : hold,
-        ),
+          hold.id === holdId ? { ...hold, ...holdData } : hold
+        )
       );
 
       // Update seat associations if seatIds changed
@@ -159,10 +166,10 @@ export default function SeatSettingsPage() {
             }
             return seat;
           }),
-        })),
+        }))
       );
     },
-    [],
+    []
   );
 
   // Delete a hold and release its seats
@@ -178,20 +185,47 @@ export default function SeatSettingsPage() {
           seats: section.seats.map((seat) =>
             seat.holdId === holdId
               ? { ...seat, status: "on-sale" as const, holdId: undefined }
-              : seat,
+              : seat
           ),
-        })),
+        }))
       );
 
       clearSelection();
     },
-    [clearSelection],
+    [clearSelection]
   );
+
+  // Calculate hold state for selected seats
+  const selectedHoldState = useMemo((): { state: HoldState; hold?: Hold } => {
+    const holdIds = new Set<string>();
+
+    for (const [, seats] of selectedSeatsBySection) {
+      for (const seat of seats) {
+        if (seat.holdId) {
+          holdIds.add(seat.holdId);
+        }
+      }
+    }
+
+    if (holdIds.size === 0) {
+      return { state: "none" };
+    }
+
+    if (holdIds.size === 1) {
+      const holdId = [...holdIds][0];
+      const hold = holds.find((h) => h.id === holdId);
+      return { state: "single", hold };
+    }
+
+    return { state: "mixed" };
+  }, [selectedSeatsBySection, holds]);
 
   // Modal states for floating action bar
   const [isSeatPriceModalOpen, setIsSeatPriceModalOpen] = useState(false);
   const [isHoldModalOpen, setIsHoldModalOpen] = useState(false);
   const [editingHold, setEditingHold] = useState<Hold | undefined>(undefined);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [holdToDelete, setHoldToDelete] = useState<Hold | null>(null);
 
   // Floating action bar handlers
   const handleSeatEditPrice = useCallback(() => {
@@ -207,30 +241,65 @@ export default function SeatSettingsPage() {
       setIsSeatPriceModalOpen(false);
       clearSelection();
     },
-    [updateSelectedSeats, clearSelection],
+    [updateSelectedSeats, clearSelection]
   );
 
+  // Open hold modal for creating a new hold
   const handleOpenHoldModal = useCallback(() => {
     setEditingHold(undefined);
     setIsHoldModalOpen(true);
   }, []);
 
-  const handleHoldConfirm = useCallback(
-    (holdData: Omit<Hold, "id" | "createdAt">) => {
-      createHold(holdData);
-      setIsHoldModalOpen(false);
-      setEditingHold(undefined);
+  // Open hold modal for editing an existing hold
+  const handleEditHold = useCallback(
+    (hold: Hold) => {
+      setEditingHold(hold);
+      // Select the seats in this hold so the modal shows them
+      selectSeats(hold.seatIds, false);
+      setIsHoldModalOpen(true);
     },
-    [createHold],
+    [selectSeats]
   );
 
-  const handleHoldDelete = useCallback(() => {
-    if (editingHold) {
-      deleteHold(editingHold.id);
+  // Handle edit hold from floating bar (uses currently selected hold)
+  const handleEditHoldFromFloatingBar = useCallback(() => {
+    if (selectedHoldState.hold) {
+      setEditingHold(selectedHoldState.hold);
+      setIsHoldModalOpen(true);
     }
-    setIsHoldModalOpen(false);
-    setEditingHold(undefined);
-  }, [editingHold, deleteHold]);
+  }, [selectedHoldState.hold]);
+
+  // Handle hold modal confirm (create or update)
+  const handleHoldConfirm = useCallback(
+    (holdData: Omit<Hold, "id" | "createdAt">) => {
+      if (editingHold) {
+        // Update existing hold
+        updateHold(editingHold.id, holdData);
+      } else {
+        // Create new hold
+        createHold(holdData);
+      }
+      setIsHoldModalOpen(false);
+      setEditingHold(undefined);
+      clearSelection();
+    },
+    [editingHold, createHold, updateHold, clearSelection]
+  );
+
+  // Open delete confirmation modal from sidebar
+  const handleOpenDeleteModal = useCallback((hold: Hold) => {
+    setHoldToDelete(hold);
+    setIsDeleteModalOpen(true);
+  }, []);
+
+  // Confirm delete from delete modal
+  const handleConfirmDelete = useCallback(() => {
+    if (holdToDelete) {
+      deleteHold(holdToDelete.id);
+    }
+    setIsDeleteModalOpen(false);
+    setHoldToDelete(null);
+  }, [holdToDelete, deleteHold]);
 
   return (
     <div className="relative h-screen overflow-hidden bg-light-gray">
@@ -252,6 +321,8 @@ export default function SeatSettingsPage() {
         onClearSelection={clearSelection}
         onDeselectRow={deselectRow}
         onSelectSeats={selectSeats}
+        onEditHold={handleEditHold}
+        onDeleteHold={handleOpenDeleteModal}
         isMinimized={isSidebarMinimized}
         onToggleMinimize={() => setIsSidebarMinimized((prev) => !prev)}
       />
@@ -259,9 +330,11 @@ export default function SeatSettingsPage() {
       {/* Floating bar for seat actions - always visible */}
       <ActionsFloatingBar
         selectedCount={selectedSeats.size}
+        holdState={selectedHoldState.state}
         onClear={clearSelection}
         onEditPrice={handleSeatEditPrice}
         onHold={handleOpenHoldModal}
+        onEditHold={handleEditHoldFromFloatingBar}
       />
 
       <SeatEditModal
@@ -279,9 +352,18 @@ export default function SeatSettingsPage() {
           setEditingHold(undefined);
         }}
         onConfirm={handleHoldConfirm}
-        onDelete={editingHold ? handleHoldDelete : undefined}
         selectedSeatsBySection={selectedSeatsBySection}
         existingHold={editingHold}
+      />
+
+      <DeleteHoldModal
+        isOpen={isDeleteModalOpen}
+        hold={holdToDelete}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setHoldToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
       />
 
       {/* Leva Controls Panel */}

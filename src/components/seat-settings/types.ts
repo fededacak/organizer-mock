@@ -10,9 +10,6 @@ export type ViewMode = "status" | "price";
 // Hold type determines behavior and visibility
 export type HoldType = "internal" | "password-protected";
 
-// What happens when a hold expires
-export type ReleaseAction = "auto-release" | "manual";
-
 // Complete hold configuration
 export interface Hold {
   id: string;
@@ -21,8 +18,6 @@ export interface Hold {
   password?: string; // Required if type is "password-protected"
   startDate?: Date; // Optional start date
   endDate?: Date; // Optional expiration date
-  maxPurchaseLimit?: number; // Max tickets per redemption (e.g., 4 per code)
-  releaseAction: ReleaseAction;
   notes?: string; // Internal notes
   color: string; // Visual differentiation on seatmap
   createdAt: Date;

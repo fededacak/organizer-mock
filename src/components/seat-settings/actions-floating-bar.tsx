@@ -1,4 +1,4 @@
-import { X, Pause } from "lucide-react";
+import { X, Pause, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Icon wrapper component
@@ -16,7 +16,7 @@ function IconWrapper({
       className={cn(
         "flex items-center justify-center rounded-full",
         bgColor,
-        className,
+        className
       )}
     >
       {children}
@@ -24,18 +24,24 @@ function IconWrapper({
   );
 }
 
+export type HoldState = "none" | "single" | "mixed";
+
 interface ActionsFloatingBarProps {
   selectedCount: number;
+  holdState: HoldState;
   onClear: () => void;
   onEditPrice: () => void;
   onHold: () => void;
+  onEditHold?: () => void;
 }
 
 export function ActionsFloatingBar({
   selectedCount,
+  holdState,
   onClear,
   onEditPrice,
   onHold,
+  onEditHold,
 }: ActionsFloatingBarProps) {
   return (
     <div
@@ -45,7 +51,7 @@ export function ActionsFloatingBar({
         "transition-all duration-300 cubic-bezier(.23,1,.32,1)",
         selectedCount > 0
           ? "translate-y-0 opacity-100"
-          : "translate-y-4 opacity-0 pointer-events-none",
+          : "translate-y-4 opacity-0 pointer-events-none"
       )}
     >
       <div className="flex items-center gap-3 w-full">
@@ -75,27 +81,47 @@ export function ActionsFloatingBar({
               </svg>
             </IconWrapper>
             <span className="font-outfit text-sm font-semibold text-black">
-              Price
+              Edit Price
             </span>
           </button>
 
-          {/* Hold button */}
-          <button
-            type="button"
-            onClick={onHold}
-            className="flex items-center gap-2 rounded-full bg-light-gray px-3 py-2.5 transition-colors duration-200 ease hover:bg-soft-gray cursor-pointer"
-          >
-            <IconWrapper className="size-[18px]" bgColor="bg-tp-purple">
-              <Pause
-                className="size-2.5 text-white"
-                strokeWidth={3}
-                fill="currentColor"
-              />
-            </IconWrapper>
-            <span className="font-outfit text-sm font-semibold text-black">
-              Hold
-            </span>
-          </button>
+          {/* Hold button - conditional based on holdState */}
+          {holdState === "none" && (
+            <button
+              type="button"
+              onClick={onHold}
+              className="flex items-center gap-2 rounded-full bg-light-gray px-3 py-2.5 transition-colors duration-200 ease hover:bg-soft-gray cursor-pointer"
+            >
+              <IconWrapper className="size-[18px]" bgColor="bg-tp-purple">
+                <Pause
+                  className="size-2.5 text-white"
+                  strokeWidth={3}
+                  fill="currentColor"
+                />
+              </IconWrapper>
+              <span className="font-outfit text-sm font-semibold text-black">
+                Hold
+              </span>
+            </button>
+          )}
+
+          {/* Edit Hold button - when all selected seats share a hold */}
+          {holdState === "single" && onEditHold && (
+            <button
+              type="button"
+              onClick={onEditHold}
+              className="flex items-center gap-2 rounded-full bg-light-gray px-3 py-2.5 transition-colors duration-200 ease hover:bg-soft-gray cursor-pointer"
+            >
+              <IconWrapper className="size-[18px]" bgColor="bg-tp-purple">
+                <Pencil className="size-2.5 text-white" strokeWidth={2.5} />
+              </IconWrapper>
+              <span className="font-outfit text-sm font-semibold text-black">
+                Edit Hold
+              </span>
+            </button>
+          )}
+
+          {/* When holdState is "mixed", no hold button is shown */}
         </div>
       </div>
 
