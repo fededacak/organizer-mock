@@ -20,7 +20,11 @@ export { HoldsSection } from "./holds-section";
 export { DeleteHoldModal } from "./delete-hold-modal";
 export { SeatEditModal } from "./seat-edit-modal";
 export { SelectedSeatsList } from "./selected-seats-list";
-export { SeatmapLegend, PRICE_COLORS, getPriceColor } from "./seatmap-legend";
+export {
+  SeatmapLegend,
+  createPriceColorMap,
+  getPriceColor,
+} from "./seatmap-legend";
 export { ZoomControls } from "./zoom-controls";
 
 // Types
