@@ -46,12 +46,9 @@ function formatSeatNumbers(seats: Seat[]): string {
   return sorted.join(", ");
 }
 
-// Calculate total price for seats in a section
-function calculateSectionTotal(seats: Seat[], sectionPrice: number): number {
-  return seats.reduce(
-    (acc, seat) => acc + (seat.priceOverride ?? sectionPrice),
-    0
-  );
+// Calculate total price for seats
+function calculateSeatsTotal(seats: Seat[]): number {
+  return seats.reduce((acc, seat) => acc + seat.price, 0);
 }
 
 export function SelectedSeatsList({
@@ -65,8 +62,8 @@ export function SelectedSeatsList({
   const totalSeats = entries.reduce((acc, [, seats]) => acc + seats.length, 0);
 
   // Calculate total price across all sections
-  const totalPrice = entries.reduce((acc, [section, seats]) => {
-    return acc + calculateSectionTotal(seats, section.price);
+  const totalPrice = entries.reduce((acc, [, seats]) => {
+    return acc + calculateSeatsTotal(seats);
   }, 0);
 
   if (totalSeats === 0) {
@@ -82,7 +79,7 @@ export function SelectedSeatsList({
 
   return (
     <div className="flex flex-1 flex-col">
-      <div className="flex flex-col gap-2 px-1">
+      <div className="flex flex-col gap-2 px-1 max-h-[60vh] overflow-y-auto">
         <AnimatePresence mode="popLayout">
           {entries.map(([section, seats]) => {
             const seatsByRow = groupSeatsByRow(seats);

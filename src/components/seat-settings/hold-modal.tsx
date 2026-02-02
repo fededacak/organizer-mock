@@ -191,7 +191,7 @@ export function HoldModal({
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g., VIP Guest List, Sponsor Block"
+                placeholder="VIP Guest List, Sponsor Block"
                 className="w-full h-[47px] px-4 text-sm text-black placeholder:text-gray bg-white border border-neutral-200 rounded-[14px] focus:outline-none focus:border-tp-blue transition-colors duration-200 ease"
                 autoFocus
               />
@@ -260,19 +260,10 @@ export function HoldModal({
 
               {/* Password Field (only for password-protected) */}
               {holdType === "password-protected" && (
-                <div className="flex flex-col gap-2 bg-light-gray rounded-[14px] p-4">
-                  <div className="flex items-center justify-between">
-                    <label className="font-bold text-sm text-black">
-                      Access Code
-                    </label>
-                    <button
-                      type="button"
-                      onClick={generatePassword}
-                      className="text-xs font-semibold text-tp-blue hover:underline cursor-pointer"
-                    >
-                      Generate Code
-                    </button>
-                  </div>
+                <div className="flex flex-col gap-1.5 bg-light-gray rounded-[14px] p-4">
+                  <label className="font-bold text-sm text-black">
+                    Access code
+                  </label>
                   <div className="relative">
                     <input
                       type={showPassword ? "text" : "password"}
@@ -281,20 +272,8 @@ export function HoldModal({
                         setPassword(e.target.value.toUpperCase())
                       }
                       placeholder="Enter access code"
-                      className="w-full h-[47px] px-4 pr-12 text-sm text-black placeholder:text-gray bg-white rounded-[14px] focus:outline-none focus:ring-1 focus:ring-tp-blue transition-all duration-200 ease font-mono tracking-wider"
+                      className="w-full h-[47px] px-4 pr-12 text-sm text-black placeholder:text-gray bg-white rounded-[12px] focus:outline-none focus:ring-1 focus:ring-tp-blue transition-all duration-200 ease"
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-light-gray rounded-md transition-colors duration-200 ease cursor-pointer"
-                    >
-                      <Eye
-                        className={cn(
-                          "size-4",
-                          showPassword ? "text-tp-blue" : "text-gray"
-                        )}
-                      />
-                    </button>
                   </div>
                 </div>
               )}
@@ -337,8 +316,8 @@ export function HoldModal({
                   <div className="grid grid-cols-2 gap-3">
                     {/* Start Date */}
                     <div className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-dark-gray">
-                        Start Date
+                      <label className="text-sm font-semibold text-black">
+                        Start date
                       </label>
                       <Popover
                         open={startDateOpen}
@@ -347,9 +326,8 @@ export function HoldModal({
                         <PopoverTrigger asChild>
                           <button
                             type="button"
-                            className="h-[42px] px-3 bg-white rounded-[10px] flex items-center gap-2 text-sm text-left cursor-pointer hover:bg-soft-gray transition-colors duration-200 ease"
+                            className="h-[42px] px-3 bg-white rounded-[12px] flex items-center gap-2 text-sm text-left cursor-pointer hover:bg-soft-gray transition-colors duration-200 ease"
                           >
-                            <CalendarIcon className="size-4 text-gray" />
                             <span
                               className={startDate ? "text-black" : "text-gray"}
                             >
@@ -374,16 +352,15 @@ export function HoldModal({
 
                     {/* End Date */}
                     <div className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-dark-gray">
-                        End Date
+                      <label className="text-sm font-semibold text-black">
+                        End date
                       </label>
                       <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
                         <PopoverTrigger asChild>
                           <button
                             type="button"
-                            className="h-[42px] px-3 bg-white rounded-[10px] flex items-center gap-2 text-sm text-left cursor-pointer hover:bg-soft-gray transition-colors duration-200 ease"
+                            className="h-[42px] px-3 bg-white rounded-[12px] flex items-center gap-2 text-sm text-left cursor-pointer transition-colors duration-200 ease"
                           >
-                            <CalendarIcon className="size-4 text-gray" />
                             <span
                               className={endDate ? "text-black" : "text-gray"}
                             >
@@ -426,7 +403,7 @@ export function HoldModal({
                 type="submit"
                 className="bg-primary cursor-pointer text-white font-bold text-base px-5 py-2.5 rounded-[36px] hover:opacity-80 transition-opacity duration-200 ease active:scale-[0.98] transform"
               >
-                {isEditing ? "Save Changes" : "Create Hold"}
+                {isEditing ? "Save" : "Create Hold"}
               </button>
             </div>
           </form>

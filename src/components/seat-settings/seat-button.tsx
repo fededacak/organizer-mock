@@ -4,13 +4,17 @@ import { cn } from "@/lib/utils";
 import type { Seat, ViewMode } from "./types";
 import { getPriceColor } from "./seatmap-legend";
 import { getSeatStatusColor } from "./seatmap-utils";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 
 export interface SeatButtonProps {
   seat: Seat;
   sectionColor: string;
-  sectionPrice: number;
   viewMode: ViewMode;
-  priceRange: { min: number; max: number };
+  priceColorMap: Map<number, string>;
   holdColor?: string;
   holdName?: string;
   isSelected: boolean;
@@ -28,9 +32,8 @@ export interface SeatButtonProps {
 export function SeatButton({
   seat,
   sectionColor,
-  sectionPrice,
   viewMode,
-  priceRange,
+  priceColorMap,
   holdColor,
   holdName,
   isSelected,
@@ -40,14 +43,12 @@ export function SeatButton({
   onMouseEnter,
   seatRef,
 }: SeatButtonProps) {
-  const effectivePrice = seat.priceOverride ?? sectionPrice;
-  const hasOverride = seat.priceOverride !== undefined;
-  const priceLabel = `$${effectivePrice}`;
+  const priceLabel = `$${seat.price}`;
 
   // Determine background color based on view mode
   const isPriceView = viewMode === "price";
   const priceColor = isPriceView
-    ? getPriceColor(effectivePrice, priceRange.min, priceRange.max)
+    ? getPriceColor(seat.price, priceColorMap)
     : undefined;
 
   // For status view, use hold color if available
@@ -56,35 +57,41 @@ export function SeatButton({
   const statusClass = getSeatStatusColor(seat.status, holdColor);
 
   // Build tooltip
-  let tooltip = `Row ${seat.row}, Seat ${seat.number} (${seat.status})`;
+  let tooltip = `Row ${seat.row}, Seat ${seat.number}`;
   if (holdName && seat.status === "held") {
-    tooltip = `Row ${seat.row}, Seat ${seat.number} - ${holdName}`;
+    tooltip += ` - ${holdName}`;
   }
-  tooltip += ` - ${priceLabel}${hasOverride ? " (override)" : ""}`;
+  tooltip += ` - ${priceLabel}`;
 
   return (
-    <button
-      ref={seatRef}
-      type="button"
-      onClick={onToggle}
-      onMouseDown={onMouseDown}
-      onMouseEnter={onMouseEnter}
-      className={cn(
-        "size-6 rounded-[2px] transition-all duration-150 ease-out cursor-pointer relative",
-        !isPriceView && statusClass,
-        isSelected && "ring-2 ring-tp-blue ring-offset-1",
-        isInLasso && !isSelected && "ring-2 ring-tp-blue/50 ring-offset-1",
-        !isSelected && !isInLasso && "hover:ring-2 hover:ring-offset-1",
-      )}
-      style={{
-        backgroundColor: isPriceView ? priceColor : statusBgColor,
-        boxShadow:
-          !isSelected && !isInLasso
-            ? `0 0 0 0.5px ${sectionColor}50`
-            : undefined,
-      }}
-      title={tooltip}
-      data-seat-id={seat.id}
-    />
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          ref={seatRef}
+          type="button"
+          onClick={onToggle}
+          onMouseDown={onMouseDown}
+          onMouseEnter={onMouseEnter}
+          className={cn(
+            "size-6 rounded-[2px] transition-all duration-150 ease-out cursor-pointer relative",
+            !isPriceView && statusClass,
+            isSelected && "ring-2 ring-tp-blue ring-offset-1",
+            isInLasso && !isSelected && "ring-2 ring-tp-blue/50 ring-offset-1",
+            !isSelected && !isInLasso && "hover:ring-2 hover:ring-offset-1"
+          )}
+          style={{
+            backgroundColor: isPriceView ? priceColor : statusBgColor,
+            boxShadow:
+              !isSelected && !isInLasso
+                ? `0 0 0 0.5px ${sectionColor}50`
+                : undefined,
+          }}
+          data-seat-id={seat.id}
+        />
+      </TooltipTrigger>
+      <TooltipContent className="bg-gray-900 text-white border-none">
+        {tooltip}
+      </TooltipContent>
+    </Tooltip>
   );
 }

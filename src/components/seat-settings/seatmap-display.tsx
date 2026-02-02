@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useRef, useCallback, useMemo } from "react";
-import type { Section, Seat, ViewMode, Hold } from "./types";
+import type { Section, ViewMode, Hold } from "./types";
 import type { SeatSettingsControlsSettings } from "./use-seat-settings-controls";
-import { SeatmapLegend } from "./seatmap-legend";
+import { SeatmapLegend, createPriceColorMap } from "./seatmap-legend";
 import { ZoomControls } from "./zoom-controls";
 import { MIN_SCALE, MAX_SCALE } from "./seatmap-utils";
 import { SectionBlock } from "./section-block";
@@ -69,24 +69,9 @@ export function SeatmapDisplay({
     return map;
   }, [holds]);
 
-  // Calculate price range for color scaling
-  const priceRange = useMemo(() => {
-    let min = Infinity;
-    let max = -Infinity;
-    for (const section of sections) {
-      min = Math.min(min, section.price);
-      max = Math.max(max, section.price);
-      for (const seat of section.seats) {
-        if (seat.priceOverride !== undefined) {
-          min = Math.min(min, seat.priceOverride);
-          max = Math.max(max, seat.priceOverride);
-        }
-      }
-    }
-    return {
-      min: min === Infinity ? 0 : min,
-      max: max === -Infinity ? 0 : max,
-    };
+  // Create price color map for consistent coloring
+  const priceColorMap = useMemo(() => {
+    return createPriceColorMap(sections);
   }, [sections]);
 
   // Find sections by name for positioning
@@ -127,7 +112,7 @@ export function SeatmapDisplay({
       // Otherwise try lasso selection
       handleLassoMouseDown(e);
     },
-    [handleViewportMouseDown, handleLassoMouseDown],
+    [handleViewportMouseDown, handleLassoMouseDown]
   );
 
   // Handle seat mouse down (for shift-click range selection)
@@ -151,7 +136,7 @@ export function SeatmapDisplay({
         setLastSelectedSeat(seatId);
       }
     },
-    [lastSelectedSeat, getAllSeats, onSelectSeats],
+    [lastSelectedSeat, getAllSeats, onSelectSeats]
   );
 
   // Handle seat mouse enter (for potential drag selection)
@@ -165,7 +150,7 @@ export function SeatmapDisplay({
       onToggleSeat(seatId);
       setLastSelectedSeat(seatId);
     },
-    [onToggleSeat],
+    [onToggleSeat]
   );
 
   // Shared props for all section blocks
@@ -173,7 +158,7 @@ export function SeatmapDisplay({
     selectedSeats,
     lassoSeats,
     viewMode,
-    priceRange,
+    priceColorMap,
     holdMap,
     onToggleSeat: handleToggleSeat,
     onSeatMouseDown: handleSeatMouseDown,
@@ -193,17 +178,16 @@ export function SeatmapDisplay({
           onZoomOut={handleZoomOut}
           onReset={handleResetZoom}
         />
-                <SeatmapLegend
+        <SeatmapLegend
           sections={sections}
           holds={holds}
           selectedSeats={selectedSeats}
           viewMode={viewMode}
-          priceRange={priceRange}
+          priceColorMap={priceColorMap}
           onSelectSeats={onSelectSeats}
           onViewModeChange={onViewModeChange}
         />
       </div>
-
 
       {/* Seatmap Container */}
       <div
@@ -234,9 +218,7 @@ export function SeatmapDisplay({
               {balconyLeft && (
                 <SectionBlock section={balconyLeft} {...sectionBlockProps} />
               )}
-              {floor && (
-                <SectionBlock section={floor} {...sectionBlockProps} />
-              )}
+              {floor && <SectionBlock section={floor} {...sectionBlockProps} />}
               {balconyRight && (
                 <SectionBlock section={balconyRight} {...sectionBlockProps} />
               )}

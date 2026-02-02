@@ -1,45 +1,40 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Section, ViewMode, SeatStatus, Hold } from "./types";
 
-// Price tier colors (low to high)
-export const PRICE_COLORS = [
-  { color: "#10B981", label: "Lowest" }, // Green
-  { color: "#84CC16", label: "Low" }, // Lime
-  { color: "#F59E0B", label: "Medium" }, // Amber
-  { color: "#EF4444", label: "High" }, // Red
-];
-
-// Get price color based on price relative to min/max
-export function getPriceColor(
-  price: number,
-  minPrice: number,
-  maxPrice: number
-): string {
-  if (minPrice === maxPrice) return PRICE_COLORS[1].color;
-  const ratio = (price - minPrice) / (maxPrice - minPrice);
-  const index = Math.min(
-    Math.floor(ratio * PRICE_COLORS.length),
-    PRICE_COLORS.length - 1
-  );
-  return PRICE_COLORS[index].color;
+// Generate a consistent random color for a given price using a simple hash
+function generateColorFromPrice(price: number): string {
+  // Use price as seed for consistent colors
+  const hue = (price * 137.508) % 360; // Golden angle approximation for good distribution
+  const saturation = 65 + (price % 20); // 65-85%
+  const lightness = 45 + (price % 15); // 45-60%
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 }
 
-// Get price tier index (0-3) based on price relative to min/max
-export function getPriceTierIndex(
+// Create a color map for all unique prices
+export function createPriceColorMap(sections: Section[]): Map<number, string> {
+  const prices = new Set<number>();
+  for (const section of sections) {
+    for (const seat of section.seats) {
+      prices.add(seat.price);
+    }
+  }
+
+  const colorMap = new Map<number, string>();
+  for (const price of prices) {
+    colorMap.set(price, generateColorFromPrice(price));
+  }
+  return colorMap;
+}
+
+// Get color for a specific price from a color map
+export function getPriceColor(
   price: number,
-  minPrice: number,
-  maxPrice: number
-): number {
-  if (minPrice === maxPrice) return 1;
-  const ratio = (price - minPrice) / (maxPrice - minPrice);
-  return Math.min(
-    Math.floor(ratio * PRICE_COLORS.length),
-    PRICE_COLORS.length - 1
-  );
+  priceColorMap: Map<number, string>
+): string {
+  return priceColorMap.get(price) ?? generateColorFromPrice(price);
 }
 
 interface SeatmapLegendProps {
@@ -47,7 +42,7 @@ interface SeatmapLegendProps {
   holds: Hold[];
   selectedSeats: Set<string>;
   viewMode: ViewMode;
-  priceRange: { min: number; max: number };
+  priceColorMap: Map<number, string>;
   onSelectSeats: (seatIds: string[], additive?: boolean) => void;
   onViewModeChange: (mode: ViewMode) => void;
 }
@@ -98,7 +93,7 @@ export function SeatmapLegend({
   holds,
   selectedSeats,
   viewMode,
-  priceRange,
+  priceColorMap,
   onSelectSeats,
   onViewModeChange,
 }: SeatmapLegendProps) {
@@ -118,26 +113,20 @@ export function SeatmapLegend({
     [sections]
   );
 
-  // Get all seats matching a specific price tier
-  const getSeatsByPriceTier = useCallback(
-    (tierIndex: number): string[] => {
+  // Get all seats matching a specific price
+  const getSeatsByPrice = useCallback(
+    (price: number): string[] => {
       const seatIds: string[] = [];
       for (const section of sections) {
         for (const seat of section.seats) {
-          const effectivePrice = seat.priceOverride ?? section.price;
-          const seatTierIndex = getPriceTierIndex(
-            effectivePrice,
-            priceRange.min,
-            priceRange.max
-          );
-          if (seatTierIndex === tierIndex) {
+          if (seat.price === price) {
             seatIds.push(seat.id);
           }
         }
       }
       return seatIds;
     },
-    [sections, priceRange]
+    [sections]
   );
 
   // Check if all seats in a list are selected
@@ -154,55 +143,55 @@ export function SeatmapLegend({
     (status: SeatStatus) => {
       const matchingSeats = getSeatsByStatus(status);
       if (areAllSelected(matchingSeats)) {
-        // Toggle off - clear selection
         onSelectSeats([], false);
       } else {
-        // Select all matching
         onSelectSeats(matchingSeats, false);
       }
     },
     [getSeatsByStatus, areAllSelected, onSelectSeats]
   );
 
-  // Handle price tier legend click
-  const handlePriceTierClick = useCallback(
-    (tierIndex: number) => {
-      const matchingSeats = getSeatsByPriceTier(tierIndex);
+  // Handle price legend click
+  const handlePriceClick = useCallback(
+    (price: number) => {
+      const matchingSeats = getSeatsByPrice(price);
       if (areAllSelected(matchingSeats)) {
-        // Toggle off - clear selection
         onSelectSeats([], false);
       } else {
-        // Select all matching
         onSelectSeats(matchingSeats, false);
       }
     },
-    [getSeatsByPriceTier, areAllSelected, onSelectSeats]
+    [getSeatsByPrice, areAllSelected, onSelectSeats]
   );
 
   // Handle hold legend click
   const handleHoldClick = useCallback(
     (hold: Hold) => {
       if (areAllSelected(hold.seatIds)) {
-        // Toggle off - clear selection
         onSelectSeats([], false);
       } else {
-        // Select all seats in this hold
         onSelectSeats(hold.seatIds, false);
       }
     },
     [areAllSelected, onSelectSeats]
   );
 
-  // Memoize price tier labels with actual prices
-  const priceTierLabels = useMemo(() => {
-    const { min, max } = priceRange;
-    const step = (max - min) / (PRICE_COLORS.length - 1);
-
-    return PRICE_COLORS.map((_, index) => {
-      const price = Math.round(min + step * index);
-      return `$${price}`;
-    });
-  }, [priceRange]);
+  // Get unique prices sorted from low to high with their counts
+  const priceData = useMemo(() => {
+    const priceCounts = new Map<number, number>();
+    for (const section of sections) {
+      for (const seat of section.seats) {
+        priceCounts.set(seat.price, (priceCounts.get(seat.price) ?? 0) + 1);
+      }
+    }
+    return Array.from(priceCounts.entries())
+      .sort((a, b) => a[0] - b[0])
+      .map(([price, count]) => ({
+        price,
+        count,
+        color: priceColorMap.get(price) ?? generateColorFromPrice(price),
+      }));
+  }, [sections, priceColorMap]);
 
   // Filter holds that have seats
   const activeHolds = useMemo(() => {
@@ -219,26 +208,6 @@ export function SeatmapLegend({
     }
     return counts;
   }, [sections]);
-
-  // Count seats by price tier
-  const priceTierCounts = useMemo(() => {
-    const counts = PRICE_COLORS.map(() => 0);
-    for (const section of sections) {
-      for (const seat of section.seats) {
-        const effectivePrice = seat.priceOverride ?? section.price;
-        const tierIndex = getPriceTierIndex(
-          effectivePrice,
-          priceRange.min,
-          priceRange.max
-        );
-        counts[tierIndex]++;
-      }
-    }
-    return counts;
-  }, [sections, priceRange]);
-
-  // Check if we have multiple rows (holds visible in status view)
-  const hasMultipleRows = viewMode === "status" && activeHolds.length > 0;
 
   return (
     <div
@@ -292,13 +261,13 @@ export function SeatmapLegend({
           </>
         ) : (
           <>
-            {PRICE_COLORS.map((tier, index) => (
+            {priceData.map(({ price, count, color }) => (
               <LegendItem
-                key={tier.label}
-                color={tier.color}
-                label={priceTierLabels[index]}
-                seatCount={priceTierCounts[index]}
-                onClick={() => handlePriceTierClick(index)}
+                key={price}
+                color={color}
+                label={`$${price}`}
+                seatCount={count}
+                onClick={() => handlePriceClick(price)}
               />
             ))}
           </>

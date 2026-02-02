@@ -9,7 +9,7 @@ export interface SectionBlockProps {
   selectedSeats: Set<string>;
   lassoSeats: Set<string>;
   viewMode: ViewMode;
-  priceRange: { min: number; max: number };
+  priceColorMap: Map<number, string>;
   holdMap: Map<string, Hold>;
   onToggleSeat: (seatId: string) => void;
   onSeatMouseDown: (seatId: string, e: React.MouseEvent) => void;
@@ -27,7 +27,7 @@ export function SectionBlock({
   selectedSeats,
   lassoSeats,
   viewMode,
-  priceRange,
+  priceColorMap,
   holdMap,
   onToggleSeat,
   onSeatMouseDown,
@@ -40,7 +40,7 @@ export function SectionBlock({
 
   // Sort rows alphabetically
   const sortedRows = Array.from(seatsByRow.entries()).sort(([a], [b]) =>
-    a.localeCompare(b),
+    a.localeCompare(b)
   );
 
   return (
@@ -72,9 +72,8 @@ export function SectionBlock({
                     key={seat.id}
                     seat={seat}
                     sectionColor={sectionColor}
-                    sectionPrice={section.price}
                     viewMode={viewMode}
-                    priceRange={priceRange}
+                    priceColorMap={priceColorMap}
                     holdColor={hold?.color}
                     holdName={hold?.name}
                     isSelected={selectedSeats.has(seat.id)}

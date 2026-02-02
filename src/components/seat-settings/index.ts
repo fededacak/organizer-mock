@@ -10,6 +10,7 @@ export { useLassoSelection } from "./use-lasso-selection";
 
 // Sub-components
 export { ActionsFloatingBar } from "./actions-floating-bar";
+export { BackButton } from "./back-button";
 export type { HoldState } from "./actions-floating-bar";
 export { HoldModal } from "./hold-modal";
 export { HoldsSection } from "./holds-section";
@@ -28,6 +29,7 @@ export type {
   ViewMode,
   Hold,
   HoldType,
+  FeeOption,
 } from "./types";
 
 // Constants

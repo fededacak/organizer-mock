@@ -6,6 +6,7 @@ import {
   SeatManagementSidebar,
   SeatmapDisplay,
   ActionsFloatingBar,
+  BackButton,
   HoldModal,
   DeleteHoldModal,
   SeatEditModal,
@@ -19,6 +20,7 @@ import type {
   Seat,
   Hold,
   HoldState,
+  FeeOption,
 } from "@/components/seat-settings";
 
 export default function SeatSettingsPage() {
@@ -233,10 +235,11 @@ export default function SeatSettingsPage() {
   }, []);
 
   const handleSeatPriceUpdate = useCallback(
-    (newPrice: number) => {
+    (newPrice: number, feeOption: FeeOption) => {
       updateSelectedSeats((seat) => ({
         ...seat,
-        priceOverride: newPrice,
+        price: newPrice,
+        feeOption,
       }));
       setIsSeatPriceModalOpen(false);
       clearSelection();
@@ -365,6 +368,9 @@ export default function SeatSettingsPage() {
         isMinimized={isSidebarMinimized}
         onToggleMinimize={() => setIsSidebarMinimized((prev) => !prev)}
       />
+
+      {/* Back button - positioned based on sidebar state */}
+      <BackButton sidebarExpanded={!isSidebarMinimized} />
 
       {/* Floating bar for seat actions - always visible */}
       <ActionsFloatingBar

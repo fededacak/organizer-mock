@@ -154,7 +154,7 @@ export function SeatManagementSidebar({
         )}
         style={{ transitionTimingFunction: EASE_OUT_CUBIC }}
       >
-        <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto">
+        <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto border-b border-soft-gray">
           {/* Selections Section */}
           <CollapsibleSection
             title={`Selections${

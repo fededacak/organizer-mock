@@ -33,13 +33,17 @@ export const HOLD_COLORS = [
   { name: "Pink", value: "#EC4899", label: "Staff" },
 ] as const;
 
+// Fee option type
+export type FeeOption = "pass_to_buyer" | "absorb";
+
 // Individual seat within a section
 export interface Seat {
   id: string;
   row: string; // e.g., "A", "B", "1"
   number: string; // e.g., "1", "2", "101"
   status: SeatStatus;
-  priceOverride?: number; // Optional seat-level price override
+  price: number; // Seat price
+  feeOption: FeeOption; // How fees are handled
   holdId?: string; // Reference to Hold
 }
 
@@ -47,7 +51,6 @@ export interface Seat {
 export interface Section {
   id: string;
   name: string; // e.g., "Section A", "Floor", "Balcony Left"
-  price: number; // Section-level pricing
   status: SectionStatus;
   capacity: number; // Total seats in section
   available: number; // Seats still available

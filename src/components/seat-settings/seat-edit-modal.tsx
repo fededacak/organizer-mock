@@ -1,22 +1,35 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Info } from "lucide-react";
+import { X, Info, ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { Section, Seat } from "./types";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import type { Section, Seat, FeeOption } from "./types";
 
 interface SeatEditModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (newPrice: number) => void;
+  onConfirm: (newPrice: number, feeOption: FeeOption) => void;
   selectedSeatsBySection: Map<Section, Seat[]>;
   sections: Section[];
 }
+
+const FEE_OPTIONS = [
+  { value: "pass_to_buyer", label: "Pass fees to buyer" },
+  { value: "absorb", label: "Absorb fees" },
+] as const;
+
+// Platform fee percentage (example: 10%)
+const PLATFORM_FEE_PERCENT = 0.1;
 
 const springTransition = {
   type: "spring" as const,
@@ -32,6 +45,8 @@ export function SeatEditModal({
   sections,
 }: SeatEditModalProps) {
   const [price, setPrice] = useState("");
+  const [feeOption, setFeeOption] = useState<FeeOption>("pass_to_buyer");
+  const [feePopoverOpen, setFeePopoverOpen] = useState(false);
 
   const entries = Array.from(selectedSeatsBySection.entries());
   const totalSeats = entries.reduce((acc, [, seats]) => acc + seats.length, 0);
@@ -40,8 +55,28 @@ export function SeatEditModal({
   useEffect(() => {
     if (isOpen) {
       setPrice("");
+      setFeeOption("pass_to_buyer");
     }
   }, [isOpen]);
+
+  // Calculate fees
+  const priceNum = parseFloat(price) || 0;
+  const platformFee = priceNum * PLATFORM_FEE_PERCENT;
+
+  let youGet = 0;
+  let buyerPays = 0;
+
+  if (feeOption === "pass_to_buyer") {
+    youGet = priceNum;
+    buyerPays = priceNum + platformFee;
+  } else {
+    youGet = priceNum - platformFee;
+    buyerPays = priceNum;
+  }
+
+  const formatCurrency = (amount: number) => {
+    return `$${amount.toFixed(2)}`;
+  };
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9.]/g, "");
@@ -55,7 +90,7 @@ export function SeatEditModal({
     e.preventDefault();
     const numericPrice = parseFloat(price);
     if (!isNaN(numericPrice) && numericPrice >= 0) {
-      onConfirm(numericPrice);
+      onConfirm(numericPrice, feeOption);
     }
   };
 
@@ -128,40 +163,105 @@ export function SeatEditModal({
             </div>
 
             {/* Price Section */}
-            <div className="flex flex-col gap-3">
+            <div className="bg-light-gray rounded-[20px] p-4 flex flex-col gap-3">
+              {/* Price per seat */}
               <div className="flex flex-col gap-1">
+                <label className="font-bold text-sm text-black">
+                  Price per seat ($)
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={price ? `$${price}` : ""}
+                    onChange={(e) => {
+                      const val = e.target.value.replace("$", "");
+                      handlePriceChange({
+                        target: { value: val },
+                      } as React.ChangeEvent<HTMLInputElement>);
+                    }}
+                    placeholder="$0.00"
+                    className="w-full h-[47px] px-4 pr-[160px] text-sm text-black placeholder:text-gray bg-white rounded-[16px] focus:outline-none focus:ring-1 focus:ring-tp-blue transition-all duration-200 ease"
+                    autoFocus
+                  />
+                  {/* Fee option dropdown */}
+                  <Popover
+                    open={feePopoverOpen}
+                    onOpenChange={setFeePopoverOpen}
+                  >
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        className="absolute right-[5px] top-1/2 -translate-y-1/2 h-[37px] px-3 bg-light-gray rounded-[12px] flex items-center gap-4 cursor-pointer hover:bg-soft-gray transition-colors duration-200 ease"
+                      >
+                        <span className="text-xs font-semibold text-black">
+                          {
+                            FEE_OPTIONS.find((o) => o.value === feeOption)
+                              ?.label
+                          }
+                        </span>
+                        <ChevronDown className="w-4 h-4 opacity-80" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-[180px] p-1 rounded-[12px]"
+                      align="end"
+                      sideOffset={4}
+                    >
+                      {FEE_OPTIONS.map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => {
+                            setFeeOption(option.value);
+                            setFeePopoverOpen(false);
+                          }}
+                          className={`w-full px-3 py-2 text-left text-sm rounded-[8px] cursor-pointer transition-colors duration-200 ease ${
+                            feeOption === option.value
+                              ? "bg-light-gray font-semibold"
+                              : "hover:bg-light-gray"
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+
+              {/* Summary line */}
+              <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <label className="font-bold text-sm text-black">
-                    Price per seat ($)
-                  </label>
+                  <span className="font-bold text-xs text-black">
+                    You get: {formatCurrency(youGet)}
+                  </span>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button type="button" className="cursor-default">
-                        <Info className="w-3.5 h-3.5 text-gray" />
+                        <Info className="w-5 h-5 text-gray" />
                       </button>
                     </TooltipTrigger>
-                    <TooltipContent side="right">
-                      <p className="max-w-[200px]">
-                        This price overrides the section price for these
-                        specific seats.
-                      </p>
+                    <TooltipContent side="bottom">
+                      <p>Amount you receive after fees</p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  value={price ? `$${price}` : ""}
-                  onChange={(e) => {
-                    const val = e.target.value.replace("$", "");
-                    handlePriceChange({
-                      target: { value: val },
-                    } as React.ChangeEvent<HTMLInputElement>);
-                  }}
-                  placeholder="$0.00"
-                  className="w-full h-[47px] px-4 text-sm text-black placeholder:text-gray bg-white border border-neutral-200 rounded-[14px] focus:outline-none focus:border-tp-blue transition-colors duration-200 ease"
-                  autoFocus
-                />
+                <span className="text-xs font-bold text-mid-gray">|</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-xs text-black">
+                    Buyer pays: {formatCurrency(buyerPays)}
+                  </span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button type="button" className="cursor-default">
+                        <Info className="w-5 h-5 text-gray" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p>Total amount the buyer will pay</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
               </div>
             </div>
           </div>

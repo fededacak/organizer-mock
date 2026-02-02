@@ -26,7 +26,7 @@ export interface UseViewportReturn {
  * Handles wheel zoom, keyboard panning (space+drag), and zoom controls
  */
 export function useViewport(
-  options: UseViewportOptions = {},
+  options: UseViewportOptions = {}
 ): UseViewportReturn {
   const { initialViewport = { x: 0, y: 0, scale: 1 } } = options;
 
@@ -66,7 +66,7 @@ export function useViewport(
         scale: newScale,
       });
     },
-    [viewport],
+    [viewport]
   );
 
   // Attach wheel event listener (needs passive: false for preventDefault)
@@ -81,6 +81,16 @@ export function useViewport(
   // Handle space key for panning mode
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't intercept space when typing in form fields
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
       if (e.code === "Space" && !e.repeat) {
         e.preventDefault();
         setIsSpacePressed(true);
@@ -219,7 +229,7 @@ export function useViewport(
       }
       return false;
     },
-    [isSpacePressed],
+    [isSpacePressed]
   );
 
   return {

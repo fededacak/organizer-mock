@@ -71,7 +71,13 @@ function HoldItem({
       </div>
 
       {/* Action buttons */}
-      <div className="flex items-center gap-1">
+      <div
+        className="flex items-center gap-1"
+        onMouseDown={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
+        onPointerUp={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           type="button"
           onClick={(e) => {

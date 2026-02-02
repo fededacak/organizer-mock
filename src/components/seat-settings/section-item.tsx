@@ -1,8 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import type { Section, SectionStatus } from "./types";
-import { Checkbox } from "./checkbox";
 
 // Status badge for sections
 function SectionStatusBadge({ status }: { status: SectionStatus }) {
@@ -33,7 +33,7 @@ function SectionStatusBadge({ status }: { status: SectionStatus }) {
     <div
       className={cn(
         "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full",
-        config.bgColor,
+        config.bgColor
       )}
     >
       <div className={cn("w-2 h-2 rounded-full", config.dotColor)} />
@@ -55,6 +55,16 @@ export function SectionItem({
   isSelected,
   onToggle,
 }: SectionItemProps) {
+  // Calculate price range from seats
+  const priceDisplay = useMemo(() => {
+    if (section.seats.length === 0) return "";
+    const prices = section.seats.map((s) => s.price);
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    if (min === max) return `$${min}`;
+    return `$${min}-$${max}`;
+  }, [section.seats]);
+
   return (
     <div
       onClick={onToggle}
@@ -62,11 +72,9 @@ export function SectionItem({
         "flex w-full items-center gap-4 rounded-[14px] border bg-white px-4 py-3 pl-3 text-left transition-colors duration-200 ease cursor-pointer",
         isSelected
           ? "border-tp-blue bg-tp-blue/5"
-          : "border-border hover:bg-light-gray",
+          : "border-border hover:bg-light-gray"
       )}
     >
-      {/* <Checkbox checked={isSelected} onChange={onToggle} /> */}
-
       {/* Color indicator */}
       <div
         className="h-full w-2 shrink-0 rounded-full"
@@ -79,7 +87,7 @@ export function SectionItem({
             {section.name}
           </span>
           <span className="font-outfit text-base font-bold text-black">
-            ${section.price}
+            {priceDisplay}
           </span>
         </div>
 
