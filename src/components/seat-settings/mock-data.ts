@@ -149,3 +149,102 @@ export const sectionGridConfig: Record<
   "section-vip": { rows: 2, seatsPerRow: 5 },
   "section-upper-deck": { rows: 4, seatsPerRow: 10 },
 };
+
+// ============================================
+// TABLE LAYOUT MOCK DATA
+// ============================================
+
+// Helper to generate seats for a table (arranged in a circle)
+function generateTableSeats(
+  tableNumber: number,
+  seatsCount: number,
+  price: number,
+  soldPercentage: number = 0.2
+): Seat[] {
+  const seats: Seat[] = [];
+
+  for (let s = 1; s <= seatsCount; s++) {
+    const seatId = `table-${tableNumber}-${s}`;
+    const random = Math.random();
+    let status: SeatStatus = "on-sale";
+
+    if (random < soldPercentage) {
+      status = "sold";
+    }
+
+    seats.push({
+      id: seatId,
+      row: `${tableNumber}`, // Table number as row
+      number: `${s}`, // Seat position around table
+      status,
+      price,
+      feeOption: "pass_to_buyer",
+    });
+  }
+
+  return seats;
+}
+
+// Table colors for visual variety
+const TABLE_COLORS = [
+  "#4F46E5", // Indigo
+  "#0EA5E9", // Sky
+  "#10B981", // Emerald
+  "#F59E0B", // Amber
+  "#EC4899", // Pink
+  "#8B5CF6", // Violet
+];
+
+// Generate 12 tables with varying seat counts and prices
+function generateMockTables(): Section[] {
+  const tables: Section[] = [];
+
+  // Front row tables (closer to stage) - 4 tables, 6 seats each, higher price
+  for (let i = 1; i <= 4; i++) {
+    const seats = generateTableSeats(i, 6, 200, 0.3);
+    const sold = seats.filter((s) => s.status === "sold").length;
+    tables.push({
+      id: `table-${i}`,
+      name: `Table ${i}`,
+      status: "on-sale",
+      capacity: 6,
+      available: 6 - sold,
+      color: TABLE_COLORS[(i - 1) % TABLE_COLORS.length],
+      seats,
+    });
+  }
+
+  // Middle row tables - 4 tables, 8 seats each, medium price
+  for (let i = 5; i <= 8; i++) {
+    const seats = generateTableSeats(i, 8, 150, 0.2);
+    const sold = seats.filter((s) => s.status === "sold").length;
+    tables.push({
+      id: `table-${i}`,
+      name: `Table ${i}`,
+      status: "on-sale",
+      capacity: 8,
+      available: 8 - sold,
+      color: TABLE_COLORS[(i - 1) % TABLE_COLORS.length],
+      seats,
+    });
+  }
+
+  // Back row tables - 4 tables, 10 seats each, lower price
+  for (let i = 9; i <= 12; i++) {
+    const seats = generateTableSeats(i, 10, 100, 0.15);
+    const sold = seats.filter((s) => s.status === "sold").length;
+    tables.push({
+      id: `table-${i}`,
+      name: `Table ${i}`,
+      status: "on-sale",
+      capacity: 10,
+      available: 10 - sold,
+      color: TABLE_COLORS[(i - 1) % TABLE_COLORS.length],
+      seats,
+    });
+  }
+
+  return tables;
+}
+
+export const mockTables: Section[] = generateMockTables();

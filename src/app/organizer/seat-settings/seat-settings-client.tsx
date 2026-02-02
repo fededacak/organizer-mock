@@ -12,6 +12,7 @@ import {
   SeatEditModal,
   mockSections,
   mockHolds,
+  mockTables,
   useSeatSettingsControls,
 } from "@/components/seat-settings";
 import type {
@@ -26,10 +27,16 @@ import type {
 export function SeatSettingsClient() {
   const settings = useSeatSettingsControls();
   const [sections, setSections] = useState<Section[]>(mockSections);
+  const [tables, setTables] = useState<Section[]>(mockTables);
   const [holds, setHolds] = useState<Hold[]>(mockHolds);
   const [selectedSeats, setSelectedSeats] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<ViewMode>("status");
   const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
+
+  // Determine active data based on layout variant
+  const isTableLayout = settings.layoutVariant === "tables";
+  const activeSections = isTableLayout ? tables : sections;
+  const setActiveSections = isTableLayout ? setTables : setSections;
 
   // Clear all selections
   const clearSelection = useCallback(() => {
@@ -67,7 +74,7 @@ export function SeatSettingsClient() {
   // Deselect all seats in a specific section and row
   const deselectRow = useCallback(
     (sectionId: string, row: string) => {
-      const section = sections.find((s) => s.id === sectionId);
+      const section = activeSections.find((s) => s.id === sectionId);
       if (!section) return;
 
       const seatsToRemove = section.seats
@@ -80,14 +87,14 @@ export function SeatSettingsClient() {
         return next;
       });
     },
-    [sections, selectedSeats]
+    [activeSections, selectedSeats]
   );
 
   // Get selected seat objects grouped by section
   const selectedSeatsBySection = useMemo(() => {
     const result: Map<Section, Seat[]> = new Map();
 
-    for (const section of sections) {
+    for (const section of activeSections) {
       const seatsInSection = section.seats.filter((s) =>
         selectedSeats.has(s.id)
       );
@@ -97,12 +104,12 @@ export function SeatSettingsClient() {
     }
 
     return result;
-  }, [sections, selectedSeats]);
+  }, [activeSections, selectedSeats]);
 
   // Update selected seats (for status changes, price overrides, holds)
   const updateSelectedSeats = useCallback(
     (updater: (seat: Section["seats"][0]) => Section["seats"][0]) => {
-      setSections((prev) =>
+      setActiveSections((prev) =>
         prev.map((section) => ({
           ...section,
           seats: section.seats.map((seat) =>
@@ -111,7 +118,7 @@ export function SeatSettingsClient() {
         }))
       );
     },
-    [selectedSeats]
+    [selectedSeats, setActiveSections]
   );
 
   // Create a new hold
@@ -127,7 +134,7 @@ export function SeatSettingsClient() {
       setHolds((prev) => [...prev, newHold]);
 
       // Update seats to reference this hold and set status to held
-      setSections((prev) =>
+      setActiveSections((prev) =>
         prev.map((section) => ({
           ...section,
           seats: section.seats.map((seat) =>
@@ -141,7 +148,7 @@ export function SeatSettingsClient() {
       // Clear selection after creating hold
       clearSelection();
     },
-    [clearSelection]
+    [clearSelection, setActiveSections]
   );
 
   // Update an existing hold
@@ -154,7 +161,7 @@ export function SeatSettingsClient() {
       );
 
       // Update seat associations if seatIds changed
-      setSections((prev) =>
+      setActiveSections((prev) =>
         prev.map((section) => ({
           ...section,
           seats: section.seats.map((seat) => {
@@ -171,7 +178,7 @@ export function SeatSettingsClient() {
         }))
       );
     },
-    []
+    [setActiveSections]
   );
 
   // Delete a hold and release its seats
@@ -181,7 +188,7 @@ export function SeatSettingsClient() {
       setHolds((prev) => prev.filter((hold) => hold.id !== holdId));
 
       // Release seats
-      setSections((prev) =>
+      setActiveSections((prev) =>
         prev.map((section) => ({
           ...section,
           seats: section.seats.map((seat) =>
@@ -194,7 +201,7 @@ export function SeatSettingsClient() {
 
       clearSelection();
     },
-    [clearSelection]
+    [clearSelection, setActiveSections]
   );
 
   // Calculate hold state for selected seats
@@ -297,7 +304,7 @@ export function SeatSettingsClient() {
     );
 
     // Update seats to remove hold reference
-    setSections((prev) =>
+    setActiveSections((prev) =>
       prev.map((section) => ({
         ...section,
         seats: section.seats.map((seat) =>
@@ -309,7 +316,7 @@ export function SeatSettingsClient() {
     );
 
     clearSelection();
-  }, [selectedHoldState, selectedSeats, clearSelection]);
+  }, [selectedHoldState, selectedSeats, clearSelection, setActiveSections]);
 
   // Handle hold modal confirm (create or update)
   const handleHoldConfirm = useCallback(
@@ -347,6 +354,7 @@ export function SeatSettingsClient() {
     <div className="relative h-screen overflow-hidden bg-light-gray">
       <SeatmapDisplay
         sections={sections}
+        tables={tables}
         holds={holds}
         selectedSeats={selectedSeats}
         viewMode={viewMode}
@@ -357,7 +365,7 @@ export function SeatSettingsClient() {
       />
 
       <SeatManagementSidebar
-        sections={sections}
+        sections={activeSections}
         holds={holds}
         selectedSeatsBySection={selectedSeatsBySection}
         onClearSelection={clearSelection}
@@ -387,7 +395,7 @@ export function SeatSettingsClient() {
         onClose={() => setIsSeatPriceModalOpen(false)}
         onConfirm={handleSeatPriceUpdate}
         selectedSeatsBySection={selectedSeatsBySection}
-        sections={sections}
+        sections={activeSections}
       />
 
       <HoldModal

@@ -7,12 +7,14 @@ import { SeatmapLegend, createPriceColorMap } from "./seatmap-legend";
 import { ZoomControls } from "./zoom-controls";
 import { MIN_SCALE, MAX_SCALE } from "./seatmap-utils";
 import { SectionBlock } from "./section-block";
+import { TableBlock } from "./table-block";
 import { LassoRect } from "./lasso-rect";
 import { useViewport } from "./use-viewport";
 import { useLassoSelection } from "./use-lasso-selection";
 
 interface SeatmapDisplayProps {
   sections: Section[];
+  tables?: Section[];
   holds: Hold[];
   selectedSeats: Set<string>;
   viewMode: ViewMode;
@@ -28,6 +30,7 @@ interface SeatmapDisplayProps {
  */
 export function SeatmapDisplay({
   sections,
+  tables = [],
   holds,
   selectedSeats,
   viewMode,
@@ -38,6 +41,13 @@ export function SeatmapDisplay({
 }: SeatmapDisplayProps) {
   const [lastSelectedSeat, setLastSelectedSeat] = useState<string | null>(null);
   const seatRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+
+  // Determine which layout to use
+  const layoutVariant = settings?.layoutVariant ?? "sections";
+  const isTableLayout = layoutVariant === "tables";
+
+  // Use tables or sections based on layout variant
+  const activeSections = isTableLayout ? tables : sections;
 
   // Viewport zoom/pan hook
   const {
@@ -71,10 +81,10 @@ export function SeatmapDisplay({
 
   // Create price color map for consistent coloring
   const priceColorMap = useMemo(() => {
-    return createPriceColorMap(sections);
-  }, [sections]);
+    return createPriceColorMap(activeSections);
+  }, [activeSections]);
 
-  // Find sections by name for positioning
+  // Find sections by name for positioning (only used in sections layout)
   const floor = sections.find((s) => s.name === "Floor");
   const balconyLeft = sections.find((s) => s.name === "Balcony Left");
   const balconyRight = sections.find((s) => s.name === "Balcony Right");
@@ -89,7 +99,7 @@ export function SeatmapDisplay({
       row: string;
       number: number;
     }[] = [];
-    for (const section of sections) {
+    for (const section of activeSections) {
       for (const seat of section.seats) {
         allSeats.push({
           id: seat.id,
@@ -100,7 +110,7 @@ export function SeatmapDisplay({
       }
     }
     return allSeats;
-  }, [sections]);
+  }, [activeSections]);
 
   // Handle mouse down on container for lasso or panning
   const handleContainerMouseDown = useCallback(
@@ -179,7 +189,7 @@ export function SeatmapDisplay({
           onReset={handleResetZoom}
         />
         <SeatmapLegend
-          sections={sections}
+          sections={activeSections}
           holds={holds}
           selectedSeats={selectedSeats}
           viewMode={viewMode}
@@ -213,26 +223,75 @@ export function SeatmapDisplay({
               </span>
             </div>
 
-            {/* Main seating area: Balcony Left - Floor - Balcony Right */}
-            <div className="flex w-full items-start justify-center gap-3">
-              {balconyLeft && (
-                <SectionBlock section={balconyLeft} {...sectionBlockProps} />
-              )}
-              {floor && <SectionBlock section={floor} {...sectionBlockProps} />}
-              {balconyRight && (
-                <SectionBlock section={balconyRight} {...sectionBlockProps} />
-              )}
-            </div>
+            {isTableLayout ? (
+              /* Table Layout */
+              <div className="flex flex-col gap-8">
+                {/* Front row - Tables 1-4 */}
+                <div className="flex items-start justify-center gap-6">
+                  {tables.slice(0, 4).map((table) => (
+                    <TableBlock
+                      key={table.id}
+                      section={table}
+                      {...sectionBlockProps}
+                    />
+                  ))}
+                </div>
 
-            {/* Bottom row: VIP Box and Upper Deck */}
-            <div className="flex items-start justify-center gap-3">
-              {vipBox && (
-                <SectionBlock section={vipBox} {...sectionBlockProps} />
-              )}
-              {upperDeck && (
-                <SectionBlock section={upperDeck} {...sectionBlockProps} />
-              )}
-            </div>
+                {/* Middle row - Tables 5-8 */}
+                <div className="flex items-start justify-center gap-6">
+                  {tables.slice(4, 8).map((table) => (
+                    <TableBlock
+                      key={table.id}
+                      section={table}
+                      {...sectionBlockProps}
+                    />
+                  ))}
+                </div>
+
+                {/* Back row - Tables 9-12 */}
+                <div className="flex items-start justify-center gap-6">
+                  {tables.slice(8, 12).map((table) => (
+                    <TableBlock
+                      key={table.id}
+                      section={table}
+                      {...sectionBlockProps}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              /* Sections Layout */
+              <>
+                {/* Main seating area: Balcony Left - Floor - Balcony Right */}
+                <div className="flex w-full items-start justify-center gap-3">
+                  {balconyLeft && (
+                    <SectionBlock
+                      section={balconyLeft}
+                      {...sectionBlockProps}
+                    />
+                  )}
+                  {floor && (
+                    <SectionBlock section={floor} {...sectionBlockProps} />
+                  )}
+                  {balconyRight && (
+                    <SectionBlock
+                      section={balconyRight}
+                      {...sectionBlockProps}
+                    />
+                  )}
+                </div>
+
+                {/* Bottom row: VIP Box and Upper Deck */}
+                <div className="flex items-start justify-center gap-3">
+                  {vipBox && (
+                    <SectionBlock section={vipBox} {...sectionBlockProps} />
+                  )}
+                  {upperDeck && (
+                    <SectionBlock section={upperDeck} {...sectionBlockProps} />
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

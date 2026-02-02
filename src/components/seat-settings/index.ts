@@ -4,7 +4,10 @@ export { SeatmapDisplay } from "./seatmap-display";
 
 // Hooks
 export { useSeatSettingsControls } from "./use-seat-settings-controls";
-export type { SeatSettingsControlsSettings } from "./use-seat-settings-controls";
+export type {
+  SeatSettingsControlsSettings,
+  LayoutVariant,
+} from "./use-seat-settings-controls";
 export { useViewport } from "./use-viewport";
 export { useLassoSelection } from "./use-lasso-selection";
 
@@ -41,4 +44,8 @@ export { getSeatStatusColor, groupSeatsByRow } from "./seatmap-utils";
 export type { Viewport } from "./seatmap-utils";
 
 // Data
-export { mockSections, mockHolds } from "./mock-data";
+export { mockSections, mockHolds, mockTables } from "./mock-data";
+
+// Table layout components
+export { TableBlock } from "./table-block";
+export { TableSeatButton } from "./table-seat-button";
