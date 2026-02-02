@@ -2,29 +2,7 @@ import type { Section, Seat, SeatStatus, Hold } from "./types";
 import { HOLD_COLORS } from "./types";
 
 // Sample holds - these will be associated with specific seats
-export const mockHolds: Hold[] = [
-  {
-    id: "hold-vip-guests",
-    name: "VIP Guest List",
-    type: "internal",
-    notes: "Reserved for artist's personal guests",
-    color: HOLD_COLORS[0].value, // Purple
-    createdAt: new Date("2026-01-15"),
-    seatIds: ["floor-A1", "floor-A2", "floor-A3", "floor-A4"],
-  },
-  {
-    id: "hold-sponsors",
-    name: "Sponsor Block",
-    type: "password-protected",
-    password: "SPONSOR2026",
-    startDate: new Date("2026-01-20"),
-    endDate: new Date("2026-02-15"),
-    notes: "Reserved for Gold sponsors - code shared via email",
-    color: HOLD_COLORS[1].value, // Blue
-    createdAt: new Date("2026-01-10"),
-    seatIds: ["vip-A1", "vip-A2", "vip-A3"],
-  },
-];
+export const mockHolds: Hold[] = [];
 
 // Create a map for quick holdId lookup
 const seatToHoldMap = new Map<string, string>();
@@ -85,11 +63,11 @@ function generateSeats(
 }
 
 // Floor: 10 rows, 12 seats each = 120 seats
-const floorSeats = generateSeats("floor", 10, 12, 0.28, 0.02);
+const floorSeats = generateSeats("floor", 10, 12, 0.28, 0);
 const floorSold = floorSeats.filter((s) => s.status === "sold").length;
 
 // Balcony Left: 2 rows, 6 seats each = 12 seats
-const balconyLeftSeats = generateSeats("bl", 2, 6, 0.1, 0.02);
+const balconyLeftSeats = generateSeats("bl", 2, 6, 0.1, 0);
 const balconyLeftSold = balconyLeftSeats.filter(
   (s) => s.status === "sold"
 ).length;
@@ -101,7 +79,7 @@ const balconyRightSold = balconyRightSeats.filter(
 ).length;
 
 // VIP Box: 2 rows, 5 seats each = 10 seats
-const vipSeats = generateSeats("vip", 2, 5, 0.4, 0.1);
+const vipSeats = generateSeats("vip", 2, 5, 0.4, 0);
 const vipSold = vipSeats.filter((s) => s.status === "sold").length;
 
 // Upper Deck: 4 rows, 10 seats each = 40 seats (off-sale, all on-sale status)

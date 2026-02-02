@@ -269,6 +269,45 @@ export default function SeatSettingsPage() {
     }
   }, [selectedHoldState.hold]);
 
+  // Remove selected seats from their hold
+  const removeSeatsFromHold = useCallback(() => {
+    if (selectedHoldState.state !== "single" || !selectedHoldState.hold) return;
+
+    const holdId = selectedHoldState.hold.id;
+    const selectedSeatIds = Array.from(selectedSeats);
+
+    // Update hold to remove selected seats
+    setHolds(
+      (prev) =>
+        prev
+          .map((hold) => {
+            if (hold.id === holdId) {
+              const newSeatIds = hold.seatIds.filter(
+                (id) => !selectedSeatIds.includes(id)
+              );
+              // If no seats left, we'll filter this out below
+              return { ...hold, seatIds: newSeatIds };
+            }
+            return hold;
+          })
+          .filter((hold) => hold.seatIds.length > 0) // Remove empty holds
+    );
+
+    // Update seats to remove hold reference
+    setSections((prev) =>
+      prev.map((section) => ({
+        ...section,
+        seats: section.seats.map((seat) =>
+          selectedSeatIds.includes(seat.id)
+            ? { ...seat, status: "on-sale" as const, holdId: undefined }
+            : seat
+        ),
+      }))
+    );
+
+    clearSelection();
+  }, [selectedHoldState, selectedSeats, clearSelection]);
+
   // Handle hold modal confirm (create or update)
   const handleHoldConfirm = useCallback(
     (holdData: Omit<Hold, "id" | "createdAt">) => {
@@ -334,7 +373,7 @@ export default function SeatSettingsPage() {
         onClear={clearSelection}
         onEditPrice={handleSeatEditPrice}
         onHold={handleOpenHoldModal}
-        onEditHold={handleEditHoldFromFloatingBar}
+        onRemoveFromHold={removeSeatsFromHold}
       />
 
       <SeatEditModal

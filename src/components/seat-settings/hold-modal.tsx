@@ -143,7 +143,7 @@ export function HoldModal({
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
           transition={springTransition}
-          className="bg-white rounded-[24px] shadow-lg w-full max-w-[480px] mx-2 pointer-events-auto max-h-[90vh] overflow-y-auto"
+          className="bg-white rounded-[24px] shadow-lg w-full max-w-[420px] mx-2 pointer-events-auto max-h-[90vh] overflow-y-auto"
         >
           {/* Header */}
           <div className="flex items-center justify-center pb-2 pt-8 px-5 relative">
@@ -165,17 +165,15 @@ export function HoldModal({
             className="px-4 md:px-6 py-4 flex flex-col gap-5"
           >
             {/* Selected seats summary */}
-            <div className="rounded-[14px] bg-light-gray p-4">
-              <p className="text-sm text-black font-bold mb-2">
-                Holding {totalSeats} seat{totalSeats !== 1 ? "s" : ""}:
-              </p>
+            <div className="rounded-[14px] bg-light-gray p-4 flex gap-2 items-center flex-wrap">
+              <p className="text-sm text-black font-bold">Hold:</p>
               <div className="flex flex-wrap gap-2">
                 {entries.map(([section, seats]) => (
                   <span
                     key={section.id}
                     className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5"
                   >
-                    <span className="text-sm font-medium text-black">
+                    <span className="text-sm font-semibold text-black">
                       {section.name}
                     </span>
                     <span className="text-xs text-muted-foreground">
@@ -197,6 +195,29 @@ export function HoldModal({
                 className="w-full h-[47px] px-4 text-sm text-black placeholder:text-gray bg-white border border-neutral-200 rounded-[14px] focus:outline-none focus:border-tp-blue transition-colors duration-200 ease"
                 autoFocus
               />
+            </div>
+
+            {/* Color Selection */}
+            <div className="flex flex-col gap-2">
+              <label className="font-bold text-sm text-black">
+                Label color
+              </label>
+              <div className="flex items-center gap-2">
+                {HOLD_COLORS.map((color) => (
+                  <button
+                    key={color.value}
+                    type="button"
+                    onClick={() => setSelectedColor(color.value)}
+                    className={cn(
+                      "size-8 rounded-full transition-all duration-200 ease cursor-pointer",
+                      selectedColor === color.value
+                        ? "ring-2 ring-offset-2 ring-black"
+                        : "hover:scale-110"
+                    )}
+                    style={{ backgroundColor: color.value }}
+                  />
+                ))}
+              </div>
             </div>
 
             {/* Password Protection Checkbox */}
@@ -390,29 +411,6 @@ export function HoldModal({
                   </div>
                 </div>
               )}
-            </div>
-
-            {/* Color Selection */}
-            <div className="flex flex-col gap-2">
-              <label className="font-bold text-sm text-black">
-                Label color
-              </label>
-              <div className="flex items-center gap-2">
-                {HOLD_COLORS.map((color) => (
-                  <button
-                    key={color.value}
-                    type="button"
-                    onClick={() => setSelectedColor(color.value)}
-                    className={cn(
-                      "size-8 rounded-full transition-all duration-200 ease cursor-pointer",
-                      selectedColor === color.value
-                        ? "ring-2 ring-offset-2 ring-black"
-                        : "hover:scale-110"
-                    )}
-                    style={{ backgroundColor: color.value }}
-                  />
-                ))}
-              </div>
             </div>
 
             {/* Footer */}

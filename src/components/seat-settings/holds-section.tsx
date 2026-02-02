@@ -1,6 +1,8 @@
 "use client";
 
 import { Pencil, Trash2 } from "lucide-react";
+import { format } from "date-fns";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { Hold } from "./types";
 
@@ -23,7 +25,12 @@ function HoldItem({
   onDelete: () => void;
 }) {
   return (
-    <div
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ type: "spring", stiffness: 500, damping: 35 }}
       className={cn(
         "group flex items-center justify-between gap-2 rounded-[10px] px-3 pl-2 py-2 border border-soft-gray",
         "cursor-pointer transition-colors duration-200 ease",
@@ -45,12 +52,22 @@ function HoldItem({
           className="h-full w-2 rounded-full shrink-0"
           style={{ backgroundColor: hold.color }}
         />
-        <span className="text-sm font-medium text-black truncate">
-          {hold.name}
-        </span>
-        <span className="text-xs text-gray shrink-0">
-          ({hold.seatIds.length})
-        </span>
+        <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-black truncate">
+              {hold.name}
+            </span>
+            <span className="text-xs text-gray shrink-0">
+              ({hold.seatIds.length})
+            </span>
+          </div>
+          {hold.startDate && hold.endDate && (
+            <span className="text-xs text-gray">
+              {format(hold.startDate, "MMM d")} -{" "}
+              {format(hold.endDate, "MMM d")}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Action buttons */}
@@ -78,7 +95,7 @@ function HoldItem({
           <Trash2 className="size-3.5 " />
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -91,9 +108,9 @@ export function HoldsSection({
   // Empty state
   if (holds.length === 0) {
     return (
-      <div className="px-3 py-4 text-center">
+      <div className="flex flex-col gap-0.5 items-center justify-center py-7">
         <p className="text-sm text-gray">No holds yet</p>
-        <p className="text-xs text-gray/70 mt-1">
+        <p className="text-xs text-gray/70">
           Select seats and click Hold to create one
         </p>
       </div>
@@ -102,15 +119,17 @@ export function HoldsSection({
 
   return (
     <div className="flex flex-col gap-2">
-      {holds.map((hold) => (
-        <HoldItem
-          key={hold.id}
-          hold={hold}
-          onSelect={() => onSelectHoldSeats(hold.seatIds)}
-          onEdit={() => onEditHold(hold)}
-          onDelete={() => onDeleteHold(hold)}
-        />
-      ))}
+      <AnimatePresence mode="popLayout">
+        {holds.map((hold) => (
+          <HoldItem
+            key={hold.id}
+            hold={hold}
+            onSelect={() => onSelectHoldSeats(hold.seatIds)}
+            onEdit={() => onEditHold(hold)}
+            onDelete={() => onDeleteHold(hold)}
+          />
+        ))}
+      </AnimatePresence>
     </div>
   );
 }

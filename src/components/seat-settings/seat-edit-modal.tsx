@@ -163,11 +163,6 @@ export function SeatEditModal({
                   autoFocus
                 />
               </div>
-
-              <p className="text-xs text-gray">
-                These seats will keep this custom price even if section prices
-                change.
-              </p>
             </div>
           </div>
 
@@ -176,7 +171,7 @@ export function SeatEditModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 text-base font-bold text-dark-gray hover:text-black bg-light-gray hover:bg-soft-gray rounded-[36px] transition-colors duration-200 ease cursor-pointer active:scale-[0.98] transform"
+              className="px-5 py-2.5 text-base font-bold text-black bg-light-gray hover:bg-soft-gray rounded-[36px] transition-colors duration-200 ease cursor-pointer active:scale-[0.98] transform"
             >
               Cancel
             </button>

@@ -17,13 +17,13 @@ export const PRICE_COLORS = [
 export function getPriceColor(
   price: number,
   minPrice: number,
-  maxPrice: number,
+  maxPrice: number
 ): string {
   if (minPrice === maxPrice) return PRICE_COLORS[1].color;
   const ratio = (price - minPrice) / (maxPrice - minPrice);
   const index = Math.min(
     Math.floor(ratio * PRICE_COLORS.length),
-    PRICE_COLORS.length - 1,
+    PRICE_COLORS.length - 1
   );
   return PRICE_COLORS[index].color;
 }
@@ -32,13 +32,13 @@ export function getPriceColor(
 export function getPriceTierIndex(
   price: number,
   minPrice: number,
-  maxPrice: number,
+  maxPrice: number
 ): number {
   if (minPrice === maxPrice) return 1;
   const ratio = (price - minPrice) / (maxPrice - minPrice);
   return Math.min(
     Math.floor(ratio * PRICE_COLORS.length),
-    PRICE_COLORS.length - 1,
+    PRICE_COLORS.length - 1
   );
 }
 
@@ -75,17 +75,16 @@ function LegendItem({
       className={cn(
         "flex items-center gap-1.5 rounded-full px-3 py-2 cursor-pointer",
         "transition-all duration-200 ease",
-        "hover:bg-gray-100 active:bg-gray-200",
+        "hover:bg-gray-100 active:bg-gray-200"
       )}
     >
       <div
         className={cn(
           "size-4 rounded-[4px] relative flex items-center justify-center",
-          isWhite && "shadow-[0_0_0_1px_rgba(0,0,0,0.2)]",
+          isWhite && "shadow-[0_0_0_1px_rgba(0,0,0,0.2)]"
         )}
         style={{ backgroundColor: isWhite ? "white" : color }}
-      >
-      </div>
+      ></div>
       <span className="text-xs font-medium text-foreground">{label}</span>
       {seatCount !== undefined && (
         <span className="text-[10px] text-gray-400">({seatCount})</span>
@@ -116,7 +115,7 @@ export function SeatmapLegend({
       }
       return seatIds;
     },
-    [sections],
+    [sections]
   );
 
   // Get all seats matching a specific price tier
@@ -129,7 +128,7 @@ export function SeatmapLegend({
           const seatTierIndex = getPriceTierIndex(
             effectivePrice,
             priceRange.min,
-            priceRange.max,
+            priceRange.max
           );
           if (seatTierIndex === tierIndex) {
             seatIds.push(seat.id);
@@ -138,7 +137,7 @@ export function SeatmapLegend({
       }
       return seatIds;
     },
-    [sections, priceRange],
+    [sections, priceRange]
   );
 
   // Check if all seats in a list are selected
@@ -147,7 +146,7 @@ export function SeatmapLegend({
       if (seatIds.length === 0) return false;
       return seatIds.every((id) => selectedSeats.has(id));
     },
-    [selectedSeats],
+    [selectedSeats]
   );
 
   // Handle status legend click
@@ -162,7 +161,7 @@ export function SeatmapLegend({
         onSelectSeats(matchingSeats, false);
       }
     },
-    [getSeatsByStatus, areAllSelected, onSelectSeats],
+    [getSeatsByStatus, areAllSelected, onSelectSeats]
   );
 
   // Handle price tier legend click
@@ -177,7 +176,7 @@ export function SeatmapLegend({
         onSelectSeats(matchingSeats, false);
       }
     },
-    [getSeatsByPriceTier, areAllSelected, onSelectSeats],
+    [getSeatsByPriceTier, areAllSelected, onSelectSeats]
   );
 
   // Handle hold legend click
@@ -191,7 +190,7 @@ export function SeatmapLegend({
         onSelectSeats(hold.seatIds, false);
       }
     },
-    [areAllSelected, onSelectSeats],
+    [areAllSelected, onSelectSeats]
   );
 
   // Memoize price tier labels with actual prices
@@ -230,7 +229,7 @@ export function SeatmapLegend({
         const tierIndex = getPriceTierIndex(
           effectivePrice,
           priceRange.min,
-          priceRange.max,
+          priceRange.max
         );
         counts[tierIndex]++;
       }
@@ -256,7 +255,7 @@ export function SeatmapLegend({
             "flex-1 h-[28px] px-4 rounded-[8px] text-xs font-semibold transition-all duration-200 ease cursor-pointer",
             viewMode === "status"
               ? "bg-white text-black shadow-sm"
-              : "text-gray hover:text-muted-foreground",
+              : "text-gray hover:text-muted-foreground"
           )}
         >
           Status
@@ -268,7 +267,7 @@ export function SeatmapLegend({
             "flex-1 h-[28px] px-4 rounded-[8px] text-xs font-semibold transition-all duration-200 ease cursor-pointer",
             viewMode === "price"
               ? "bg-white text-black shadow-sm"
-              : "text-gray hover:text-muted-foreground",
+              : "text-gray hover:text-muted-foreground"
           )}
         >
           Price
@@ -290,14 +289,6 @@ export function SeatmapLegend({
               seatCount={statusCounts.sold}
               onClick={() => handleStatusClick("sold")}
             />
-            {activeHolds.length === 0 && (
-              <LegendItem
-                color="#f87171"
-                label="Held"
-                seatCount={statusCounts.held}
-                onClick={() => handleStatusClick("held")}
-              />
-            )}
           </>
         ) : (
           <>
