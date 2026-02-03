@@ -9,6 +9,8 @@ import {
   BackButton,
   HoldModal,
   DeleteHoldModal,
+  ReleaseHoldModal,
+  MoveHoldModal,
   SeatEditModal,
   mockSections,
   mockHolds,
@@ -20,8 +22,9 @@ import type {
   ViewMode,
   Seat,
   Hold,
-  HoldState,
   FeeOption,
+  SelectionInfo,
+  MoveHoldInfo,
 } from "@/components/seat-settings";
 
 export function SeatSettingsClient() {
@@ -204,29 +207,43 @@ export function SeatSettingsClient() {
     [clearSelection, setActiveSections]
   );
 
-  // Calculate hold state for selected seats
-  const selectedHoldState = useMemo((): { state: HoldState; hold?: Hold } => {
+  // Calculate rich selection info for floating action bar
+  const selectionInfo = useMemo((): SelectionInfo => {
+    let heldCount = 0;
+    let onSaleCount = 0;
+    let soldCount = 0;
     const holdIds = new Set<string>();
 
     for (const [, seats] of selectedSeatsBySection) {
       for (const seat of seats) {
-        if (seat.holdId) {
-          holdIds.add(seat.holdId);
+        if (seat.status === "held") {
+          heldCount++;
+          if (seat.holdId) {
+            holdIds.add(seat.holdId);
+          }
+        } else if (seat.status === "on-sale") {
+          onSaleCount++;
+        } else if (seat.status === "sold") {
+          soldCount++;
         }
       }
     }
 
-    if (holdIds.size === 0) {
-      return { state: "none" };
-    }
+    const totalCount = heldCount + onSaleCount + soldCount;
+    const uniqueHolds = holds.filter((h) => holdIds.has(h.id));
 
-    if (holdIds.size === 1) {
-      const holdId = [...holdIds][0];
-      const hold = holds.find((h) => h.id === holdId);
-      return { state: "single", hold };
-    }
-
-    return { state: "mixed" };
+    return {
+      totalCount,
+      heldCount,
+      onSaleCount,
+      soldCount,
+      uniqueHolds,
+      allHeld: totalCount > 0 && heldCount === totalCount,
+      allOnSale: totalCount > 0 && onSaleCount === totalCount,
+      allSold: totalCount > 0 && soldCount === totalCount,
+      canHold: onSaleCount > 0,
+      canRelease: heldCount > 0,
+    };
   }, [selectedSeatsBySection, holds]);
 
   // Modal states for floating action bar
@@ -235,6 +252,11 @@ export function SeatSettingsClient() {
   const [editingHold, setEditingHold] = useState<Hold | undefined>(undefined);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [holdToDelete, setHoldToDelete] = useState<Hold | null>(null);
+  const [isReleaseModalOpen, setIsReleaseModalOpen] = useState(false);
+  const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
+  const [moveTargetHold, setMoveTargetHold] = useState<Hold | null>(null);
+  const [moveHoldInfo, setMoveHoldInfo] = useState<MoveHoldInfo[]>([]);
+  const [moveOnSaleCount, setMoveOnSaleCount] = useState(0);
 
   // Floating action bar handlers
   const handleSeatEditPrice = useCallback(() => {
@@ -273,42 +295,34 @@ export function SeatSettingsClient() {
 
   // Handle edit hold from floating bar (uses currently selected hold)
   const handleEditHoldFromFloatingBar = useCallback(() => {
-    if (selectedHoldState.hold) {
-      setEditingHold(selectedHoldState.hold);
+    if (selectionInfo.uniqueHolds.length === 1) {
+      setEditingHold(selectionInfo.uniqueHolds[0]);
       setIsHoldModalOpen(true);
     }
-  }, [selectedHoldState.hold]);
+  }, [selectionInfo.uniqueHolds]);
 
-  // Remove selected seats from their hold
-  const removeSeatsFromHold = useCallback(() => {
-    if (selectedHoldState.state !== "single" || !selectedHoldState.hold) return;
+  // Remove selected seats from their holds (works for any held seats)
+  const releaseHeldSeats = useCallback(() => {
+    if (!selectionInfo.canRelease) return;
 
-    const holdId = selectedHoldState.hold.id;
     const selectedSeatIds = Array.from(selectedSeats);
 
-    // Update hold to remove selected seats
-    setHolds(
-      (prev) =>
-        prev
-          .map((hold) => {
-            if (hold.id === holdId) {
-              const newSeatIds = hold.seatIds.filter(
-                (id) => !selectedSeatIds.includes(id)
-              );
-              // If no seats left, we'll filter this out below
-              return { ...hold, seatIds: newSeatIds };
-            }
-            return hold;
-          })
-          .filter((hold) => hold.seatIds.length > 0) // Remove empty holds
+    // Update all affected holds to remove selected seats (keeps empty holds)
+    setHolds((prev) =>
+      prev.map((hold) => {
+        const newSeatIds = hold.seatIds.filter(
+          (id) => !selectedSeatIds.includes(id)
+        );
+        return { ...hold, seatIds: newSeatIds };
+      })
     );
 
-    // Update seats to remove hold reference
+    // Update seats to remove hold reference (only for held seats)
     setActiveSections((prev) =>
       prev.map((section) => ({
         ...section,
         seats: section.seats.map((seat) =>
-          selectedSeatIds.includes(seat.id)
+          selectedSeatIds.includes(seat.id) && seat.status === "held"
             ? { ...seat, status: "on-sale" as const, holdId: undefined }
             : seat
         ),
@@ -316,7 +330,143 @@ export function SeatSettingsClient() {
     );
 
     clearSelection();
-  }, [selectedHoldState, selectedSeats, clearSelection, setActiveSections]);
+    setIsReleaseModalOpen(false);
+  }, [
+    selectionInfo.canRelease,
+    selectedSeats,
+    clearSelection,
+    setActiveSections,
+  ]);
+
+  // Open release confirmation modal
+  const handleOpenReleaseModal = useCallback(() => {
+    if (selectionInfo.canRelease) {
+      setIsReleaseModalOpen(true);
+    }
+  }, [selectionInfo.canRelease]);
+
+  // Open move confirmation modal
+  const handleOpenMoveModal = useCallback(
+    (targetHold: Hold) => {
+      // Collect info about seats being moved
+      let onSaleCount = 0;
+      const holdSeatCounts = new Map<string, number>();
+
+      for (const [, seats] of selectedSeatsBySection) {
+        for (const seat of seats) {
+          if (seat.status === "on-sale") {
+            onSaleCount++;
+          } else if (
+            seat.status === "held" &&
+            seat.holdId &&
+            seat.holdId !== targetHold.id
+          ) {
+            holdSeatCounts.set(
+              seat.holdId,
+              (holdSeatCounts.get(seat.holdId) || 0) + 1
+            );
+          }
+        }
+      }
+
+      // Build move info array
+      const moveInfo: MoveHoldInfo[] = [];
+      for (const [holdId, count] of holdSeatCounts) {
+        const hold = holds.find((h) => h.id === holdId);
+        if (hold) {
+          moveInfo.push({ fromHold: hold, seatCount: count });
+        }
+      }
+
+      // If no seats to move, just return
+      if (onSaleCount === 0 && moveInfo.length === 0) return;
+
+      setMoveTargetHold(targetHold);
+      setMoveHoldInfo(moveInfo);
+      setMoveOnSaleCount(onSaleCount);
+      setIsMoveModalOpen(true);
+    },
+    [selectedSeatsBySection, holds]
+  );
+
+  // Confirm and execute the move
+  const confirmMoveHold = useCallback(() => {
+    if (!moveTargetHold) return;
+
+    // Collect seats that can be added/moved (on-sale and held, not sold)
+    const seatsToMove: string[] = [];
+    const seatsToRemoveFromHolds: { seatId: string; fromHoldId: string }[] = [];
+
+    for (const [, seats] of selectedSeatsBySection) {
+      for (const seat of seats) {
+        if (seat.status === "on-sale") {
+          seatsToMove.push(seat.id);
+        } else if (seat.status === "held") {
+          seatsToMove.push(seat.id);
+          // Track which hold this seat needs to be removed from
+          if (seat.holdId && seat.holdId !== moveTargetHold.id) {
+            seatsToRemoveFromHolds.push({
+              seatId: seat.id,
+              fromHoldId: seat.holdId,
+            });
+          }
+        }
+        // Sold seats are ignored
+      }
+    }
+
+    if (seatsToMove.length === 0) {
+      setIsMoveModalOpen(false);
+      return;
+    }
+
+    // Update holds: remove from old holds, add to target hold
+    setHolds((prev) =>
+      prev.map((h) => {
+        if (h.id === moveTargetHold.id) {
+          // Add seats to target hold
+          return {
+            ...h,
+            seatIds: [...new Set([...h.seatIds, ...seatsToMove])],
+          };
+        }
+        // Remove seats from their old holds
+        const seatsToRemove = seatsToRemoveFromHolds
+          .filter((s) => s.fromHoldId === h.id)
+          .map((s) => s.seatId);
+        if (seatsToRemove.length > 0) {
+          return {
+            ...h,
+            seatIds: h.seatIds.filter((id) => !seatsToRemove.includes(id)),
+          };
+        }
+        return h;
+      })
+    );
+
+    // Update seats to reference the target hold
+    setActiveSections((prev) =>
+      prev.map((section) => ({
+        ...section,
+        seats: section.seats.map((seat) =>
+          seatsToMove.includes(seat.id)
+            ? { ...seat, status: "held" as const, holdId: moveTargetHold.id }
+            : seat
+        ),
+      }))
+    );
+
+    setIsMoveModalOpen(false);
+    setMoveTargetHold(null);
+    setMoveHoldInfo([]);
+    setMoveOnSaleCount(0);
+    clearSelection();
+  }, [
+    moveTargetHold,
+    selectedSeatsBySection,
+    clearSelection,
+    setActiveSections,
+  ]);
 
   // Handle hold modal confirm (create or update)
   const handleHoldConfirm = useCallback(
@@ -382,12 +532,13 @@ export function SeatSettingsClient() {
 
       {/* Floating bar for seat actions - always visible */}
       <ActionsFloatingBar
-        selectedCount={selectedSeats.size}
-        holdState={selectedHoldState.state}
+        selectionInfo={selectionInfo}
+        availableHolds={holds}
         onClear={clearSelection}
         onEditPrice={handleSeatEditPrice}
         onHold={handleOpenHoldModal}
-        onRemoveFromHold={removeSeatsFromHold}
+        onReleaseHeld={handleOpenReleaseModal}
+        onAddToExistingHold={handleOpenMoveModal}
       />
 
       <SeatEditModal
@@ -417,6 +568,27 @@ export function SeatSettingsClient() {
           setHoldToDelete(null);
         }}
         onConfirm={handleConfirmDelete}
+      />
+
+      <ReleaseHoldModal
+        isOpen={isReleaseModalOpen}
+        seatCount={selectionInfo.heldCount}
+        onClose={() => setIsReleaseModalOpen(false)}
+        onConfirm={releaseHeldSeats}
+      />
+
+      <MoveHoldModal
+        isOpen={isMoveModalOpen}
+        targetHold={moveTargetHold}
+        moveInfo={moveHoldInfo}
+        onSaleSeatsCount={moveOnSaleCount}
+        onClose={() => {
+          setIsMoveModalOpen(false);
+          setMoveTargetHold(null);
+          setMoveHoldInfo([]);
+          setMoveOnSaleCount(0);
+        }}
+        onConfirm={confirmMoveHold}
       />
 
       {/* Leva Controls Panel */}

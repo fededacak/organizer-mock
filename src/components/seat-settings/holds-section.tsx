@@ -54,7 +54,7 @@ function HoldItem({
         />
         <div className="flex flex-col gap-0.5 min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-black truncate">
+            <span className="text-sm font-semibold text-black truncate">
               {hold.name}
             </span>
             <span className="text-xs text-gray shrink-0">

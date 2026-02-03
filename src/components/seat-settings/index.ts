@@ -18,6 +18,9 @@ export type { HoldState } from "./actions-floating-bar";
 export { HoldModal } from "./hold-modal";
 export { HoldsSection } from "./holds-section";
 export { DeleteHoldModal } from "./delete-hold-modal";
+export { ReleaseHoldModal } from "./release-hold-modal";
+export { MoveHoldModal } from "./move-hold-modal";
+export type { MoveHoldInfo } from "./move-hold-modal";
 export { SeatEditModal } from "./seat-edit-modal";
 export { SelectedSeatsList } from "./selected-seats-list";
 export {
@@ -37,6 +40,7 @@ export type {
   Hold,
   HoldType,
   FeeOption,
+  SelectionInfo,
 } from "./types";
 
 // Constants

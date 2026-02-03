@@ -57,3 +57,22 @@ export interface Section {
   color?: string; // For seatmap visualization
   seats: Seat[];
 }
+
+// Selection info for floating action bar - provides rich context about selected seats
+export interface SelectionInfo {
+  // Counts
+  totalCount: number;
+  heldCount: number;
+  onSaleCount: number;
+  soldCount: number;
+
+  // Hold info
+  uniqueHolds: Hold[]; // All distinct holds in selection
+
+  // Derived flags
+  allHeld: boolean; // Every seat is held
+  allOnSale: boolean; // Every seat is on-sale
+  allSold: boolean; // Every seat is sold (rare edge case)
+  canHold: boolean; // Has at least 1 on-sale seat
+  canRelease: boolean; // Has at least 1 held seat
+}

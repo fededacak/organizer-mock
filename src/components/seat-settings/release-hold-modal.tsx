@@ -2,11 +2,10 @@
 
 import { X } from "lucide-react";
 import { motion } from "framer-motion";
-import type { Hold } from "./types";
 
-interface DeleteHoldModalProps {
+interface ReleaseHoldModalProps {
   isOpen: boolean;
-  hold: Hold | null;
+  seatCount: number;
   onClose: () => void;
   onConfirm: () => void;
 }
@@ -17,21 +16,19 @@ const springTransition = {
   damping: 30,
 };
 
-export function DeleteHoldModal({
+export function ReleaseHoldModal({
   isOpen,
-  hold,
+  seatCount,
   onClose,
   onConfirm,
-}: DeleteHoldModalProps) {
+}: ReleaseHoldModalProps) {
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
 
-  if (!isOpen || !hold) return null;
-
-  const seatCount = hold.seatIds.length;
+  if (!isOpen || seatCount === 0) return null;
 
   return (
     <>
@@ -57,7 +54,7 @@ export function DeleteHoldModal({
           {/* Header */}
           <div className="flex items-end gap-[30px] pb-2 pt-8 px-6 relative">
             <h2 className="font-outfit font-black text-[20px] text-black leading-normal">
-              Delete Hold?
+              Release {seatCount} seat{seatCount !== 1 ? "s" : ""}?
             </h2>
             <button
               type="button"
@@ -71,29 +68,27 @@ export function DeleteHoldModal({
           {/* Content */}
           <div className="px-6 py-6">
             <p className="text-sm text-black leading-normal">
-              Are you sure you want to delete{" "}
-              <span className="font-semibold">"{hold.name}"</span>? This will
-              release {seatCount} seat{seatCount !== 1 ? "s" : ""} back to
-              on-sale.
+              The selected seats will be removed from their holds and returned
+              to on-sale.
             </p>
           </div>
 
           {/* Footer */}
           <div className="px-6 pt-2 pb-6">
-            <div className="flex gap-4 items-center justify-end">
+            <div className="flex gap-3 items-center justify-end">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-5 py-[11px] text-base font-bold text-black bg-light-gray hover:bg-soft-gray rounded-[36px] transition-colors duration-200 ease cursor-pointer active:scale-[0.98] transform"
+                className="px-5 py-[11px] text-base font-bold text-black bg-light-gray hover:bg-soft-gray rounded-full transition-colors duration-200 ease cursor-pointer active:scale-[0.98] transform"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={onConfirm}
-                className="px-5 py-[11px] text-base font-bold text-[#f06] bg-[#fff0f6] hover:bg-[#ffe0ed] rounded-[36px] transition-colors duration-200 ease cursor-pointer active:scale-[0.98] transform"
+                className="px-5 py-[11px] text-base font-bold text-white bg-primary rounded-full transition-opacity duration-200 ease cursor-pointer active:scale-[0.98] transform hover:opacity-80"
               >
-                Delete
+                Release
               </button>
             </div>
           </div>

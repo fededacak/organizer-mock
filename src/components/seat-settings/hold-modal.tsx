@@ -103,8 +103,10 @@ export function HoldModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!name.trim()) return;
+
     const hold: Omit<Hold, "id" | "createdAt"> = {
-      name: name.trim() || "Untitled Hold",
+      name: name.trim(),
       type: holdType,
       password: holdType === "password-protected" ? password : undefined,
       startDate: enableDateRange ? startDate : undefined,
@@ -186,7 +188,9 @@ export function HoldModal({
 
             {/* Hold Name */}
             <div className="flex flex-col gap-1">
-              <label className="font-bold text-sm text-black">Name</label>
+              <label className="font-bold text-sm text-black">
+                Name <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 value={name}
@@ -401,7 +405,8 @@ export function HoldModal({
               </button>
               <button
                 type="submit"
-                className="bg-primary cursor-pointer text-white font-bold text-base px-5 py-2.5 rounded-[36px] hover:opacity-80 transition-opacity duration-200 ease active:scale-[0.98] transform"
+                disabled={!name.trim()}
+                className="bg-primary cursor-pointer text-white font-bold text-base px-5 py-2.5 rounded-[36px] hover:opacity-80 transition-opacity duration-200 ease active:scale-[0.98] transform disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
               >
                 {isEditing ? "Save" : "Create Hold"}
               </button>
