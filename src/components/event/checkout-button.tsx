@@ -1,7 +1,11 @@
+import { MousePointerClick } from "lucide-react";
+
 interface CheckoutButtonProps {
   totalTickets: number;
   totalPrice: number;
   ticketTypeCount?: number;
+  mode?: "checkout" | "seats";
+  onSeatsClick?: () => void;
 }
 
 function formatPrice(price: number) {
@@ -12,13 +16,23 @@ export function CheckoutButton({
   totalTickets,
   totalPrice,
   ticketTypeCount = 1,
+  mode = "checkout",
+  onSeatsClick,
 }: CheckoutButtonProps) {
   const showCount = ticketTypeCount > 1 && totalTickets > 0;
-  const isDisabled = totalTickets === 0;
+  const isSeatsMode = mode === "seats";
+  const isDisabled = !isSeatsMode && totalTickets === 0;
+
+  const handleClick = () => {
+    if (isSeatsMode && onSeatsClick) {
+      onSeatsClick();
+    }
+  };
 
   return (
     <button
       disabled={isDisabled}
+      onClick={handleClick}
       className={`w-full rounded-full h-[50px] md:h-[46px] px-2.5 flex items-center justify-between text-white transition-colors duration-200 ease ${
         isDisabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
       }`}
@@ -40,13 +54,17 @@ export function CheckoutButton({
     >
       <div
         className={`w-[26px] h-[26px] rounded-full bg-black/10 flex items-center justify-center ${
-          !showCount ? "opacity-0" : ""
+          !showCount || isSeatsMode ? "opacity-0" : ""
         }`}
       >
         <span className="font-bold text-sm tracking-tight">{totalTickets}</span>
       </div>
-      <span className="font-bold text-base tracking-tight">
-        {isDisabled ? "Checkout" : `Buy Tickets - ${formatPrice(totalPrice)}`}
+      <span className="font-bold text-base tracking-tight flex items-center gap-2">
+        {isSeatsMode
+          ? "Choose Seats"
+          : isDisabled
+          ? "Checkout"
+          : `Buy Tickets - ${formatPrice(totalPrice)}`}
       </span>
       <div className="w-[26px] h-[26px] opacity-0" />
     </button>

@@ -12,7 +12,9 @@ export interface EventControlsSettings {
   eventType: "single" | "multi";
   showEndTime: boolean;
   locationTBD: boolean;
-  ticketCount: 1 | 2 | 6;
+  ticketCount: 0 | 1 | 2 | 6;
+  // Seated
+  showSeatedTicket: boolean;
   // Sections
   description: "none" | "short" | "long";
   youtubeVideoCount: 0 | 1 | 2;
@@ -45,7 +47,10 @@ export function useEventControls(): EventControlsSettings {
       eventType: { value: "single", options: ["single", "multi"] as const },
       showEndTime: false,
       locationTBD: false,
-      ticketCount: { value: 2, options: [1, 2, 6] as const },
+      ticketCount: { value: 2, options: [0, 1, 2, 6] as const },
+    }),
+    Seated: folder({
+      showSeatedTicket: { value: false, label: "Show Seated Ticket" },
     }),
     Sections: folder({
       description: {

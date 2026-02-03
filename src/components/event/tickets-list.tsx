@@ -1,6 +1,7 @@
 "use client";
 
 import { TicketCard } from "./ticket-card";
+import { SeatedTicketCard } from "./seated-ticket-card";
 import type { Ticket } from "./types";
 
 interface TicketsListProps {
@@ -10,9 +11,11 @@ interface TicketsListProps {
   expandedTicket: string | null;
   isMultiDay: boolean;
   ticketDayTab: "all" | "single";
+  selectedSeatedTicketId: string | null;
   onQuantityChange: (ticketId: string, delta: number) => void;
   onExpandToggle: (ticketId: string) => void;
   onTabChange: (tab: "all" | "single") => void;
+  onSeatedTicketSelect: (ticketId: string) => void;
 }
 
 export function TicketsList({
@@ -22,10 +25,35 @@ export function TicketsList({
   expandedTicket,
   isMultiDay,
   ticketDayTab,
+  selectedSeatedTicketId,
   onQuantityChange,
   onExpandToggle,
   onTabChange,
+  onSeatedTicketSelect,
 }: TicketsListProps) {
+  const renderTicket = (ticket: Ticket) => {
+    if (ticket.isSeated) {
+      return (
+        <SeatedTicketCard
+          key={ticket.id}
+          ticket={ticket}
+          isSelected={selectedSeatedTicketId === ticket.id}
+          onSelect={() => onSeatedTicketSelect(ticket.id)}
+        />
+      );
+    }
+    return (
+      <TicketCard
+        key={ticket.id}
+        ticket={ticket}
+        quantity={quantities[ticket.id] || 0}
+        isExpanded={expandedTicket === ticket.id}
+        onToggleExpand={() => onExpandToggle(ticket.id)}
+        onUpdateQuantity={(delta) => onQuantityChange(ticket.id, delta)}
+      />
+    );
+  };
+
   return (
     <div className="flex flex-col gap-3">
       {isMultiDay && (
@@ -37,30 +65,10 @@ export function TicketsList({
               <p className="font-extrabold text-sm text-black dark:text-white">
                 {day}
               </p>
-              {dayTickets.map((ticket) => (
-                <TicketCard
-                  key={ticket.id}
-                  ticket={ticket}
-                  quantity={quantities[ticket.id] || 0}
-                  isExpanded={expandedTicket === ticket.id}
-                  onToggleExpand={() => onExpandToggle(ticket.id)}
-                  onUpdateQuantity={(delta) =>
-                    onQuantityChange(ticket.id, delta)
-                  }
-                />
-              ))}
+              {dayTickets.map(renderTicket)}
             </div>
           ))
-        : tickets.map((ticket) => (
-            <TicketCard
-              key={ticket.id}
-              ticket={ticket}
-              quantity={quantities[ticket.id] || 0}
-              isExpanded={expandedTicket === ticket.id}
-              onToggleExpand={() => onExpandToggle(ticket.id)}
-              onUpdateQuantity={(delta) => onQuantityChange(ticket.id, delta)}
-            />
-          ))}
+        : tickets.map(renderTicket)}
     </div>
   );
 }

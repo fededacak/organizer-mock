@@ -5,6 +5,7 @@ export * from "./organizer-section";
 export * from "./spotify-section";
 export * from "./lineup-section";
 export * from "./ticket-card";
+export * from "./seated-ticket-card";
 export * from "./tickets-list";
 export * from "./checkout-button";
 export * from "./about-section";

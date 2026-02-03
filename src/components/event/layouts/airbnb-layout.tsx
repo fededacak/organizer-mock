@@ -62,7 +62,7 @@ export function AirbnbLayout({
       ([entry]) => {
         setIsCheckoutVisible(entry.isIntersecting);
       },
-      { threshold: 0.1 },
+      { threshold: 0.1 }
     );
 
     if (inlineCheckoutRef.current) {
@@ -94,7 +94,9 @@ export function AirbnbLayout({
 
           <div
             ref={stickyContainerRef}
-            className={`flex flex-col gap-4 mt-4 ${fitsViewport ? "sticky top-[102px]" : ""}`}
+            className={`flex flex-col gap-4 mt-4 ${
+              fitsViewport ? "sticky top-[102px]" : ""
+            }`}
           >
             <AirbnbTicketsContainer>
               <div className="relative">
@@ -110,6 +112,10 @@ export function AirbnbLayout({
                   totalTickets={ticketState.totalTickets}
                   totalPrice={ticketState.totalPrice}
                   ticketTypeCount={settings.ticketCount}
+                  mode={
+                    ticketState.selectedSeatedTicketId ? "seats" : "checkout"
+                  }
+                  onSeatsClick={ticketState.onOpenSeatmap}
                 />
               </div>
             </AirbnbTicketsContainer>
@@ -143,6 +149,8 @@ export function AirbnbLayout({
                 totalTickets={ticketState.totalTickets}
                 totalPrice={ticketState.totalPrice}
                 ticketTypeCount={settings.ticketCount}
+                mode={ticketState.selectedSeatedTicketId ? "seats" : "checkout"}
+                onSeatsClick={ticketState.onOpenSeatmap}
               />
             </div>
           </motion.div>

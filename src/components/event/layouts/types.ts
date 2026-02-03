@@ -11,9 +11,12 @@ export interface TicketState {
   totalTickets: number;
   totalPrice: number;
   isMultiDay: boolean;
+  selectedSeatedTicketId: string | null;
   onQuantityChange: (ticketId: string, delta: number) => void;
   onExpandToggle: (ticketId: string) => void;
   onTabChange: (tab: "all" | "single") => void;
+  onSeatedTicketSelect: (ticketId: string) => void;
+  onOpenSeatmap: () => void;
 }
 
 export interface DescriptionState {

@@ -44,6 +44,8 @@ export function MobileLayout({
           totalTickets={ticketState.totalTickets}
           totalPrice={ticketState.totalPrice}
           ticketTypeCount={settings.ticketCount}
+          mode={ticketState.selectedSeatedTicketId ? "seats" : "checkout"}
+          onSeatsClick={ticketState.onOpenSeatmap}
         />
       </div>
     </>

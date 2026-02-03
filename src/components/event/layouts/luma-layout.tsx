@@ -21,7 +21,7 @@ export function LumaLayout({
       ([entry]) => {
         setIsCheckoutVisible(entry.isIntersecting);
       },
-      { threshold: 0.1 },
+      { threshold: 0.1 }
     );
 
     if (inlineCheckoutRef.current) {
@@ -61,6 +61,8 @@ export function LumaLayout({
               totalTickets={ticketState.totalTickets}
               totalPrice={ticketState.totalPrice}
               ticketTypeCount={settings.ticketCount}
+              mode={ticketState.selectedSeatedTicketId ? "seats" : "checkout"}
+              onSeatsClick={ticketState.onOpenSeatmap}
             />
           </div>
 
@@ -88,6 +90,8 @@ export function LumaLayout({
                 totalTickets={ticketState.totalTickets}
                 totalPrice={ticketState.totalPrice}
                 ticketTypeCount={settings.ticketCount}
+                mode={ticketState.selectedSeatedTicketId ? "seats" : "checkout"}
+                onSeatsClick={ticketState.onOpenSeatmap}
               />
             </div>
           </div>

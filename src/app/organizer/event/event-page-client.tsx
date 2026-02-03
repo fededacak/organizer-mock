@@ -31,6 +31,7 @@ import type {
   LayoutProps,
   LayoutSections,
 } from "@/components/event/layouts/types";
+import { ConsumerSeatmapModal } from "@/components/consumer-seatmap";
 
 const PRIMARY_COLOR_MAP: Record<string, string> = {
   blue: "#3399ff",
@@ -84,6 +85,28 @@ function EventPageContent({ eventData }: EventPageClientProps) {
   // Description state
   const [showFullDescription, setShowFullDescription] = useState(false);
 
+  // Seatmap modal state
+  const [isSeatmapModalOpen, setIsSeatmapModalOpen] = useState(false);
+
+  // Seated ticket selection state
+  const [selectedSeatedTicketId, setSelectedSeatedTicketId] = useState<
+    string | null
+  >(null);
+
+  // Handle seated ticket selection (toggle behavior, clears other tickets)
+  const handleSeatedTicketSelect = (ticketId: string) => {
+    setSelectedSeatedTicketId((prev) => {
+      if (prev === ticketId) {
+        return null;
+      }
+      // Reset all ticket quantities when selecting a seated ticket
+      setTicketQuantities((quantities) =>
+        Object.fromEntries(Object.keys(quantities).map((key) => [key, 0]))
+      );
+      return ticketId;
+    });
+  };
+
   // Handle tab change and expand first ticket of that category
   const handleTicketDayTabChange = (tab: "all" | "single") => {
     setTicketDayTab(tab);
@@ -94,18 +117,38 @@ function EventPageContent({ eventData }: EventPageClientProps) {
     }
   };
 
+  // Seated ticket option
+  const seatedTicket: Ticket = useMemo(
+    () => ({
+      id: "reserved-seating",
+      name: "Reserved Seating",
+      price: 45,
+      description: "Choose your exact seats from an interactive map.",
+      isSeated: true,
+    }),
+    []
+  );
+
   // Compute displayed tickets based on settings and tab selection
   const displayedTickets = useMemo(() => {
-    if (isMultiDay && ticketDayTab === "single") {
-      return eventData.singleDayTickets || [];
+    const baseTickets =
+      isMultiDay && ticketDayTab === "single"
+        ? eventData.singleDayTickets || []
+        : eventData.tickets.slice(0, settings.ticketCount);
+
+    // Conditionally add seated ticket at the beginning
+    if (settings.showSeatedTicket) {
+      return [seatedTicket, ...baseTickets];
     }
-    return eventData.tickets.slice(0, settings.ticketCount);
+    return baseTickets;
   }, [
     eventData.tickets,
     eventData.singleDayTickets,
     settings.ticketCount,
+    settings.showSeatedTicket,
     isMultiDay,
     ticketDayTab,
+    seatedTicket,
   ]);
 
   // Group single day tickets by day
@@ -134,6 +177,10 @@ function EventPageContent({ eventData }: EventPageClientProps) {
   }, [eventData.description, settings.description]);
 
   const updateQuantity = (ticketId: string, delta: number) => {
+    // Deselect seated ticket when adding a regular ticket
+    if (delta > 0 && selectedSeatedTicketId) {
+      setSelectedSeatedTicketId(null);
+    }
     setTicketQuantities((prev) => ({
       ...prev,
       [ticketId]: Math.max(0, (prev[ticketId] || 0) + delta),
@@ -142,7 +189,7 @@ function EventPageContent({ eventData }: EventPageClientProps) {
 
   const totalTickets = Object.values(ticketQuantities).reduce(
     (sum, qty) => sum + qty,
-    0,
+    0
   );
   const totalPrice = displayedTickets.reduce((sum, ticket) => {
     return sum + ticket.price * (ticketQuantities[ticket.id] || 0);
@@ -267,11 +314,13 @@ function EventPageContent({ eventData }: EventPageClientProps) {
       expandedTicket={expandedTicket}
       isMultiDay={isMultiDay}
       ticketDayTab={ticketDayTab}
+      selectedSeatedTicketId={selectedSeatedTicketId}
       onQuantityChange={updateQuantity}
       onExpandToggle={(id) =>
         setExpandedTicket(expandedTicket === id ? null : id)
       }
       onTabChange={handleTicketDayTabChange}
+      onSeatedTicketSelect={handleSeatedTicketSelect}
     />
   );
 
@@ -288,10 +337,13 @@ function EventPageContent({ eventData }: EventPageClientProps) {
       totalTickets,
       totalPrice,
       isMultiDay,
+      selectedSeatedTicketId,
       onQuantityChange: updateQuantity,
       onExpandToggle: (id) =>
         setExpandedTicket(expandedTicket === id ? null : id),
       onTabChange: handleTicketDayTabChange,
+      onSeatedTicketSelect: handleSeatedTicketSelect,
+      onOpenSeatmap: () => setIsSeatmapModalOpen(true),
     },
     descriptionState: {
       displayedDescription,
@@ -357,6 +409,12 @@ function EventPageContent({ eventData }: EventPageClientProps) {
               titleBarHeight: "32px",
             },
           }}
+        />
+
+        {/* Consumer Seatmap Modal */}
+        <ConsumerSeatmapModal
+          isOpen={isSeatmapModalOpen}
+          onClose={() => setIsSeatmapModalOpen(false)}
         />
       </div>
     </div>
