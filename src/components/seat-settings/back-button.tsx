@@ -49,7 +49,7 @@ export function BackButton({ sidebarExpanded, className }: BackButtonProps) {
       aria-label="Go to main menu"
     >
       {/* Circular icon container */}
-      <div className="flex size-[22px] shrink-0 items-center justify-center rounded-full bg-mid-gray group-hover:bg-foreground transition-colors duration-200 ease">
+      <div className="flex size-[22px] shrink-0 items-center justify-center rounded-full bg-mid-gray">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="11"

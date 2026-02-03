@@ -1,17 +1,17 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { X, Lock, Eye, Calendar as CalendarIcon } from "lucide-react";
-import { motion } from "framer-motion";
-import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import type { Section, Seat, Hold, HoldType } from "./types";
+import { format } from "date-fns";
+import { motion } from "framer-motion";
+import { CircleAlert, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import type { Hold, HoldType, Seat, Section } from "./types";
 import { HOLD_COLORS } from "./types";
 
 interface HoldModalProps {
@@ -56,14 +56,33 @@ export function HoldModal({
   const entries = Array.from(selectedSeatsBySection.entries());
   const totalSeats = entries.reduce((acc, [, seats]) => acc + seats.length, 0);
 
-  // Get all seat IDs
+  // Get all seat IDs (excluding sold seats)
   const seatIds = useMemo(() => {
     const ids: string[] = [];
     entries.forEach(([, seats]) => {
-      seats.forEach((seat) => ids.push(seat.id));
+      seats.forEach((seat) => {
+        if (seat.status !== "sold") {
+          ids.push(seat.id);
+        }
+      });
     });
     return ids;
   }, [entries]);
+
+  // Check if any sold seats are in the selection
+  const soldSeatsCount = useMemo(() => {
+    let count = 0;
+    entries.forEach(([, seats]) => {
+      seats.forEach((seat) => {
+        if (seat.status === "sold") {
+          count++;
+        }
+      });
+    });
+    return count;
+  }, [entries]);
+
+  const hasSoldSeats = soldSeatsCount > 0;
 
   // Reset form when modal opens
   useEffect(() => {
@@ -88,17 +107,6 @@ export function HoldModal({
       }
     }
   }, [isOpen, existingHold]);
-
-  // Generate a random password
-  const generatePassword = () => {
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    let result = "";
-    for (let i = 0; i < 8; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    setPassword(result);
-    setShowPassword(true);
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -394,6 +402,18 @@ export function HoldModal({
               )}
             </div>
 
+            {/* Sold seats warning */}
+            {hasSoldSeats && (
+              <div className="flex items-center gap-2 px-3 py-2.5 rounded-[14px] bg-[#FFB222]/10">
+                <CircleAlert className="w-4 h-4 text-[#FFB222] shrink-0" />
+                <p className="text-sm text-black">
+                  {soldSeatsCount} sold{" "}
+                  {soldSeatsCount === 1 ? "seat" : "seats"} will be excluded
+                  from this hold.
+                </p>
+              </div>
+            )}
+
             {/* Footer */}
             <div className="flex justify-end items-center gap-3 pt-2">
               <button
@@ -408,7 +428,7 @@ export function HoldModal({
                 disabled={!name.trim()}
                 className="bg-primary cursor-pointer text-white font-bold text-base px-5 py-2.5 rounded-[36px] hover:opacity-80 transition-opacity duration-200 ease active:scale-[0.98] transform disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
               >
-                {isEditing ? "Save" : "Create Hold"}
+                {isEditing ? "Save" : "Create"}
               </button>
             </div>
           </form>
