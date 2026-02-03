@@ -155,6 +155,11 @@ export function ConsumerSeatmapModal({
               selectedSeats={selectedSeatInfo}
               onRemoveSeat={handleRemoveSeat}
               onClose={handleClose}
+              sections={consumerSections}
+              holds={consumerHolds}
+              unlockedHolds={unlockedHolds}
+              onSelectSeat={handleSelectSeat}
+              onLockedClick={handleLockedClick}
             />
 
             {/* Seatmap Area */}
