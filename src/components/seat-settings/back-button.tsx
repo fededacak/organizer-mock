@@ -32,8 +32,10 @@ export function BackButton({ sidebarExpanded, className }: BackButtonProps) {
       className={cn(
         // Fixed positioning in top-left area
         "fixed top-2.5 z-50",
+        // Hidden on mobile - use browser navigation instead
+        "hidden md:flex",
         // Button styling - pill shape
-        "flex items-center gap-2.5 pl-2 pr-3 py-2",
+        "items-center gap-2.5 pl-2 pr-3 py-2",
         "rounded-full bg-white border border-soft-gray",
         "cursor-pointer",
         // Hover state

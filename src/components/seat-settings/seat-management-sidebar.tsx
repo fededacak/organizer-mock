@@ -144,7 +144,7 @@ export function SeatManagementSidebar({
       {/* Floating panel - visible when expanded */}
       <div
         className={cn(
-          "fixed bottom-2.5 left-2.5 top-2.5 z-40 w-[320px]",
+          "fixed bottom-2.5 left-2.5 top-2.5 right-2.5 md:right-auto z-40 md:w-[320px]",
           "flex flex-col gap-2 rounded-[20px] bg-white p-2.5 shadow-floating border border-soft-gray",
           "origin-bottom-left transition-all duration-250",
           "motion-reduce:transition-none",

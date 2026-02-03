@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { Leva } from "leva";
 import {
   SeatManagementSidebar,
@@ -35,6 +35,14 @@ export function SeatSettingsClient() {
   const [selectedSeats, setSelectedSeats] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<ViewMode>("status");
   const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
+
+  // Start with sidebar minimized on mobile
+  useEffect(() => {
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    if (isMobile) {
+      setIsSidebarMinimized(true);
+    }
+  }, []);
 
   // Determine active data based on layout variant
   const isTableLayout = settings.layoutVariant === "tables";

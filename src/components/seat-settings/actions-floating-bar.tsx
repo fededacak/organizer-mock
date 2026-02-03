@@ -335,7 +335,7 @@ export function ActionsFloatingBar({
   return (
     <div
       className={cn(
-        "fixed bottom-2.5 left-1/2 -translate-x-1/2 z-50",
+        "fixed bottom-2.5 left-2.5 right-2.5 md:left-1/2 md:right-auto md:-translate-x-1/2 z-50",
         "flex items-center justify-between gap-3 rounded-[20px] md:min-w-[400px] border border-soft-gray bg-white px-4 py-3 shadow-card",
         "transition-all duration-300 cubic-bezier(.23,1,.32,1)",
         totalCount > 0
