@@ -78,6 +78,7 @@ function EventPageContent({ eventData }: EventPageClientProps) {
     "late-night": 0,
     saturday: 0,
     sunday: 0,
+    "pay-what-you-want": 0,
   });
   const [expandedTicket, setExpandedTicket] = useState<string | null>(null);
   const [ticketDayTab, setTicketDayTab] = useState<"all" | "single">("all");
@@ -93,6 +94,9 @@ function EventPageContent({ eventData }: EventPageClientProps) {
     string | null
   >(null);
 
+  // Custom prices state for PWYW tickets
+  const [customPrices, setCustomPrices] = useState<Record<string, string>>({});
+
   // Handle seated ticket selection (toggle behavior, clears other tickets)
   const handleSeatedTicketSelect = (ticketId: string) => {
     setSelectedSeatedTicketId((prev) => {
@@ -105,6 +109,14 @@ function EventPageContent({ eventData }: EventPageClientProps) {
       );
       return ticketId;
     });
+  };
+
+  // Handle custom price change for PWYW tickets
+  const handleCustomPriceChange = (ticketId: string, price: string) => {
+    setCustomPrices((prev) => ({
+      ...prev,
+      [ticketId]: price,
+    }));
   };
 
   // Handle tab change and expand first ticket of that category
@@ -129,6 +141,19 @@ function EventPageContent({ eventData }: EventPageClientProps) {
     []
   );
 
+  // Pay What You Want ticket option
+  const payWhatYouWantTicket: Ticket = useMemo(
+    () => ({
+      id: "pay-what-you-want",
+      name: "Support the Event",
+      price: 0,
+      description: "Pay what you feel is fair. Every contribution helps.",
+      isPayWhatYouWant: true,
+      minimumPrice: settings.payWhatYouWantHasMinimum ? 5 : 0,
+    }),
+    [settings.payWhatYouWantHasMinimum]
+  );
+
   // Compute displayed tickets based on settings and tab selection
   const displayedTickets = useMemo(() => {
     const baseTickets =
@@ -136,19 +161,26 @@ function EventPageContent({ eventData }: EventPageClientProps) {
         ? eventData.singleDayTickets || []
         : eventData.tickets.slice(0, settings.ticketCount);
 
-    // Conditionally add seated ticket at the beginning
+    // Build special tickets array
+    const specialTickets: Ticket[] = [];
     if (settings.showSeatedTicket) {
-      return [seatedTicket, ...baseTickets];
+      specialTickets.push(seatedTicket);
     }
-    return baseTickets;
+    if (settings.showPayWhatYouWantTicket) {
+      specialTickets.push(payWhatYouWantTicket);
+    }
+
+    return [...specialTickets, ...baseTickets];
   }, [
     eventData.tickets,
     eventData.singleDayTickets,
     settings.ticketCount,
     settings.showSeatedTicket,
+    settings.showPayWhatYouWantTicket,
     isMultiDay,
     ticketDayTab,
     seatedTicket,
+    payWhatYouWantTicket,
   ]);
 
   // Group single day tickets by day
@@ -194,6 +226,16 @@ function EventPageContent({ eventData }: EventPageClientProps) {
   const totalPrice = displayedTickets.reduce((sum, ticket) => {
     return sum + ticket.price * (ticketQuantities[ticket.id] || 0);
   }, 0);
+
+  // Check if PWYW ticket is selected but has invalid price
+  const isPwywInvalid = displayedTickets.some((ticket) => {
+    if (!ticket.isPayWhatYouWant) return false;
+    const quantity = ticketQuantities[ticket.id] || 0;
+    if (quantity === 0) return false;
+    const customPrice = parseFloat(customPrices[ticket.id] || "0") || 0;
+    const minimumPrice = ticket.minimumPrice ?? 0;
+    return customPrice < minimumPrice;
+  });
 
   // Build sections object for layouts
   const sections: LayoutSections = {
@@ -315,12 +357,14 @@ function EventPageContent({ eventData }: EventPageClientProps) {
       isMultiDay={isMultiDay}
       ticketDayTab={ticketDayTab}
       selectedSeatedTicketId={selectedSeatedTicketId}
+      customPrices={customPrices}
       onQuantityChange={updateQuantity}
       onExpandToggle={(id) =>
         setExpandedTicket(expandedTicket === id ? null : id)
       }
       onTabChange={handleTicketDayTabChange}
       onSeatedTicketSelect={handleSeatedTicketSelect}
+      onCustomPriceChange={handleCustomPriceChange}
     />
   );
 
@@ -338,11 +382,14 @@ function EventPageContent({ eventData }: EventPageClientProps) {
       totalPrice,
       isMultiDay,
       selectedSeatedTicketId,
+      customPrices,
+      isPwywInvalid,
       onQuantityChange: updateQuantity,
       onExpandToggle: (id) =>
         setExpandedTicket(expandedTicket === id ? null : id),
       onTabChange: handleTicketDayTabChange,
       onSeatedTicketSelect: handleSeatedTicketSelect,
+      onCustomPriceChange: handleCustomPriceChange,
       onOpenSeatmap: () => setIsSeatmapModalOpen(true),
     },
     descriptionState: {

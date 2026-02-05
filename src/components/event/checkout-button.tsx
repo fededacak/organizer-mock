@@ -6,6 +6,7 @@ interface CheckoutButtonProps {
   ticketTypeCount?: number;
   mode?: "checkout" | "seats";
   onSeatsClick?: () => void;
+  isPwywInvalid?: boolean;
 }
 
 function formatPrice(price: number) {
@@ -18,10 +19,11 @@ export function CheckoutButton({
   ticketTypeCount = 1,
   mode = "checkout",
   onSeatsClick,
+  isPwywInvalid = false,
 }: CheckoutButtonProps) {
   const showCount = ticketTypeCount > 1 && totalTickets > 0;
   const isSeatsMode = mode === "seats";
-  const isDisabled = !isSeatsMode && totalTickets === 0;
+  const isDisabled = !isSeatsMode && (totalTickets === 0 || isPwywInvalid);
 
   const handleClick = () => {
     if (isSeatsMode && onSeatsClick) {

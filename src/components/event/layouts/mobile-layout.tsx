@@ -46,6 +46,7 @@ export function MobileLayout({
           ticketTypeCount={settings.ticketCount}
           mode={ticketState.selectedSeatedTicketId ? "seats" : "checkout"}
           onSeatsClick={ticketState.onOpenSeatmap}
+          isPwywInvalid={ticketState.isPwywInvalid}
         />
       </div>
     </>

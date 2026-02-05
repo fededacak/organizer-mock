@@ -10,6 +10,7 @@ import {
   CircleAlert,
   Check,
   Download,
+  Scaling,
 } from "lucide-react";
 import { motion, LayoutGroup } from "framer-motion";
 import {
@@ -635,13 +636,34 @@ export function BannerGeneratorModal({
                         ease: [0.25, 0.46, 0.45, 0.94],
                       }}
                     />
-                    <button
-                      onClick={handleDownload}
-                      className="absolute top-2 right-2 w-8 h-8 bg-black/50 hover:bg-black/70 text-white rounded-[10px] flex items-center justify-center transition-all duration-200 ease cursor-pointer"
-                      aria-label="Download banner"
-                    >
-                      <Download className="w-4 h-4" />
-                    </button>
+                    <div className="absolute top-2 right-2 flex items-center gap-1.5">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => {
+                              // Resize action placeholder
+                            }}
+                            className="w-8 h-8 bg-black/50 hover:bg-black/70 text-white rounded-[10px] flex items-center justify-center transition-all duration-200 ease cursor-pointer"
+                            aria-label="Resize banner"
+                          >
+                            <Scaling className="w-4 h-4" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom">Resize</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={handleDownload}
+                            className="w-8 h-8 bg-black/50 hover:bg-black/70 text-white rounded-[10px] flex items-center justify-center transition-all duration-200 ease cursor-pointer"
+                            aria-label="Download banner"
+                          >
+                            <Download className="w-4 h-4" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom">Download</TooltipContent>
+                      </Tooltip>
+                    </div>
                   </>
                 )}
               </div>

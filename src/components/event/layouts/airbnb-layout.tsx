@@ -116,6 +116,7 @@ export function AirbnbLayout({
                     ticketState.selectedSeatedTicketId ? "seats" : "checkout"
                   }
                   onSeatsClick={ticketState.onOpenSeatmap}
+                  isPwywInvalid={ticketState.isPwywInvalid}
                 />
               </div>
             </AirbnbTicketsContainer>
@@ -151,6 +152,7 @@ export function AirbnbLayout({
                 ticketTypeCount={settings.ticketCount}
                 mode={ticketState.selectedSeatedTicketId ? "seats" : "checkout"}
                 onSeatsClick={ticketState.onOpenSeatmap}
+                isPwywInvalid={ticketState.isPwywInvalid}
               />
             </div>
           </motion.div>

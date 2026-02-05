@@ -13,8 +13,10 @@ export interface EventControlsSettings {
   showEndTime: boolean;
   locationTBD: boolean;
   ticketCount: 0 | 1 | 2 | 6;
-  // Seated
+  // Seated / Special Tickets
   showSeatedTicket: boolean;
+  showPayWhatYouWantTicket: boolean;
+  payWhatYouWantHasMinimum: boolean;
   // Sections
   description: "none" | "short" | "long";
   youtubeVideoCount: 0 | 1 | 2;
@@ -51,6 +53,8 @@ export function useEventControls(): EventControlsSettings {
     }),
     Seated: folder({
       showSeatedTicket: { value: false, label: "Show Seated Ticket" },
+      showPayWhatYouWantTicket: { value: false, label: "Show PWYW Ticket" },
+      payWhatYouWantHasMinimum: { value: true, label: "PWYW Has Minimum" },
     }),
     Sections: folder({
       description: {

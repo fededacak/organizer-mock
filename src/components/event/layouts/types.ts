@@ -12,10 +12,13 @@ export interface TicketState {
   totalPrice: number;
   isMultiDay: boolean;
   selectedSeatedTicketId: string | null;
+  customPrices: Record<string, string>;
+  isPwywInvalid: boolean;
   onQuantityChange: (ticketId: string, delta: number) => void;
   onExpandToggle: (ticketId: string) => void;
   onTabChange: (tab: "all" | "single") => void;
   onSeatedTicketSelect: (ticketId: string) => void;
+  onCustomPriceChange: (ticketId: string, price: string) => void;
   onOpenSeatmap: () => void;
 }
 

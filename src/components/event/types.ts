@@ -17,6 +17,8 @@ export interface Ticket {
   description?: string;
   day?: string;
   isSeated?: boolean;
+  isPayWhatYouWant?: boolean;
+  minimumPrice?: number;
 }
 
 export interface Artist {

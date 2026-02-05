@@ -2,6 +2,7 @@
 
 import { TicketCard } from "./ticket-card";
 import { SeatedTicketCard } from "./seated-ticket-card";
+import { PayWhatYouWantTicketCard } from "./pay-what-you-want-ticket-card";
 import type { Ticket } from "./types";
 
 interface TicketsListProps {
@@ -12,10 +13,12 @@ interface TicketsListProps {
   isMultiDay: boolean;
   ticketDayTab: "all" | "single";
   selectedSeatedTicketId: string | null;
+  customPrices: Record<string, string>;
   onQuantityChange: (ticketId: string, delta: number) => void;
   onExpandToggle: (ticketId: string) => void;
   onTabChange: (tab: "all" | "single") => void;
   onSeatedTicketSelect: (ticketId: string) => void;
+  onCustomPriceChange: (ticketId: string, price: string) => void;
 }
 
 export function TicketsList({
@@ -26,10 +29,12 @@ export function TicketsList({
   isMultiDay,
   ticketDayTab,
   selectedSeatedTicketId,
+  customPrices,
   onQuantityChange,
   onExpandToggle,
   onTabChange,
   onSeatedTicketSelect,
+  onCustomPriceChange,
 }: TicketsListProps) {
   const renderTicket = (ticket: Ticket) => {
     if (ticket.isSeated) {
@@ -39,6 +44,18 @@ export function TicketsList({
           ticket={ticket}
           isSelected={selectedSeatedTicketId === ticket.id}
           onSelect={() => onSeatedTicketSelect(ticket.id)}
+        />
+      );
+    }
+    if (ticket.isPayWhatYouWant) {
+      return (
+        <PayWhatYouWantTicketCard
+          key={ticket.id}
+          ticket={ticket}
+          quantity={quantities[ticket.id] || 0}
+          onUpdateQuantity={(delta) => onQuantityChange(ticket.id, delta)}
+          customPrice={customPrices[ticket.id] || ""}
+          onPriceChange={(price) => onCustomPriceChange(ticket.id, price)}
         />
       );
     }
