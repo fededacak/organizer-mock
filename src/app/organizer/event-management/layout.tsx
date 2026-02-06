@@ -25,37 +25,7 @@ export default function EventManagementLayout({
       </div>
 
       {/* Main Content Area */}
-      <main className="flex flex-1 flex-col gap-6 px-8 pb-[72px] pt-5 w-full max-w-[1292px] mx-auto">
-        {/* Header Row: Breadcrumb + View Event */}
-        <div className="flex items-center justify-between w-full">
-          {/* Breadcrumb */}
-          <nav className="flex items-center gap-1">
-            <Link
-              href="/organizer/home"
-              className="font-open-sans text-sm font-semibold text-gray transition-colors duration-200 ease hover:text-dark-gray"
-            >
-              Events
-            </Link>
-            <ChevronRight className="size-3.5 text-gray" />
-            <span className="font-open-sans text-sm font-semibold text-black">
-              {eventName}
-            </span>
-          </nav>
-
-          {/* View Event Link */}
-          <Link
-            href={`/organizer/event/${eventName
-              .toLowerCase()
-              .replace(/\s+/g, "-")}`}
-            className="flex items-center gap-2 rounded-full transition-colors duration-200 ease hover:opacity-80"
-          >
-            <span className="font-outfit text-sm font-bold text-tp-blue">
-              View Event
-            </span>
-            <ExternalLink className="size-4 text-tp-blue" />
-          </Link>
-        </div>
-
+      <main className="flex flex-1 flex-col gap-6 px-8 pb-[72px] pt-8 w-full max-w-[1292px] mx-auto">
         {/* Page Content */}
         <div className="flex-1 w-full">{children}</div>
       </main>

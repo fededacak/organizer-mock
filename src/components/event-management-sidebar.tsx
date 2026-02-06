@@ -164,7 +164,7 @@ export function EventManagementSidebar({
   };
 
   return (
-    <aside className="flex h-full flex-col gap-2 rounded-[20px] bg-white p-2.5 shadow-[0px_4px_24px_0px_rgba(155,182,190,0.07)] w-[230px]">
+    <aside className="flex h-full flex-col gap-2 rounded-[20px] bg-white p-2.5 shadow-[0px_4px_24px_0px_rgba(155,182,190,0.07)] w-[244px]">
       {/* Main Menu Button */}
       <Link
         href="/organizer/home"
@@ -195,7 +195,7 @@ export function EventManagementSidebar({
 
       {/* Navigation Sections */}
       <div className="flex flex-1 flex-col gap-2 overflow-y-auto">
-        <nav className="flex flex-1 flex-col gap-2">
+        <nav className="flex flex-1 flex-col">
           {/* Overview Item */}
           <Link
             href={overviewItem.href}
@@ -203,12 +203,12 @@ export function EventManagementSidebar({
               "flex items-center gap-2 rounded-full p-2 transition-colors duration-200 ease",
               isActive(overviewItem.href)
                 ? "bg-[rgba(51,153,255,0.05)]"
-                : "bg-white hover:bg-light-gray"
+                : "bg-white hover:bg-light-gray",
             )}
           >
             <span
               className={cn(
-                isActive(overviewItem.href) ? "text-tp-blue" : "text-gray"
+                isActive(overviewItem.href) ? "text-tp-blue" : "text-gray",
               )}
             >
               {overviewItem.icon}
@@ -218,7 +218,7 @@ export function EventManagementSidebar({
                 "font-outfit text-sm",
                 isActive(overviewItem.href)
                   ? "font-semibold text-tp-blue"
-                  : "font-normal text-foreground"
+                  : "font-normal text-foreground",
               )}
             >
               {overviewItem.label}
@@ -229,7 +229,7 @@ export function EventManagementSidebar({
             <div key={section.title} className="flex flex-col">
               {/* Section Title */}
               <div className="px-2 py-1">
-                <span className="font-outfit text-xs font-semibold text-gray">
+                <span className="font-outfit text-[11px] font-semibold text-gray uppercase">
                   {section.title}
                 </span>
               </div>
@@ -246,7 +246,7 @@ export function EventManagementSidebar({
                         "flex items-center gap-2 rounded-full p-2 transition-colors duration-200 ease",
                         active
                           ? "bg-[rgba(51,153,255,0.05)]"
-                          : "bg-white hover:bg-light-gray"
+                          : "bg-white hover:bg-light-gray",
                       )}
                     >
                       <span
@@ -259,7 +259,7 @@ export function EventManagementSidebar({
                           "font-outfit text-sm",
                           active
                             ? "font-semibold text-tp-blue"
-                            : "font-normal text-foreground"
+                            : "font-normal text-foreground",
                         )}
                       >
                         {item.label}
