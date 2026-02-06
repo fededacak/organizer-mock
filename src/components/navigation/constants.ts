@@ -32,6 +32,11 @@ export const FOLDERS: FolderData[] = [
         name: "Seatmap Settings",
         href: "/organizer/seat-settings",
       },
+      {
+        id: "organizer-event-management",
+        name: "Event Management",
+        href: "/organizer/event-management",
+      },
     ],
   },
 ];
