@@ -13,8 +13,8 @@ export interface EventControlsSettings {
   showEndTime: boolean;
   locationTBD: boolean;
   ticketCount: 0 | 1 | 2 | 6;
-  // Seated / Special Tickets
-  showSeatedTicket: boolean;
+  // Ticket Type
+  ticketType: "ga" | "seated";
   showPayWhatYouWantTicket: boolean;
   payWhatYouWantHasMinimum: boolean;
   // Sections
@@ -51,8 +51,12 @@ export function useEventControls(): EventControlsSettings {
       locationTBD: false,
       ticketCount: { value: 2, options: [0, 1, 2, 6] as const },
     }),
-    Seated: folder({
-      showSeatedTicket: { value: false, label: "Show Seated Ticket" },
+    Tickets: folder({
+      ticketType: {
+        value: "ga",
+        options: ["ga", "seated"] as const,
+        label: "Ticket Type",
+      },
       showPayWhatYouWantTicket: { value: false, label: "Show PWYW Ticket" },
       payWhatYouWantHasMinimum: { value: true, label: "PWYW Has Minimum" },
     }),

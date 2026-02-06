@@ -1,9 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import type { Section, Hold } from "../seat-settings/types";
 import { ZoomControls } from "../seat-settings/zoom-controls";
-import { useViewport } from "../seat-settings/use-viewport";
 import { MIN_SCALE, MAX_SCALE } from "../seat-settings/seatmap-utils";
 import { ConsumerSectionBlock } from "./consumer-section-block";
 import { ConsumerSeatmapLegend } from "./consumer-seatmap-legend";
@@ -19,7 +18,8 @@ interface ConsumerSeatmapDisplayProps {
 
 /**
  * Consumer seatmap display component
- * Renders an interactive seatmap for consumers to select seats
+ * Renders an interactive seatmap for consumers to select seats.
+ * Content is always centered — only zoom in/out is supported (no panning).
  */
 export function ConsumerSeatmapDisplay({
   sections,
@@ -29,17 +29,40 @@ export function ConsumerSeatmapDisplay({
   onSelectSeat,
   onLockedClick,
 }: ConsumerSeatmapDisplayProps) {
-  // Viewport zoom/pan hook
-  const {
-    viewport,
-    containerRef,
-    contentRef,
-    handleZoomIn,
-    handleZoomOut,
-    handleResetZoom,
-    getCursor,
-    handleContainerMouseDown,
-  } = useViewport();
+  const [scale, setScale] = useState(1);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleZoomIn = useCallback(() => {
+    setScale((prev) => Math.min(MAX_SCALE, prev * 1.2));
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setScale((prev) => Math.max(MIN_SCALE, prev / 1.2));
+  }, []);
+
+  const handleResetZoom = useCallback(() => {
+    setScale(1);
+  }, []);
+
+  // Wheel zoom (always centered)
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const direction = e.deltaY > 0 ? -1 : 1;
+      setScale((prev) => {
+        const scaleBy = 1.1;
+        const next =
+          direction > 0 ? prev * scaleBy : prev / scaleBy;
+        return Math.max(MIN_SCALE, Math.min(MAX_SCALE, next));
+      });
+    };
+
+    container.addEventListener("wheel", handleWheel, { passive: false });
+    return () => container.removeEventListener("wheel", handleWheel);
+  }, []);
 
   // Create hold map for quick lookup by holdId
   const holdMap = useMemo(() => {
@@ -68,13 +91,13 @@ export function ConsumerSeatmapDisplay({
 
   return (
     <div className="relative flex h-full flex-1 flex-col overflow-hidden bg-light-gray">
-      {/* Floating Controls (top right) */}
+      {/* Floating Controls */}
       <div className="absolute left-2.5 top-2.5 z-30 flex gap-2">
         <ConsumerSeatmapLegend />
       </div>
       <div className="absolute left-2.5 bottom-2.5 z-30 flex gap-2">
         <ZoomControls
-          scale={viewport.scale}
+          scale={scale}
           minScale={MIN_SCALE}
           maxScale={MAX_SCALE}
           onZoomIn={handleZoomIn}
@@ -83,19 +106,16 @@ export function ConsumerSeatmapDisplay({
         />
       </div>
 
-      {/* Seatmap Container */}
+      {/* Seatmap Container — centered, no panning */}
       <div
         ref={containerRef}
-        className="flex flex-1"
-        style={{ cursor: getCursor() }}
-        onMouseDown={handleContainerMouseDown}
+        className="flex flex-1 items-center justify-center overflow-auto"
       >
-        {/* Transform wrapper for zoom/pan */}
         <div
-          ref={contentRef}
-          className="origin-top-left flex flex-col items-center justify-center w-full"
+          className="flex flex-col items-center justify-center"
           style={{
-            transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.scale})`,
+            transform: `scale(${scale})`,
+            transformOrigin: "center center",
             willChange: "transform",
           }}
         >

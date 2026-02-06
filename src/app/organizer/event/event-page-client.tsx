@@ -89,26 +89,15 @@ function EventPageContent({ eventData }: EventPageClientProps) {
   // Seatmap modal state
   const [isSeatmapModalOpen, setIsSeatmapModalOpen] = useState(false);
 
-  // Seated ticket selection state
-  const [selectedSeatedTicketId, setSelectedSeatedTicketId] = useState<
-    string | null
-  >(null);
+  const isSeatedEvent = settings.ticketType === "seated";
 
   // Custom prices state for PWYW tickets
   const [customPrices, setCustomPrices] = useState<Record<string, string>>({});
 
-  // Handle seated ticket selection (toggle behavior, clears other tickets)
-  const handleSeatedTicketSelect = (ticketId: string) => {
-    setSelectedSeatedTicketId((prev) => {
-      if (prev === ticketId) {
-        return null;
-      }
-      // Reset all ticket quantities when selecting a seated ticket
-      setTicketQuantities((quantities) =>
-        Object.fromEntries(Object.keys(quantities).map((key) => [key, 0]))
-      );
-      return ticketId;
-    });
+  // Seated ticket is always selected in seated events — no toggle
+  const selectedSeatedTicketId = isSeatedEvent ? "reserved-seating" : null;
+  const handleSeatedTicketSelect = (_ticketId: string) => {
+    // No-op: seated ticket is always selected in a seated event
   };
 
   // Handle custom price change for PWYW tickets
@@ -138,7 +127,7 @@ function EventPageContent({ eventData }: EventPageClientProps) {
       description: "Choose your exact seats from an interactive map.",
       isSeated: true,
     }),
-    []
+    [],
   );
 
   // Pay What You Want ticket option
@@ -151,21 +140,23 @@ function EventPageContent({ eventData }: EventPageClientProps) {
       isPayWhatYouWant: true,
       minimumPrice: settings.payWhatYouWantHasMinimum ? 5 : 0,
     }),
-    [settings.payWhatYouWantHasMinimum]
+    [settings.payWhatYouWantHasMinimum],
   );
 
   // Compute displayed tickets based on settings and tab selection
+  // Seated events only show the seated ticket — no GA or PWYW tickets
   const displayedTickets = useMemo(() => {
+    if (isSeatedEvent) {
+      return [seatedTicket];
+    }
+
     const baseTickets =
       isMultiDay && ticketDayTab === "single"
         ? eventData.singleDayTickets || []
         : eventData.tickets.slice(0, settings.ticketCount);
 
-    // Build special tickets array
+    // Build special tickets array (only PWYW in GA mode)
     const specialTickets: Ticket[] = [];
-    if (settings.showSeatedTicket) {
-      specialTickets.push(seatedTicket);
-    }
     if (settings.showPayWhatYouWantTicket) {
       specialTickets.push(payWhatYouWantTicket);
     }
@@ -175,8 +166,8 @@ function EventPageContent({ eventData }: EventPageClientProps) {
     eventData.tickets,
     eventData.singleDayTickets,
     settings.ticketCount,
-    settings.showSeatedTicket,
     settings.showPayWhatYouWantTicket,
+    isSeatedEvent,
     isMultiDay,
     ticketDayTab,
     seatedTicket,
@@ -209,10 +200,6 @@ function EventPageContent({ eventData }: EventPageClientProps) {
   }, [eventData.description, settings.description]);
 
   const updateQuantity = (ticketId: string, delta: number) => {
-    // Deselect seated ticket when adding a regular ticket
-    if (delta > 0 && selectedSeatedTicketId) {
-      setSelectedSeatedTicketId(null);
-    }
     setTicketQuantities((prev) => ({
       ...prev,
       [ticketId]: Math.max(0, (prev[ticketId] || 0) + delta),
@@ -221,7 +208,7 @@ function EventPageContent({ eventData }: EventPageClientProps) {
 
   const totalTickets = Object.values(ticketQuantities).reduce(
     (sum, qty) => sum + qty,
-    0
+    0,
   );
   const totalPrice = displayedTickets.reduce((sum, ticket) => {
     return sum + ticket.price * (ticketQuantities[ticket.id] || 0);
