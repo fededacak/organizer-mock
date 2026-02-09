@@ -53,7 +53,7 @@ export function ConsumerSeatmapModal({
       }
       return undefined;
     },
-    []
+    [],
   );
 
   // Get seat object by ID
@@ -139,30 +139,19 @@ export function ConsumerSeatmapModal({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={springTransition}
-            className="fixed inset-4 z-50 bg-white rounded-[24px] shadow-2xl overflow-hidden flex"
+            className="fixed md:inset-4 inset-2 z-50 bg-light-gray md:rounded-[24px] rounded-[20px] shadow-2xl overflow-hidden flex"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close button */}
+            {/* Close button - offset to avoid overlapping floating sidebar */}
             <button
               type="button"
               onClick={handleClose}
-              className="absolute right-4 top-4 z-40 size-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white shadow-md transition-colors duration-200 ease cursor-pointer"
+              className="absolute md:left-3 md:top-3 right-2 top-2 z-40 size-8 bg-white backdrop-blur-sm rounded-full flex items-center justify-center hover:scale-[1.03] active:scale-[0.97] shadow-md transition-all duration-200 ease cursor-pointer text-muted-foreground hover:text-foreground"
             >
-              <X className="size-5 text-gray-700" />
+              <X className="size-4" />
             </button>
-            {/* Selection Sidebar */}
-            <SelectionSidebar
-              selectedSeats={selectedSeatInfo}
-              onRemoveSeat={handleRemoveSeat}
-              onClose={handleClose}
-              sections={consumerSections}
-              holds={consumerHolds}
-              unlockedHolds={unlockedHolds}
-              onSelectSeat={handleSelectSeat}
-              onLockedClick={handleLockedClick}
-            />
 
-            {/* Seatmap Area */}
+            {/* Seatmap Area - full width behind floating sidebar */}
             <div className="flex-1 relative bg-red-200">
               <ConsumerSeatmapDisplay
                 sections={consumerSections}
@@ -173,6 +162,18 @@ export function ConsumerSeatmapModal({
                 onLockedClick={handleLockedClick}
               />
             </div>
+
+            {/* Floating Selection Sidebar */}
+            <SelectionSidebar
+              selectedSeats={selectedSeatInfo}
+              onRemoveSeat={handleRemoveSeat}
+              onClose={handleClose}
+              sections={consumerSections}
+              holds={consumerHolds}
+              unlockedHolds={unlockedHolds}
+              onSelectSeat={handleSelectSeat}
+              onLockedClick={handleLockedClick}
+            />
 
             {/* Password Modal (nested) */}
             <PasswordUnlockModal

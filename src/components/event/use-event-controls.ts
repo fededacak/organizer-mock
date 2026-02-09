@@ -80,11 +80,11 @@ export function useEventControls(): EventControlsSettings {
     }),
     Appearance: folder({
       layoutVariant: {
-        value: "luma",
+        value: "airbnb",
         options: ["luma", "airbnb"] as const,
       },
       bannerStyle: {
-        value: "carousel",
+        value: "grid",
         options: ["carousel", "grid"] as const,
       },
       theme: { value: "light", options: ["light", "dark"] as const },

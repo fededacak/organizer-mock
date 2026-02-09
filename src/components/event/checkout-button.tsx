@@ -1,5 +1,3 @@
-import { MousePointerClick } from "lucide-react";
-
 interface CheckoutButtonProps {
   totalTickets: number;
   totalPrice: number;
