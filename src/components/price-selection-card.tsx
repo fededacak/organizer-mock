@@ -120,7 +120,7 @@ export function PriceSelectionCard({
           }`}
         >
           <span className="text-sm font-semibold text-black text-center w-full">
-            Flexible
+            Donation
           </span>
         </button>
       </div>
@@ -146,7 +146,7 @@ export function PriceSelectionCard({
           />
           <p className="text-xs text-dark-gray">
             Customers will enter a price of ${minimumPrice || "0"} or more to
-            continue.
+            check out.
           </p>
         </div>
       )}

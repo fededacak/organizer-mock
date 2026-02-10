@@ -26,7 +26,7 @@ export function ArtistCard({ artist, onOpenModal }: ArtistCardProps) {
           style={{ borderRadius: 11 }}
         >
           <Image
-            src="/lineup-avatar.jpg"
+            src="/lineup-avatar.jpeg"
             alt={artist.name}
             width={30}
             height={30}

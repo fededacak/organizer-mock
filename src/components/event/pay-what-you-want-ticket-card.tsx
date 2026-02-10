@@ -58,19 +58,22 @@ export function PayWhatYouWantTicketCard({
               : "Name your price"}
           </p>
         </div>
-        <QuantityStepper quantity={quantity} onUpdateQuantity={onUpdateQuantity} />
+        <QuantityStepper
+          quantity={quantity}
+          onUpdateQuantity={onUpdateQuantity}
+        />
       </div>
 
       {/* Description */}
       {ticket.description && (
-        <p className="text-sm text-dark-gray dark:text-[#9ca3af] mt-2.5 leading-relaxed">
+        <p className="text-sm text-dark-gray dark:text-[#9ca3af] mt-1.5 leading-relaxed">
           {ticket.description}
         </p>
       )}
 
       {/* Price input - shown when selected */}
       {isSelected && (
-        <div className="mt-2.5 flex flex-col gap-1.5">
+        <div className="mt-1.5 flex flex-col gap-1.5">
           <label className="font-bold text-sm text-black dark:text-white">
             Enter your amount
           </label>
@@ -92,8 +95,8 @@ export function PayWhatYouWantTicketCard({
                 isFocused
                   ? "ring-1 ring-(--color-tp-blue)"
                   : !isValidPrice && customPrice
-                  ? "ring-1 ring-red-500"
-                  : ""
+                    ? "ring-1 ring-red-500"
+                    : ""
               }`}
             />
           </div>
