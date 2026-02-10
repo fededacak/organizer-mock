@@ -139,7 +139,7 @@ export function ConsumerSeatmapModal({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={springTransition}
-            className="fixed md:inset-4 inset-0 z-50 bg-light-gray md:rounded-[24px] md:shadow-2xl overflow-hidden flex"
+            className="fixed md:inset-4 inset-0 z-50 bg-light-gray md:rounded-[24px] md:shadow-2xl overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close button - offset to avoid overlapping floating sidebar */}

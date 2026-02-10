@@ -19,7 +19,7 @@ interface SidebarTabsProps {
 
 export function SidebarTabs({ activeTab, onTabChange }: SidebarTabsProps) {
   return (
-    <div className="md:px-3 px-4">
+    <div className="md:px-3 px-4 mb-2">
       <div className="flex gap-1 rounded-[16px] bg-light-gray p-1">
         {tabs.map((tab) => (
           <button
@@ -27,10 +27,10 @@ export function SidebarTabs({ activeTab, onTabChange }: SidebarTabsProps) {
             type="button"
             onClick={() => onTabChange(tab.value)}
             className={cn(
-              "flex-1 rounded-[12px] md:py-1.5 py-2 md:text-sm text-base transition-all duration-200 ease cursor-pointer",
+              "flex-1 rounded-[12px] md:py-1.5 py-2 md:text-sm font-semibold text-base transition-all duration-200 ease cursor-pointer",
               activeTab === tab.value
-                ? "bg-white text-foreground shadow-sm font-semibold"
-                : "text-muted-foreground hover:text-foreground",
+                ? "bg-white text-foreground shadow-sm"
+                : "text-muted-foreground/80 hover:text-foreground",
             )}
           >
             {tab.label}

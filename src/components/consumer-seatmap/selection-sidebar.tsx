@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { X, Armchair } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -39,21 +39,12 @@ export function SelectionSidebar({
   onSelectSeat,
   onLockedClick,
 }: SelectionSidebarProps) {
-  // Tab state - will be set by useEffect on mount based on screen size
   const [activeTab, setActiveTab] = useState<TabType>("your-seats");
 
   // Single-open accordion state
   const [expandedSectionId, setExpandedSectionId] = useState<string | null>(
     null,
   );
-
-  // Set default tab based on screen size on mount
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 767px)");
-    if (mediaQuery.matches) {
-      setActiveTab("browse");
-    }
-  }, []);
 
   const totalPrice = selectedSeats.reduce(
     (sum, { seat }) => sum + seat.price,
@@ -140,7 +131,7 @@ export function SelectionSidebar({
   };
 
   return (
-    <div className="md:w-[300px] absolute md:right-2 md:bottom-2 md:top-2 right-0 bottom-0 left-0 md:left-auto max-h-[75dvh] md:max-h-none bg-white rounded-2xl flex flex-col z-30 overflow-hidden shadow-floating">
+    <div className="md:w-[300px] md:absolute md:right-2 md:bottom-2 md:top-2 max-h-[75dvh] md:max-h-none bg-white rounded-2xl flex flex-col z-30 overflow-hidden shadow-floating shrink-0">
       {/* Header */}
       <div className="p-4 pt-5 md:pt-4 ">
         <div className="flex items-center gap-2">
@@ -162,12 +153,9 @@ export function SelectionSidebar({
       <div className="flex-1 overflow-y-auto">
         {activeTab === "your-seats" ? (
           // Your Seats Tab Content
-          <div className="p-4 md:px-3 px-4">
+          <div className="p-3 md:px-3 px-4">
             {selectedSeats.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-center md:py-12 py-8">
-                <div className="size-[56px] bg-light-gray rounded-full flex items-center justify-center mb-2">
-                  <Armchair className="size-7 text-[#AAAAAA]" />
-                </div>
+              <div className="flex flex-col items-center justify-center h-full text-center md:py-10 py-8 rounded-[14px] bg-light-gray mb-3">
                 <p className="text-foreground md:text-sm text-base">
                   No seats selected
                 </p>
@@ -231,7 +219,7 @@ export function SelectionSidebar({
           </div>
         ) : (
           // Browse Tab Content
-          <div className="py-1">
+          <div>
             {browseSections.map(
               ({ section, availableSeats, lowestPrice, isSoldOut }) => (
                 <div
