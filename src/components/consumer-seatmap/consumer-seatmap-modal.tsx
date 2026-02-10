@@ -139,16 +139,16 @@ export function ConsumerSeatmapModal({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={springTransition}
-            className="fixed md:inset-4 inset-2 z-50 bg-light-gray md:rounded-[24px] rounded-[20px] shadow-2xl overflow-hidden flex"
+            className="fixed md:inset-4 inset-0 z-50 bg-light-gray md:rounded-[24px] md:shadow-2xl overflow-hidden flex"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close button - offset to avoid overlapping floating sidebar */}
             <button
               type="button"
               onClick={handleClose}
-              className="absolute md:left-3 md:top-3 right-2 top-2 z-40 size-8 bg-white backdrop-blur-sm rounded-full flex items-center justify-center hover:scale-[1.03] active:scale-[0.97] shadow-md transition-all duration-200 ease cursor-pointer text-muted-foreground hover:text-foreground"
+              className="absolute md:left-3 md:top-3 right-2 top-2 z-40 md:size-8 size-9 bg-white backdrop-blur-sm rounded-full flex items-center justify-center hover:scale-[1.03] active:scale-[0.97] shadow-md transition-all duration-200 ease cursor-pointer text-muted-foreground hover:text-foreground"
             >
-              <X className="size-4" />
+              <X className="md:size-4 size-5" />
             </button>
 
             {/* Seatmap Area - full width behind floating sidebar */}

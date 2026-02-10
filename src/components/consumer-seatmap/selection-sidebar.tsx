@@ -140,15 +140,15 @@ export function SelectionSidebar({
   };
 
   return (
-    <div className="md:w-[300px] absolute md:right-2 md:bottom-2 md:top-2 right-2 bottom-2 left-2 md:left-auto max-h-[75dvh] md:max-h-none bg-white md:rounded-2xl rounded-[12px] flex flex-col z-30 overflow-hidden shadow-floating">
+    <div className="md:w-[300px] absolute md:right-2 md:bottom-2 md:top-2 right-0 bottom-0 left-0 md:left-auto max-h-[75dvh] md:max-h-none bg-white rounded-2xl flex flex-col z-30 overflow-hidden shadow-floating">
       {/* Header */}
-      <div className="p-4">
+      <div className="p-4 pt-5 md:pt-4 ">
         <div className="flex items-center gap-2">
           <h2 className="font-bold md:text-lg text-xl text-black">
             Select seats
           </h2>
           {selectedSeats.length > 0 && (
-            <span className="bg-tp-blue text-white text-xs font-bold size-5 shrink-0 rounded-full flex items-center justify-center">
+            <span className="bg-tp-blue text-white md:text-xs text-sm font-bold md:size-5 size-6 shrink-0 rounded-full flex items-center justify-center">
               {selectedSeats.length}
             </span>
           )}
@@ -162,7 +162,7 @@ export function SelectionSidebar({
       <div className="flex-1 overflow-y-auto">
         {activeTab === "your-seats" ? (
           // Your Seats Tab Content
-          <div className="p-4 px-3">
+          <div className="p-4 md:px-3 px-4">
             {selectedSeats.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center md:py-12 py-8">
                 <div className="size-[56px] bg-light-gray rounded-full flex items-center justify-center mb-2">
@@ -254,7 +254,7 @@ export function SelectionSidebar({
 
                   {/* Section Content (Expanded) */}
                   {expandedSectionId === section.id && !isSoldOut && (
-                    <div className="px-3 py-2 flex flex-col gap-2">
+                    <div className="md:px-3 px-4 py-2 flex flex-col gap-2">
                       {availableSeats.map((seat) => {
                         const hold = getHoldForSeat(seat);
                         const isUnlocked = unlockedHolds.has(hold?.id || "");
@@ -296,7 +296,7 @@ export function SelectionSidebar({
 
       {/* Footer with Total and Checkout */}
       {selectedSeats.length > 0 && (
-        <div className="p-3 pt-2.5 flex flex-col gap-2">
+        <div className="md:p-3 p-4 pt-2.5 flex flex-col gap-2">
           {/* Total */}
           <div className="flex items-center justify-between px-2">
             <span className="text-muted-foreground">Total</span>
