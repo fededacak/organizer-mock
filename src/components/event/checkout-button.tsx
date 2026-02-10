@@ -64,7 +64,9 @@ export function CheckoutButton({
           ? "Choose Seats"
           : isDisabled
             ? "Checkout"
-            : `Buy Tickets - ${formatPrice(totalPrice)}`}
+            : totalPrice === 0
+              ? "RSVP"
+              : `Buy Tickets - ${formatPrice(totalPrice)}`}
       </span>
       <div className="w-[26px] h-[26px] opacity-0" />
     </button>

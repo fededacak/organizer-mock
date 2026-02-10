@@ -79,6 +79,7 @@ function EventPageContent({ eventData }: EventPageClientProps) {
     saturday: 0,
     sunday: 0,
     "pay-what-you-want": 0,
+    "free-ticket": 0,
   });
   const [expandedTicket, setExpandedTicket] = useState<string | null>(null);
   const [ticketDayTab, setTicketDayTab] = useState<"all" | "single">("all");
@@ -130,6 +131,18 @@ function EventPageContent({ eventData }: EventPageClientProps) {
     [],
   );
 
+  // Free ticket option
+  const freeTicket: Ticket = useMemo(
+    () => ({
+      id: "free-ticket",
+      name: "General Admission",
+      price: 0,
+      description: "Complimentary entry. Reserve your spot now.",
+      isFree: true,
+    }),
+    [],
+  );
+
   // Pay What You Want ticket option
   const payWhatYouWantTicket: Ticket = useMemo(
     () => ({
@@ -155,8 +168,11 @@ function EventPageContent({ eventData }: EventPageClientProps) {
         ? eventData.singleDayTickets || []
         : eventData.tickets.slice(0, settings.ticketCount);
 
-    // Build special tickets array (only PWYW in GA mode)
+    // Build special tickets array (only PWYW/Free in GA mode)
     const specialTickets: Ticket[] = [];
+    if (settings.showFreeTicket) {
+      specialTickets.push(freeTicket);
+    }
     if (settings.showPayWhatYouWantTicket) {
       specialTickets.push(payWhatYouWantTicket);
     }
@@ -167,10 +183,12 @@ function EventPageContent({ eventData }: EventPageClientProps) {
     eventData.singleDayTickets,
     settings.ticketCount,
     settings.showPayWhatYouWantTicket,
+    settings.showFreeTicket,
     isSeatedEvent,
     isMultiDay,
     ticketDayTab,
     seatedTicket,
+    freeTicket,
     payWhatYouWantTicket,
   ]);
 

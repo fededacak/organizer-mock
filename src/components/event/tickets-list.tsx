@@ -3,6 +3,7 @@
 import { TicketCard } from "./ticket-card";
 import { SeatedTicketCard } from "./seated-ticket-card";
 import { PayWhatYouWantTicketCard } from "./pay-what-you-want-ticket-card";
+import { FreeTicketCard } from "./free-ticket-card";
 import type { Ticket } from "./types";
 
 interface TicketsListProps {
@@ -44,6 +45,18 @@ export function TicketsList({
           ticket={ticket}
           isSelected={selectedSeatedTicketId === ticket.id}
           onSelect={() => onSeatedTicketSelect(ticket.id)}
+        />
+      );
+    }
+    if (ticket.isFree) {
+      return (
+        <FreeTicketCard
+          key={ticket.id}
+          ticket={ticket}
+          quantity={quantities[ticket.id] || 0}
+          isExpanded={expandedTicket === ticket.id}
+          onToggleExpand={() => onExpandToggle(ticket.id)}
+          onUpdateQuantity={(delta) => onQuantityChange(ticket.id, delta)}
         />
       );
     }

@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import type { Ticket } from "./types";
 import { QuantityStepper } from "./quantity-stepper";
 
-interface TicketCardProps {
+interface FreeTicketCardProps {
   ticket: Ticket;
   quantity: number;
   isExpanded: boolean;
@@ -12,17 +12,13 @@ interface TicketCardProps {
   onUpdateQuantity: (delta: number) => void;
 }
 
-function formatPrice(price: number) {
-  return `$${price.toFixed(2).replace(/\.00$/, "")}`;
-}
-
-export function TicketCard({
+export function FreeTicketCard({
   ticket,
   quantity,
   isExpanded,
   onToggleExpand,
   onUpdateQuantity,
-}: TicketCardProps) {
+}: FreeTicketCardProps) {
   const isSelected = quantity > 0;
   const descriptionRef = useRef<HTMLParagraphElement>(null);
   const [isClamped, setIsClamped] = useState(false);
@@ -31,15 +27,12 @@ export function TicketCard({
     const el = descriptionRef.current;
     if (!el || isExpanded) return;
 
-    // Use ResizeObserver to reliably detect when layout is stable
     const checkClamped = () => {
       setIsClamped(el.scrollHeight > el.clientHeight);
     };
 
-    // Check immediately after first paint
     const rafId = requestAnimationFrame(checkClamped);
 
-    // Also observe for size changes (handles font loading, hydration, etc.)
     const resizeObserver = new ResizeObserver(checkClamped);
     resizeObserver.observe(el);
 
@@ -63,7 +56,7 @@ export function TicketCard({
             {ticket.name}
           </p>
           <p className="font-black text-xl text-black dark:text-white mt-1.5">
-            {formatPrice(ticket.price)}
+            Free
           </p>
         </div>
         <QuantityStepper quantity={quantity} onUpdateQuantity={onUpdateQuantity} />

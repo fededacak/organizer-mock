@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Minus, Plus, Heart } from "lucide-react";
 import type { Ticket } from "./types";
+import { QuantityStepper } from "./quantity-stepper";
 
 interface PayWhatYouWantTicketCardProps {
   ticket: Ticket;
@@ -58,38 +58,7 @@ export function PayWhatYouWantTicketCard({
               : "Name your price"}
           </p>
         </div>
-        {/* Quantity Stepper or Add Button */}
-        {isSelected ? (
-          <div className="bg-light-gray dark:bg-[#1e1e26] rounded-full h-[30px] flex items-center justify-center gap-2 px-2 py-1 shrink-0">
-            <button
-              onClick={() => onUpdateQuantity(-1)}
-              className="size-[14px] cursor-pointer flex items-center justify-center text-dark-gray dark:text-[#9ca3af] hover:text-black dark:hover:text-white transition-colors duration-200 ease shrink-0"
-            >
-              <Minus className="size-[14px]" strokeWidth={3} />
-            </button>
-            <div className="w-[22px] h-full bg-white dark:bg-[#0a0a0f] rounded-[6px] flex items-center justify-center shrink-0">
-              <span className="font-extrabold text-sm text-black dark:text-white leading-none">
-                {quantity}
-              </span>
-            </div>
-            <button
-              onClick={() => onUpdateQuantity(1)}
-              className="size-[14px] cursor-pointer flex items-center justify-center text-dark-gray dark:text-[#9ca3af] hover:text-black dark:hover:text-white transition-colors duration-200 ease shrink-0"
-            >
-              <Plus className="size-[14px]" strokeWidth={3} />
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => onUpdateQuantity(1)}
-            className="w-[30px] h-[30px] cursor-pointer rounded-full bg-light-gray dark:bg-[#1e1e26] flex items-center justify-center hover:bg-soft-gray dark:hover:bg-[#252530] transition-colors duration-200 ease"
-          >
-            <Plus
-              className="size-[14px] text-dark-gray dark:text-[#9ca3af]"
-              strokeWidth={3}
-            />
-          </button>
-        )}
+        <QuantityStepper quantity={quantity} onUpdateQuantity={onUpdateQuantity} />
       </div>
 
       {/* Description */}

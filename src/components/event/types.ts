@@ -18,6 +18,7 @@ export interface Ticket {
   day?: string;
   isSeated?: boolean;
   isPayWhatYouWant?: boolean;
+  isFree?: boolean;
   minimumPrice?: number;
 }
 

@@ -17,6 +17,7 @@ export interface EventControlsSettings {
   ticketType: "ga" | "seated";
   showPayWhatYouWantTicket: boolean;
   payWhatYouWantHasMinimum: boolean;
+  showFreeTicket: boolean;
   // Sections
   description: "none" | "short" | "long";
   youtubeVideoCount: 0 | 1 | 2;
@@ -59,6 +60,7 @@ export function useEventControls(): EventControlsSettings {
       },
       showPayWhatYouWantTicket: { value: false, label: "Show PWYW Ticket" },
       payWhatYouWantHasMinimum: { value: true, label: "PWYW Has Minimum" },
+      showFreeTicket: { value: false, label: "Show Free Ticket" },
     }),
     Sections: folder({
       description: {
