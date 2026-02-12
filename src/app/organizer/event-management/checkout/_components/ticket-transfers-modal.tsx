@@ -47,10 +47,6 @@ function CutoffDaysInput({
     }
   }, [selected]);
 
-  if (!selected) {
-    return <span className="text-base text-black select-none">X</span>;
-  }
-
   return (
     <input
       ref={ref}
@@ -62,9 +58,9 @@ function CutoffDaysInput({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       onFocus={onFocus}
-      placeholder="7"
+      placeholder="5"
       aria-label="Number of days before event to close transfers"
-      className="w-[48px] rounded-[12px] border bg-white px-2 py-0.5 h-[38px] text-center text-base tabular-nums text-black transition-colors duration-200 ease placeholder:text-gray focus-visible:outline-none focus-visible:border-tp-blue focus-visible:ring-2 focus-visible:ring-tp-blue/25 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+      className="w-[48px] rounded-[8px] bg-white px-2 py-0.5 h-[24px] text-center text-base tabular-nums border text-black transition-colors duration-200 ease placeholder:text-gray focus-visible:outline-none focus-visible:border-tp-blue focus-visible:ring-2 focus-visible:ring-tp-blue/25 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
     />
   );
 }
