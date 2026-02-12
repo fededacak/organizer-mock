@@ -31,7 +31,7 @@ export default function RootLayout({
         className={`${outfit.variable} ${openSans.variable} font-outfit antialiased`}
       >
         {children}
-        <Toaster position="bottom-center" />
+        <Toaster position="bottom-right" />
       </body>
     </html>
   );
