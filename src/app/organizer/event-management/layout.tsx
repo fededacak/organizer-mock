@@ -16,7 +16,7 @@ export default function EventManagementLayout({
   return (
     <div className="flex min-h-screen w-full bg-light-gray">
       {/* Sidebar Container */}
-      <div className="flex h-screen shrink-0 items-center p-2.5 sticky top-0">
+      <div className=" h-screen shrink-0 items-center p-2.5 sticky top-0 hidden lg:flex">
         <EventManagementSidebar
           eventName={eventName}
           eventDate="Apr 12, 7:00 PM"
@@ -25,7 +25,7 @@ export default function EventManagementLayout({
       </div>
 
       {/* Main Content Area */}
-      <main className="flex flex-1 flex-col gap-6 px-8 pb-[72px] pt-8 w-full max-w-[1292px] mx-auto">
+      <main className="flex flex-1 flex-col gap-6 lg:px-8 pb-[72px] lg:pt-8 px-4 pt-5 w-full max-w-[1292px] mx-auto">
         {/* Page Content */}
         <div className="flex-1 w-full">{children}</div>
       </main>

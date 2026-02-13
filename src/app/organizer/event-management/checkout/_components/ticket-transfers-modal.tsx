@@ -11,7 +11,27 @@ import {
   DialogTitle,
   DialogCloseButton,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+
+function useIsMobile(breakpoint = 640) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < breakpoint);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, [breakpoint]);
+
+  return isMobile;
+}
 
 export type TransferPolicy = "until-event" | "days-before" | "never";
 
@@ -72,6 +92,7 @@ export function TicketTransfersModal({
   onSave,
 }: TicketTransfersModalProps) {
   const [draft, setDraft] = useState<TransferSettings>(settings);
+  const isMobile = useIsMobile();
 
   function handleOpenChange(next: boolean) {
     if (next) {
@@ -93,76 +114,103 @@ export function TicketTransfersModal({
     draft.policy === "days-before" &&
     (draft.cutoffDays === "" || Number(draft.cutoffDays) < 1);
 
+  const formContent = (
+    <div className="px-4 sm:px-6 pb-2 lg:pt-4 pt-6">
+      <fieldset>
+        <legend className="sr-only">Transfer policy</legend>
+
+        <RadioGroup
+          value={draft.policy}
+          onValueChange={(v) => setPolicy(v as TransferPolicy)}
+          className="gap-2"
+        >
+          {/* Until event starts */}
+          <label
+            htmlFor="modal-until-event"
+            className="flex items-center gap-3 rounded-[16px] px-4 py-4 transition-colors duration-200 ease cursor-pointer border not-has-data-[state=checked]:hover:bg-light-gray has-data-[state=checked]:border-tp-blue"
+          >
+            <RadioGroupItem value="until-event" id="modal-until-event" />
+            <span className="text-base text-black select-none">
+              Until the event starts
+            </span>
+          </label>
+
+          {/* X days before */}
+          <label
+            htmlFor="modal-days-before"
+            className="flex items-center gap-3 rounded-[16px] px-4 py-4 transition-colors duration-200 ease border cursor-pointer not-has-data-[state=checked]:hover:bg-light-gray has-data-[state=checked]:border-tp-blue"
+          >
+            <RadioGroupItem value="days-before" id="modal-days-before" />
+            <span className="flex items-center gap-1.5 text-base text-black select-none">
+              Close
+              <CutoffDaysInput
+                value={draft.cutoffDays}
+                onChange={(value) =>
+                  setDraft((d) => ({ ...d, cutoffDays: value }))
+                }
+                selected={draft.policy === "days-before"}
+                onFocus={() => setPolicy("days-before")}
+              />
+              days before the event
+            </span>
+          </label>
+
+          {/* Never */}
+          <label
+            htmlFor="modal-never"
+            className="flex items-center gap-3 rounded-[16px] px-4 py-4 transition-colors duration-200 ease cursor-pointer border not-has-data-[state=checked]:hover:bg-light-gray has-data-[state=checked]:border-tp-blue"
+          >
+            <RadioGroupItem value="never" id="modal-never" />
+            <span className="text-base text-black select-none">Never</span>
+          </label>
+        </RadioGroup>
+      </fieldset>
+    </div>
+  );
+
+  const saveButton = (
+    <Button
+      onClick={handleSave}
+      disabled={isSaveDisabled}
+      className="h-11 px-6 w-full"
+    >
+      Save
+    </Button>
+  );
+
+  // Mobile: Bottom Sheet
+  if (isMobile) {
+    return (
+      <Sheet open={open} onOpenChange={handleOpenChange}>
+        <SheetContent
+          side="bottom"
+          className="flex flex-col rounded-t-[20px] bg-white gap-0"
+        >
+          <SheetHeader className="px-4 pt-6 pb-0">
+            <SheetTitle className="text-xl font-bold max-w-[85%] mx-auto text-pretty text-center leading-tight">
+              When should transfers be allowed?
+            </SheetTitle>
+          </SheetHeader>
+          {formContent}
+          <SheetFooter className="px-4 pb-5">{saveButton}</SheetFooter>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  // Desktop: Dialog
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-[420px]">
         <DialogHeader>
-          <DialogTitle className=" text-center">
+          <DialogTitle className="text-center">
             When should transfers be allowed?
           </DialogTitle>
           <DialogCloseButton />
         </DialogHeader>
-
-        <div className="px-6 pb-2 pt-4">
-          <fieldset>
-            <legend className="sr-only">Transfer policy</legend>
-
-            <RadioGroup
-              value={draft.policy}
-              onValueChange={(v) => setPolicy(v as TransferPolicy)}
-              className="gap-2"
-            >
-              {/* Until event starts */}
-              <label
-                htmlFor="modal-until-event"
-                className="flex items-center gap-3 rounded-[16px] px-4 py-4 transition-colors duration-200 ease cursor-pointer border not-has-data-[state=checked]:hover:bg-light-gray has-data-[state=checked]:border-tp-blue"
-              >
-                <RadioGroupItem value="until-event" id="modal-until-event" />
-                <span className="text-base text-black select-none">
-                  Until the event starts
-                </span>
-              </label>
-
-              {/* X days before */}
-              <label
-                htmlFor="modal-days-before"
-                className="flex items-center gap-3 rounded-[16px] px-4 py-4 transition-colors duration-200 ease border cursor-pointer not-has-data-[state=checked]:hover:bg-light-gray has-data-[state=checked]:border-tp-blue"
-              >
-                <RadioGroupItem value="days-before" id="modal-days-before" />
-                <span className="flex items-center gap-1.5 text-base text-black select-none">
-                  Close
-                  <CutoffDaysInput
-                    value={draft.cutoffDays}
-                    onChange={(value) =>
-                      setDraft((d) => ({ ...d, cutoffDays: value }))
-                    }
-                    selected={draft.policy === "days-before"}
-                    onFocus={() => setPolicy("days-before")}
-                  />
-                  days before the event
-                </span>
-              </label>
-
-              {/* Never */}
-              <label
-                htmlFor="modal-never"
-                className="flex items-center gap-3 rounded-[16px] px-4 py-4 transition-colors duration-200 ease cursor-pointer border not-has-data-[state=checked]:hover:bg-light-gray has-data-[state=checked]:border-tp-blue"
-              >
-                <RadioGroupItem value="never" id="modal-never" />
-                <span className="text-base text-black select-none">Never</span>
-              </label>
-            </RadioGroup>
-          </fieldset>
-        </div>
-
+        {formContent}
         <DialogFooter className="pt-4 flex flex-col gap-3">
-          <Button
-            onClick={handleSave}
-            disabled={isSaveDisabled}
-            className="h-11 px-6 w-full"
-          >
-            Save
-          </Button>
+          {saveButton}
         </DialogFooter>
       </DialogContent>
     </Dialog>

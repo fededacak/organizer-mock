@@ -42,7 +42,7 @@ export function CheckoutClient() {
       />
 
       {/* ── Two-column Grid ──────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* ── Left Column ──────────────────────────────────────── */}
         <div className="flex flex-col gap-5">
           <CheckoutQuestionsCard />

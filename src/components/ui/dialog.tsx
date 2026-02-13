@@ -39,7 +39,7 @@ function DialogOverlay({
       data-slot="dialog-overlay"
       className={cn(
         "fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-        className
+        className,
       )}
       {...props}
     />
@@ -58,7 +58,7 @@ function DialogContent({
         data-slot="dialog-content"
         className={cn(
           "fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 bg-white rounded-[24px] shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
-          className
+          className,
         )}
         {...props}
       >
@@ -77,7 +77,7 @@ function DialogHeader({
       data-slot="dialog-header"
       className={cn(
         "flex items-center justify-center pb-2 pt-8 px-5 relative",
-        className
+        className,
       )}
       {...props}
     />
@@ -104,10 +104,7 @@ function DialogTitle({
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn(
-        "font-outfit font-extrabold text-[20px] text-black",
-        className
-      )}
+      className={cn("font-outfit font-bold text-xl text-black", className)}
       {...props}
     />
   );
@@ -134,7 +131,7 @@ function DialogCloseButton({
     <DialogPrimitive.Close
       className={cn(
         "absolute right-3 top-3 w-6 h-6 bg-light-gray rounded-full flex items-center justify-center hover:bg-soft-gray transition-colors duration-200 ease cursor-pointer",
-        className
+        className,
       )}
       {...props}
     >

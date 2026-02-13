@@ -17,7 +17,7 @@ export function SectionHeader({
 }: SectionHeaderProps) {
   return (
     <div className="flex flex-col gap-1.5 mb-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-x-3 gap-y-1 flex-wrap">
         <div className="flex items-center gap-3">
           <h2 className="font-outfit text-xl font-extrabold text-black">
             {title}
